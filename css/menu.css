@@ -1,9 +1,8 @@
 :root {
   font-size: 1vw;
-  --azul-esverdeado: #3b7f84;
+  --azul: #6ABDF9;
   --azul-escrever-claro: #478992;
   --azul-background-componentes: #295678;
-  --azul-pagina-atual: #6ABDF9;
   --azul-escuro-bordas: #081A31;
   --azul-escuro-btn: #122F32;
   --fundo-pagina-claro: #eee;
@@ -53,7 +52,7 @@ body, html {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: var(--azul-esverdeado);
+  background-color: var(--azul-background-componentes);
   border-bottom: 0.2rem solid var(--cinza-bordas);
   position: sticky;
   top: 0;
@@ -91,7 +90,7 @@ padding: 3.5rem;
 .semurb_bottom {
   font-size: 1.4rem;
   font-weight: bold;
-  color: var(--azul-escrever-claro);
+  color: var(--azul);
   text-align: center;
   line-height: 1.2;
 }
@@ -116,7 +115,7 @@ padding: 3.5rem;
 
 .bemvindo {
   font-size: 1.4rem;
-  font-family: "Montserrat";
+  font-family: "Montserrat", sans-serif;
 }
 
 .foto_user {
@@ -137,8 +136,8 @@ padding: 3.5rem;
   top: 6.5rem;
   height: 30rem;
   width: 20rem;
-  margin: 1rem 1rem 1rem 3rem;
-  background-color: var(--azul-background-componentes);
+  margin: 1rem 1rem 1rem 2.15rem;
+  background-color: var(--azul-escuro-bordas);
   border-radius: 1cqmin;
   box-shadow: 0 0 0.5rem rgba(0,0,0,0.2);
   padding: 0.5rem;
@@ -149,7 +148,7 @@ padding: 3.5rem;
   z-index: 50;
   position: sticky;
   top: 7rem;
-  font-family: "Roboto";
+  font-family: "Roboto", sans-serif;
 }
 
 .sidebar hr {
@@ -171,13 +170,13 @@ padding: 3.5rem;
 }
 
 .item_sidebar:hover, a:hover{
-  color: var(--azul-pagina-atual);
-  background-color: var(--azul-escuro-bordas);
+  color: var(--azul);
+  background-color: var(--azul-background-componentes);
   transition: all 0.2s ease-in-out;
 }
 
 .atual{
-  color: var(--azul-pagina-atual);
+  color: var(--azul);
   padding: 0.9rem;
   font-size: 1.2rem;
   text-align: center;
@@ -253,13 +252,13 @@ padding: 3.5rem;
   position: absolute;
   right: 2rem;
   top: 5.5rem;
-  background-color: var(--azul-esverdeado);
+  background-color: var(--azul-background-componentes);
   border-bottom: 1px solid var(--cinza-bordas);
   border-radius: 0.5rem;
   width: 20rem;
   z-index: 200;
   padding: 1rem;
-  font-family: "montserrat";
+  font-family: "montserrat", sans-serif;
   color: var(--branco);
   overflow-y: auto;
   overflow-x: hidden;
@@ -269,7 +268,7 @@ padding: 3.5rem;
 h3{
   display: block;
   text-align: center;
-  font-family: "montserrat";
+  font-family: "montserrat", sans-serif;
   padding: 0.5rem;
 }
 
@@ -279,7 +278,7 @@ h3{
   padding: 0.5rem;
   border-radius: 0.5rem;
   width: 16vw;
-  font-family: "montserrat";
+  font-family: "montserrat", sans-serif;
   font-size: 1rem;
 }
 
@@ -321,7 +320,7 @@ h3{
 
 .card h2 {
   position: relative;
-  font-size: 2rem;
+  font-size: 1.5rem;
   gap: 2rem;
   margin-bottom: 1rem;
 }
@@ -332,7 +331,7 @@ h3{
 }
 
 .card h3:hover {
-  color: var(--azul-pagina-atual);
+  color: var(--azul);
 }
 
 .card p {
@@ -358,7 +357,7 @@ h3{
   padding: 2.5rem;
   border-radius: 1rem;
   text-align: center;
-  font-family: "Montserrat";
+  font-family: "Montserrat", sans-serif;
 }
 
 .info {
