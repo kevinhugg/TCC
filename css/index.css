@@ -1,0 +1,126 @@
+body{
+    grid-template-columns: 20% 20% 20% 20% 20%;
+    grid-template-rows: 20% 20% 20% 20% 20%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url(../assets/img/fundo_login.png);
+}
+
+
+.bloco_login{
+    margin-top: 7%;
+    justify-self: center;
+    align-items: center;
+    background-color: aliceblue;
+    display: flex;
+    max-width: fit-content;
+    border-radius: 23px;
+    flex-direction: row;
+    font-family: Montserrat;
+}
+
+.logo{
+flex-flow: column wrap;
+justify-content: flex-start;
+padding: 9%;
+background-color: #478992;
+border-radius: 23px;
+border-top-right-radius: 0px;
+border-bottom-right-radius: 0px;
+}
+
+.logo h1{
+    color: white;
+    text-shadow: black 0px 7px 1px;
+    justify-self: center;
+}
+
+.forms{ 
+    display: flex;
+    padding: 2%;
+    margin-right: 160px;
+    text-align: center;
+}
+
+.inputs{
+    margin-left: 15px;
+}
+
+.inputs h1,h2{
+ 
+    color: #478992;
+}
+
+.inputs h1{
+       font-weight: 500;
+}
+
+.inputs h2{
+    font-weight: 750;
+}
+
+.campo{
+    width: 295px;
+    height: 40px;
+    border-width: 1px;
+    border-style: solid;
+     border-radius: 25px;
+     background-color: aliceblue;
+     box-shadow: rgb(194, 194, 194) 5px 8px 4px;
+     border-color: #478992;
+     font-size: larger;
+     padding-left: 2%;
+}
+
+
+
+.inputs ::placeholder{
+color: #4789928c;
+    font-family: Montserrat;
+    font-weight: 550;
+}
+
+.inputs p,a{
+   color: #478992;
+   text-decoration: underline;
+}
+
+#enviar{
+    background-color: #478992;
+    width: 300px;
+    height: 40px;
+    border-radius: 25px;
+         box-shadow: rgb(194, 194, 194) 5px 8px 4px;
+         border-style: solid;
+         border-color: #478992;
+         display: inline-block;
+}
+
+#enviar a{
+    display: block;
+       text-decoration: none;
+       color: white;
+       font-family: Montserrat;
+       font-weight: bold;
+       border-radius: 25px;
+       
+}
+
+.inputs h3{
+    color: #478992;
+    font-family: Montserrat;
+    font-weight: 700;
+}
+
+.número{
+    width: 30px;
+    height: 50px;
+    font-size: x-large;
+    text-align: center;
+    border-color: #478992;
+    border-style: solid;
+    background-color: aliceblue;
+    border-top: hidden;
+    border-left: hidden;
+    border-right: hidden;
+}

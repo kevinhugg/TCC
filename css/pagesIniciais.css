@@ -1,0 +1,481 @@
+:root {
+  font-size: 1vw;
+  --azul-esverdeado: #3b7f84;
+  --azul-escrever-claro: #478992;
+  --azul-background-componentes: #295678;
+  --azul-pagina-atual: #6ABDF9;
+  --azul-escuro-bordas: #081A31;
+  --azul-escuro-btn: #122F32;
+  --fundo-pagina-claro: #eee;
+  --branco: #fff;
+  --cinza-bordas: #ccc;
+  --preto: #000;
+  --verde-feitos: #45E317;
+  --verde-btn: #377E22;
+  --amarelo-pendente: #FFFF00;
+  --amarelo-bordas: #F2A93B;
+  --vemelho-btn: #DE0000;
+}
+
+.montserrat-botões {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.roboto-corpo {
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  width: 100%;
+  height: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--azul-esverdeado);
+  border-bottom: 0.2rem solid var(--cinza-bordas);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.barueri_semurb {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--branco);
+  padding: 1rem 1rem;
+  flex-wrap: wrap;
+  font-family: "Montserrat";
+}
+
+.barueri{
+  width: 10rem;
+  height: 3rem;
+}
+
+.semurb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.semurb_top {
+  font-size: 1.2rem;
+  color: var(--preto);
+  line-height: 1.5;
+padding: 3.5rem;
+}
+.semurb_bottom {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--azul-escrever-claro);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.frame-log-out {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.icon_noti {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.notifications, .logout {
+  height: 2rem;
+  width: 2rem;
+  cursor: pointer;
+}
+
+.bemvindo {
+  font-size: 1.4rem;
+  font-family: "Montserrat";
+}
+
+.foto_user {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.frame-sidebar {
+  display: grid;
+  grid-template-columns: 25% 75%;
+  height: auto;
+  width: 100%;
+}
+
+.sidebar {
+  top: 6.5rem;
+  height: 30rem;
+  width: 20rem;
+  margin: 1rem 1rem 1rem 3rem;
+  background-color: var(--azul-background-componentes);
+  border-radius: 1cqmin;
+  box-shadow: 0 0 0.5rem rgba(0,0,0,0.2);
+  padding: 0.5rem;
+  border: 4px solid var(--cinza-bordas);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  z-index: 50;
+  position: sticky;
+  top: 7rem;
+  font-family: "Roboto";
+}
+
+.sidebar hr {
+  height: 2px;
+  background-color: var(--cinza-bordas);
+  border: none;
+}
+
+.sidebar, .item_sidebar, a{
+  color: white;
+  padding: 0.9rem;
+  font-size: 1.2rem;
+  text-align: center;
+  border-radius: 1rem;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.item_sidebar:hover, a:hover{
+  color: var(--azul-pagina-atual);
+  background-color: var(--azul-escuro-bordas);
+  transition: all 0.2s ease-in-out;
+}
+
+.atual{
+  color: var(--azul-pagina-atual);
+  padding: 0.9rem;
+  font-size: 1.2rem;
+  text-align: center;
+  border-radius: 0.2rem;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.main {
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 1rem; 
+  height: 50rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: var(--preto);
+  padding: 1rem;
+  bottom: 0.5rem;
+  position: relative;
+  text-align: center;
+}
+
+.search-box{
+  display: flex;
+  justify-content: center;
+  bottom: 1rem;
+  position: relative;
+}
+
+.search-input{
+  position: relative;
+  top: 0rem;
+  height: 3rem;
+  width: 25rem;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: none;
+  background-color: var(--cinza-bordas);
+  color: var(--preto);
+  align-content: center;
+}
+
+.lupa{
+  position: relative;
+  right: 2.5rem;
+  top: 0.5rem;
+  height: 2rem;
+  width: 2rem;
+  cursor: pointer;
+}
+
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--fundo-pagina-claro);
+  border-radius: 1rem;
+  border: var(--azul-escuro-bordas) 2px solid;
+  padding: 0;
+  height: 25vw;
+  width: 65vw;
+  margin: 0 auto;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.table{
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
+  margin: 1rem;
+  text-align: center;
+}
+
+th, td {
+  padding: 1.1rem;
+  text-align: center;
+}
+
+th {
+  font-weight: bold;
+  font-size: 1.8rem;
+  font-family: "roboto";
+}
+
+td {
+  font-size: 1.4rem;
+  font-family: "roboto";
+  background-color: var(--azul-background-componentes);
+}
+
+.tipos{
+  color: var(--branco);
+  border-radius: 1.5rem 0 0 1.5rem;
+}
+
+.placa{
+  color: var(--branco);
+}
+
+.numero {
+  color: var(--branco);
+}
+
+.btn_ver_mais{
+  border-radius: 0 1.5rem 1.5rem 0;
+}
+
+.feitos{
+  color: var(--verde-feitos);
+
+}
+
+.pendente{
+  color: var(--amarelo-pendente);
+}
+
+.feitos, .pendente{
+  font-size: 2rem;
+  font-weight: bold;
+  font-family: "roboto";  
+}
+
+.ver_mais{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--azul-escuro-btn);
+  color: var(--branco);
+  border-radius: 1rem;
+  border: 2px solid var(--amarelo-bordas);
+  padding: 0.5rem;
+  font-family: "montserrat";
+  height: 2.5rem;
+  width: 10rem;
+  cursor: pointer;
+  margin: auto;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.ver_mais:hover{
+  background-color: var(--amarelo-bordas);
+  color: var(--azul-escuro-btn);
+  font-size: 1.2rem;
+  transition: all 0.5s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 2.2vw;
+  }
+
+  .frame-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    top: 0;
+    width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .sidebar span {
+    flex: 1 1 40%;
+    text-align: center;
+  }
+
+  .barueri_semurb {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 2rem;
+  }
+
+  .table-container{
+    padding: 1rem;
+    width: 100%;
+  }
+
+  .table{
+    min-width: 100%;
+    font-size: 0.8rem;
+  }
+
+  th, td{
+    padding: 0.8rem;
+  }
+
+  .ver_mais{
+    font-size: 0.8rem;
+    width: 8rem;
+  }
+}
+
+
+/*Tela de notificações*/
+.notification-dropdown {
+  display: none;
+  position: absolute;
+  right: 2rem;
+  top: 5.5rem;
+  background-color: var(--azul-esverdeado);
+  border-bottom: 1px solid var(--cinza-bordas);
+  border-radius: 0.5rem;
+  width: 20rem;
+  z-index: 200;
+  padding: 1rem;
+  font-family: "montserrat";
+  color: var(--branco);
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 30rem;
+}
+
+h3{
+  display: block;
+  text-align: center;
+  font-family: "montserrat";
+  padding: 0.5rem;
+}
+
+.item_noti{
+  background-color: var(--azul-background-componentes);
+  margin: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  width: 16vw;
+  font-family: "montserrat";
+  font-size: 1rem;
+}
+
+.name {
+  display: block;
+  text-align: center;
+  margin: 0.5rem;
+}
+
+.data_hora {
+  margin: 0.5rem;
+  display: block;
+  text-align: center;
+}
+
+.view_noti {
+  display: block;
+  text-align: right;
+  cursor: pointer;
+}
+.botoes_add_rem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 2rem;
+  font-family: "montserrat";
+  width: 100%;
+  height: 2.8rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.op_btn_add, .op_btn_rem {
+  height: 100%;
+  border: none;
+  width: 12rem;
+  border-radius: 0.5rem;
+  background-color: var(--azul-escuro-btn);
+  color: var(--branco);
+  font-family: "montserrat";
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.op_btn_add {
+  border: 2px solid var(--verde-btn);
+}
+
+.op_btn_add:hover {
+  background-color: var(--verde-btn);
+  color: var(--azul-escuro-btn);
+  font-size: 1rem;
+  transition: all 0.5s ease-in-out;
+}
+
+.op_btn_rem {
+  border: 2px solid var(--vemelho-btn);
+}
+
+.op_btn_rem:hover {
+  background-color: var(--vemelho-btn);
+  font-size: 1rem;
+  transition: all 0.5s ease-in-out;
+}
