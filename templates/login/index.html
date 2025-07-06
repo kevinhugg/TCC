@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Login</title>
+</head>
+<body>
+    
+
+ <div class="bloco_login">
+    <div class="logo">
+        <img id="logo_barueri" src="/static/assets/img/logo_barueri.png" alt="Logo de Barueri">
+        <h1>SEMURB</h1>
+    </div>
+
+    <div class="forms">
+        <div class="inputs">
+            <h1>Administrador</h1>
+            <h2>LOGIN</h2>
+            <form action="/login" method="post"> <!--Adicinei aqui um form com action login e método post, igual a gente fazia em PHP com a Lilian-->
+            <input name="matricula" class="campo" placeholder="Número de Matrícula" type="text"> <!--Adicionando nome nos inputs, para conseguir puxar eles depois-->
+            <br><br>
+            <input name="senha" class="campo" placeholder="Senha" type="password">
+            <br><br>
+            <button style="color: aliceblue;" id="enviar" type="submit">ENTRAR </button> <!--Mudei o tipo do botão para submit-->
+            </form>
+            <p><a href="{{ url_for('metodoRecSenha') }}">Esqueci minha senha</a></p> <!--Para redirecionar por <a>, tem que usar esse estilo para o Python ver (talvez eu tenha tido alguns problemas por não saber disso)-->
+        </div>
+    </div>
+ </div>
+
+
+
+
+</body>
+</html>
