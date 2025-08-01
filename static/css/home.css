@@ -4,6 +4,8 @@
     --blue-components: #295678;
     --blue-hover: #6ABDF8;
     --blue-letter: #0D1F2C;
+    --yellow-hover: #f5d100;
+    --yellow-components: #f7e57d;
 }
 
 body {
@@ -209,7 +211,10 @@ body {
     background: white;
     border-radius: 12px;
     margin-top: 5rem;
-    padding: 2rem;
+    padding: 0.5rem;
+    height: 30rem;
+    width: 20rem;
+    overflow: hidden;
 }
 
 .Ranking_Ocu h4{
@@ -219,9 +224,13 @@ body {
 }
 
 .table_ocu {
-    width: 20rem;
+    width: 95%;
+    height: 85%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
     border-collapse: collapse;
-    margin-top: 1rem;
+    padding: 1rem;
 }
 
 .table_ocu th,
@@ -236,18 +245,19 @@ body {
 }
 
 .table_ocu th {
-    background-color: #f5d100;
-    color: black;
+    background-color: var(--blue-components);
+    color: white;
     font-weight: bold;
 }
 
 .table_ocu tr:nth-child(even) {
-    background-color: var(--blue-components);
+    background-color: var(--yellow-hover);
     color: white;
 }
 
 .table_ocu tr:hover {
     background-color: #cdcdcd;
+    color: black;
 }
 
 /* Mapa */
@@ -269,8 +279,11 @@ body {
 .NgbhInfos {
     grid-area: NgbhInfos;
     background: white;
-    padding: 2rem;
+    padding: 0.5rem;
     border-radius: 12px;
+    height: 30rem;
+    width: 20rem;
+    overflow: hidden;
 }
 
 .NgbhInfos h4 {
@@ -281,8 +294,13 @@ body {
 }
 
 .table_neighborhoods {
-    width: 15rem;
+    width: 95%;
+    height: 85%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
     border-collapse: collapse;
+    padding: 1rem;
 }
 
 .table_neighborhoods th,
@@ -297,13 +315,13 @@ body {
 }
 
 .table_neighborhoods th {
-    background-color: #f5d100;
-    color: black;
+    background-color: var(--blue-components);
+    color: white;
     font-weight: bold;
 }
 
 .table_neighborhoods tr:nth-child(even) {
-    background-color: var(--blue-components);
+    background-color: var(--yellow-hover);
     color: white;
 }
 

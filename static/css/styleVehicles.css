@@ -1,5 +1,24 @@
+:root {
+    --white-snow: #f0f0f0;
+    --black: #000;
+    --blue-components: #295678;
+    --blue-hover: #6ABDF8;
+    --blue-letter: #0D1F2C;
+    --yellow-hover: #f5d100;
+    --yellow-components: #f7e57d;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e7e7f1;
+}
+
+.parent {
+    display: grid;
+    grid-template-columns: 0.3fr 1fr; /* Sidebar + conteúdo */
+    grid-template-rows: auto;
+    height: 100%;
+    width: 100%;
 }
 
 .sidebar {
@@ -62,7 +81,7 @@ body {
     width: 100%;
     height: 60px;
     display: flex;
-    justify-content: flex-end; /* Alinha conteúdo à direita */
+    justify-content: flex-end;
     align-items: center;
     padding: 0;
     z-index: 1000;
@@ -77,29 +96,88 @@ body {
 }
 
 .page-content {
-    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "vehicles vehicles vehicles vehicles"
+        "vehicles vehicles vehicles vehicles"
+        "Ranking_Ocu Ranking_Ocu graph-line graph-line"
+        "Ranking_Ocu Ranking_Ocu graph-line graph-line";
+    grid-gap: 20px;
+    padding: 2rem;
+    margin-left: 5em;
+    margin-top: 10px;
+    width: 72rem;
 }
 
-.tittle {
-    text-align: center;
-    color: #333;
-    margin-bottom: 30px;
+.vehicles {
+    grid-area: vehicles;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    height: 35rem;
+    box-shadow: 1px 1px 1px 1px #eff0f8;
+}
+
+.searchbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.input-search {
+    width: 35%;
+    height: 2rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    border: 2px solid var(--yellow-components);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.input-search:focus {
+    border-color: var(--yellow-hover);
 }
 
 .list-vehicles {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    max-height: calc(100% - 8rem);
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.list-header {
+    display: grid;
+    grid-template-columns: 120px 150px 150px 150px 150px;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0 2rem;
+    border-bottom: 2px solid var(--yellow-components);
+    text-align: center;
+    gap: 40px;
+}
+
+.header-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card-vehicles {
-    display: flex;
+    display: grid;
+    grid-template-columns: 120px 150px 150px 150px 150px;
     align-items: center;
-    background-color: white;
-    padding: 15px;
+    background-color: var(--blue-components);
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    gap: 20px;
+    padding: 0.5rem 2rem;
+    text-align: center;
+    gap: 40px;
 }
 
 .img-vehicle {
@@ -107,14 +185,149 @@ body {
     height: 80px;
     object-fit: cover;
     border-radius: 8px;
+    justify-self: center;
 }
 
-.situation-av {
-    color: red;
+.card-vehicles p {
+    text-align: center;
     font-weight: bold;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.situation-ava {
+    color: #d81818 !important;
 }
 
 .situation-op {
-    color: green;
+    color: #1cc51c !important;
+}
+
+.btn_rem_add {
+    display: grid;
+    grid-template-columns: 160px 160px;
+    justify-content: space-around;
+    x-index: 100;
+    padding: 0.5rem 0;
+}
+
+.btn {
+    color: white;
+    display: flex;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn_add {
+    background: var(--blue-components);
+    border-radius: 10px;
+    border: 1px solid #1cc51c;
+}
+
+.btn_add:hover {
+    color: black;
+    background-color: #1cc51c;
+}
+
+.btn_rem {
+    background: var(--blue-components);
+    border-radius: 10px;
+    border: 2px solid #d81818;
+}
+
+.btn_rem:hover {
+    color: black;
+    background-color: #d81818;
+}
+
+/* Tabela veiculos danificados */
+.Ranking_Ocu {
+    grid-area: Ranking_Ocu;
+    background: white;
+    border-radius: 12px;
+    height: 40rem;
+    width: 30rem;
+    overflow: hidden;
+}
+
+.Ranking_Ocu h4{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.table_ocu {
+    width: 95%;
+    height: 75%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
+    border-collapse: collapse;
+    padding: 1rem;
+}
+
+.table_ocu th,
+.table_ocu td {
+    border: 1px solid #d7d7d7;
+    padding: 10px;
+    text-align: center;
+}
+
+.table_ocu td {
+    font-weight: bolder;
+}
+
+.table_ocu th {
+    background-color: var(--blue-components);
+    color: white;
     font-weight: bold;
+}
+
+.table_ocu tr:nth-child(even) {
+    background-color: var(--yellow-hover);
+    color: white;
+}
+
+.table_ocu tr:hover {
+    background-color: #cdcdcd;
+    color: black;
+}
+
+/* botão para gerar o pdf */
+.btn-pdf {
+    height: 3rem;
+    width: 8rem;
+    padding: 10px;
+    background-color: #f5d100;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-pdf:hover {
+    background-color: #e4c800;
+}
+
+.drop-date {
+    display: flex;
+    justify-content: center;
+}
+
+/* Gráfico de linhas veículos danificados */
+.graph-line {
+    grid-area: graph-line;
+    background: white;
+    border-radius: 12px;
+    height: 40rem;
+    overflow: hidden;
+}
+
+.graph-line h4 {
+    text-align: center;
+    margin-top: 1rem;
 }

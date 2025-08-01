@@ -2,14 +2,26 @@ import dash
 from dash import html
 
 def get_sidebar():
-    # Cria a lista de links das páginas registradas
+
+    ordem_paginas = [
+        "/",
+        "/pageVehicles",
+        "/pageAgents",
+        "/services",
+        "/ocurrences",
+        "/historic",
+        "/configurations",
+    ]
+
     links = []
-    for page in dash.page_registry.values():
-        links.append(
-            html.Div(
-                html.A(page["name"], href=f"/dashboard{page["path"]}", className="sidebar-link")
+    for path in ordem_paginas:
+        page = next((p for p in dash.page_registry.values() if p["path"] == path), None)
+        if page:
+            links.append(
+                html.Div(
+                    html.A(page["name"], href=f"/dashboard{page['path']}", className="sidebar-link")
+                )
             )
-        )
 
     sidebar = html.Div([
         html.Div([
