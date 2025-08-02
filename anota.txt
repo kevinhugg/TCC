@@ -1,0 +1,17 @@
+@callback(
+    Output("page-content", "style"),
+    Input("dark-mode-toggle", "on")
+)
+def mudar_tema(is_dark_mode):
+    if is_dark_mode:
+        return {'backgroundColor':'black',
+                'color':'white',
+                }
+    return {'backgroundColor':'white',
+                'color':'black',
+                }
+
+
+
+
+ADICIONAR UM BOTAO PARA COLOCAR OS AGENTES NOS TURNOS E MANDAR PARA O APP
