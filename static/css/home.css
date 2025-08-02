@@ -105,7 +105,7 @@ body {
 .page-content {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto;
     grid-template-areas:
         "vehicles agents GraphIndOcu GraphIndOcu"
         "pizza ocuMonthly GraphIndOcu GraphIndOcu"
@@ -113,9 +113,11 @@ body {
         "NgbhInfos GraphMap GraphMap GraphMap";
     grid-gap: 20px;
     padding: 2rem;
-    margin-left: 5em;
+    margin-left: 13em; /* sidebar width + padding */
     margin-top: 10px;
-    width: 72rem;
+    width: auto;
+    max-width: 1400px; /* optional: to avoid very wide content on large screens */
+    margin-right: 2rem;
 }
 
 
@@ -383,4 +385,130 @@ body {
     align-items: center;
     margin-top: 1.5rem;
     margin-right: 5rem;
+}
+
+/* --- Responsive Design --- */
+
+/* Medium devices (tablets, less than 1200px) */
+@media (max-width: 1200px) {
+    .page-content {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas:
+            "vehicles agents"
+            "pizza ocuMonthly"
+            "GraphIndOcu GraphIndOcu"
+            "GraphTimeRes GraphTimeRes"
+            "Ranking_Ocu Ranking_Ocu"
+            "GraphMap GraphMap"
+            "NgbhInfos NgbhInfos";
+    }
+
+    .GraphTimeRes, .Ranking_Ocu {
+        margin-top: 1rem;
+    }
+
+    .Ranking_Ocu, .NgbhInfos {
+        width: auto;
+        height: auto;
+    }
+}
+
+/* Small devices (landscape phones, 768px and up) */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 5em;
+    }
+
+    .sidebar-title {
+        display: none;
+    }
+
+    .sidebar-link {
+        width: 90%;
+        font-size: 0.8rem;
+        padding: 8px 5px;
+    }
+
+    .semurb-logo {
+        height: 3rem;
+        width: 3rem;
+    }
+
+    .page-content {
+        margin-left: 6em;
+        padding: 1.5rem;
+    }
+
+    .info-vehic {
+        flex-direction: column;
+        align-items: center;
+        margin-left: 0;
+        gap: 0.5rem;
+    }
+}
+
+/* Extra small devices (phones, less than 768px) */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+
+    .page-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "vehicles"
+            "agents"
+            "pizza"
+            "ocuMonthly"
+            "GraphIndOcu"
+            "GraphTimeRes"
+            "Ranking_Ocu"
+            "GraphMap"
+            "NgbhInfos";
+        width: 100%;
+        margin-left: 0;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .vehicles, .agents, .pizza, .ocuMonthly, .GraphIndOcu, .GraphTimeRes, .Ranking_Ocu, .GraphMap, .NgbhInfos {
+        height: auto;
+        margin-top: 1rem;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .ocuMonthly, .Ranking_Ocu, .NgbhInfos {
+        width: 100%;
+    }
+
+    .header {
+        justify-content: center;
+    }
+
+    .profile-pic {
+        margin: 0.5rem 0;
+    }
+}
+
+/* Extra small devices (phones, less than 480px) */
+@media (max-width: 480px) {
+    h4 {
+        font-size: 1.1rem;
+    }
+
+    .NumsVehicles {
+        font-size: 1.5rem;
+    }
+
+    .NumOcuMonth {
+        font-size: 2rem;
+        margin: 0;
+        justify-content: center;
+    }
+
+    .agents-info {
+        font-size: 1.5rem;
+        margin: 1rem 0 0 0;
+    }
 }
