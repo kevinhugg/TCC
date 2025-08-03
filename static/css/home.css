@@ -1,29 +1,140 @@
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+
+.sidebar-link,
+.table_ocu tr,
+.table_neighborhoods tr {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+.table_ocu td,
+.table_neighborhoods td {
+    font-weight: bolder;
+}
+
+.table_ocu th,
+.table_neighborhoods th {
+    background-color: var(--blue-hover);
+    color: var(--bg-color);
+    font-weight: bold;
+}
+
+.table_ocu tr,
+.table_neighborhoods tr {
+    background-color: var(--bg-sidebar);
+    color: var(--cinza);
+}
+
+.table_ocu tr:nth-child(even),
+.table_neighborhoods tr:nth-child(even) {
+    background-color: var(--yellow-hover);
+    color: var(--bg-color);
+}
+
+.table_ocu tr:hover,
+.table_neighborhoods tr:hover {
+    background-color: var(--blue-hover);
+    color: var(--bg-color);
+    cursor: pointer;
+}
+
+:root {
+    --font-family: 'Segoe UI', sans-serif;
+}
+
 .light-mode {
-    --bg-color: #e0e0e0;
-    --bg-sidebar: #0D1F2C;
-    --text-color: #000;
-    --container-color: #fff;
-    --hover-text: #2c3e50;
-    --blue-components: #295678;
-    --blue-hover: #6ABDF8;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
-    --cinza: #d7d7d7;
-    --blue-bg: #0D1F2C;
+    --bg-color: #f4f6f8;
+    --bg-sidebar: var(--bg-sidebar);
+    --text-color: #1a1a1a;
+    --container-color: var(--container-color);
+    --hover-text: #1f2a36;
+    --blue-components: #1E3A8A;
+    --blue-hover: #3B82F6;
+    --yellow-hover: #FFE066;
+    --yellow-components: #FFF4B2;
+    --cinza: #d9d9d9;
+    --blue-bg: var(--bg-sidebar);
 }
 
 .dark-mode {
-    --bg-color: #111827;
-    --bg-sidebar: #2c3e50;
-    --text-color: #fff;
-    --container-color: #295678;
-    --blue-components: #6ABDF8;
-    --blue-hover: #0D1F2C;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
-    --blue-bg: #6ABDF8;
-    --cinza: #d7d7d7;
+    --bg-color: #0f172a;
+    --bg-sidebar: #1e293b;
+    --text-color: #e5e7eb;
+    --container-color: #1e40af;
+    --blue-components: #60a5fa;
+    --blue-hover: #1e3a8a;
+    --yellow-hover: #FFD60A;
+    --yellow-components: #fef9c3;
+    --blue-bg: #3B82F6;
+    --cinza: #d1d5db;
 }
+
+body {
+    font-family: var(--font-family);
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-bottom: 2px solid var(--blue-hover);
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.8rem;
+    color: var(--text-color);
+    letter-spacing: 0.5px;
+}
+
+.sidebar-link {
+    color: var(--blue-components);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    transform: translateX(0);
+}
+
+.sidebar-link:hover {
+    background-color: var(--blue-hover);
+    color: var(--bg-color);
+    transform: translateX(3px);
+}
+
+.vehicles:hover,
+.agents:hover,
+.pizza:hover,
+.ocuMonthly:hover,
+.GraphIndOcu:hover,
+.GraphTimeRes:hover,
+.Ranking_Ocu:hover,
+.GraphMap:hover,
+.NgbhInfos:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.01);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.badge-up {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-down {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -66,17 +177,20 @@ body {
     width: 9em;
     color: var(--blue-components);
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
     padding: 10px 15px;
     text-align: center;
     border-radius: 6px;
-    transition: background-color 0.5s ease, color 0.3s ease;
+    transition: all 0.3s ease;
     align-self: center;
 }
 
 .sidebar-link:hover {
     background-color: var(--blue-hover);
     color: var(--container-color);
+    transform: translateX(3px);
 }
 
 .logo-title-container {
@@ -543,9 +657,30 @@ body {
     }
 }
 
-/* Large devices (desktops, 1600px and up) */
 @media (min-width: 1600px) {
     .page-content {
         margin: 10px auto 10px 13em;
     }
+}
+.card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.card .valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--blue-components);
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  background-color: var(--container-color);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
