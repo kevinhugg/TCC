@@ -1,215 +1,69 @@
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-
-.sidebar-link,
-.table_ocu tr,
-.table_neighborhoods tr {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-
-.table_ocu td,
-.table_neighborhoods td {
-    font-weight: bolder;
-}
-
-.table_ocu th,
-.table_neighborhoods th {
-    background-color: var(--blue-hover);
-    color: var(--bg-color);
-    font-weight: bold;
-}
-
-.table_ocu tr,
-.table_neighborhoods tr {
-    background-color: var(--bg-sidebar);
-    color: var(--cinza);
-}
-
-.table_ocu tr:nth-child(even),
-.table_neighborhoods tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: var(--bg-color);
-}
-
-.table_ocu tr:hover,
-.table_neighborhoods tr:hover {
-    background-color: var(--blue-hover);
-    color: var(--bg-color);
-    cursor: pointer;
-}
-
-:root {
-    --font-family: 'Segoe UI', sans-serif;
-}
-
+/* === CORES E TEMAS === */
 .light-mode {
-    --bg-color: #f4f6f8;
-    --bg-sidebar: var(--bg-sidebar);
-    --text-color: #1a1a1a;
-    --container-color: var(--container-color);
-    --hover-text: #1f2a36;
-    --blue-components: #1E3A8A;
-    --blue-hover: #3B82F6;
-    --yellow-hover: #FFE066;
-    --yellow-components: #FFF4B2;
-    --cinza: #d9d9d9;
-    --blue-bg: var(--bg-sidebar);
+    --bg-color: #e0e0e0;
+    --bg-sidebar: #0D1F2C;
+    --text-color: #000;
+    --container-color: #fff;
+    --hover-text: #2c3e50;
+    --blue-components: #295678;
+    --blue-hover: #6ABDF8;
+    --yellow-hover: #f5d100;
+    --yellow-components: #f7e57d;
+    --cinza: #d7d7d7;
+    --blue-bg: #0D1F2C;
 }
 
 .dark-mode {
-    --bg-color: #0f172a;
-    --bg-sidebar: #1e293b;
-    --text-color: #e5e7eb;
-    --container-color: #1e40af;
-    --blue-components: #60a5fa;
-    --blue-hover: #1e3a8a;
-    --yellow-hover: #FFD60A;
-    --yellow-components: #fef9c3;
-    --blue-bg: #3B82F6;
-    --cinza: #d1d5db;
+    --bg-color: #111827;
+    --bg-sidebar: #2c3e50;
+    --text-color: #fff;
+    --container-color: #295678;
+    --blue-components: #6ABDF8;
+    --blue-hover: #0D1F2C;
+    --yellow-hover: #f5d100;
+    --yellow-components: #f7e57d;
+    --blue-bg: #6ABDF8;
+    --cinza: #d7d7d7;
 }
 
-body {
-    font-family: var(--font-family);
-    transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-h4 {
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-bottom: 2px solid var(--blue-hover);
-    padding-bottom: 0.3rem;
-    margin-bottom: 0.8rem;
-    color: var(--text-color);
-    letter-spacing: 0.5px;
-}
-
-.sidebar-link {
-    color: var(--blue-components);
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    transform: translateX(0);
-}
-
-.sidebar-link:hover {
-    background-color: var(--blue-hover);
-    color: var(--bg-color);
-    transform: translateX(3px);
-}
-
-.vehicles:hover,
-.agents:hover,
-.pizza:hover,
-.ocuMonthly:hover,
-.GraphIndOcu:hover,
-.GraphTimeRes:hover,
-.Ranking_Ocu:hover,
-.GraphMap:hover,
-.NgbhInfos:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    transform: scale(1.01);
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-.badge {
-    padding: 0.3rem 0.6rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: inline-block;
-    letter-spacing: 0.5px;
-}
-
-.badge-up {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.badge-down {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-
+/* === LAYOUT BASE === */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
-    min-height: 100vh;
-    max-width: 100vw;
     overflow-x: hidden;
     margin: 0;
     padding: 0;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .parent {
     display: grid;
-    grid-template-columns: 0.3fr 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-rows: auto;
     height: 100%;
     width: 100%;
 }
 
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 11em;
-    padding: 2rem 1rem;
-    background-color: var(--bg-sidebar);
-    font-size: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    overflow-y: auto;
-    z-index: 1000;
-}
-
-.sidebar-link {
-    display: block;
-    width: 9em;
-    color: var(--blue-components);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    padding: 10px 15px;
-    text-align: center;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    align-self: center;
-}
-
-.sidebar-link:hover {
-    background-color: var(--blue-hover);
-    color: var(--container-color);
-    transform: translateX(3px);
-}
-
-.logo-title-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0;
-    margin-left: -1rem;
-    margin-top: -1rem;
-}
-
-.semurb-logo {
-    height: 4rem;
-    width: 4rem;
-}
-
-.sidebar-title {
-    color: var(--blue-components);
-    font-size: 1.5rem;
-    margin-top: 1rem;
+.page-content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas:
+        "vehicles agents pizza ocuMonthly"
+        "GraphIndOcu GraphIndOcu GraphIndOcu GraphIndOcu"
+        "GraphTimeRes GraphTimeRes GraphTimeRes GraphTimeRes"
+        "GraphMap GraphMap GraphMap GraphMap"
+        "Ranking_Ocu Ranking_Ocu NgbhInfos NgbhInfos";
+    gap: 2.5rem;
+    padding: 2rem;
+    margin-left: 5em;
+    margin-top: 10px;
+    max-width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    box-sizing: border-box;
 }
 
 .header {
@@ -234,283 +88,202 @@ body {
     margin: 1rem 1rem 0 0;
 }
 
-.page-content {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto;
-    grid-template-areas:
-        "vehicles agents GraphIndOcu GraphIndOcu"
-        "pizza ocuMonthly GraphIndOcu GraphIndOcu"
-        "GraphTimeRes GraphTimeRes GraphTimeRes Ranking_Ocu"
-        "NgbhInfos GraphMap GraphMap GraphMap";
-    grid-gap: 20px;
-    padding: 2rem;
-    margin-left: 5em;
-    margin-top: 10px;
-    width: auto;
-    max-width: 1400px;
-    margin-right: 2rem;
-    background-color: var(--bg-color);
+/* === COMPONENTES: SIDEBAR === */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 11em;
+    padding: 2rem 1rem;
+    background-color: var(--bg-sidebar);
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    overflow-y: auto;
+    z-index: 1000;
 }
 
+.logo-title-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    margin-left: -1rem;
+    margin-top: -1rem;
+}
 
-/* Blocos Superiores */
-.vehicles {
-    grid-area: vehicles;
+.semurb-logo {
+    height: 4rem;
+    width: 4rem;
+}
+
+.sidebar-title {
+    color: var(--blue-components);
+    font-size: 1.5rem;
+    margin-top: 1rem;
+}
+
+.sidebar-link {
+    display: block;
+    width: 9em;
+    color: var(--blue-components);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 15px;
+    text-align: center;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    align-self: center;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-link:hover {
+    background-color: var(--blue-hover);
+    color: var(--bg-color);
+}
+
+.sidebar-link.active {
+    background-color: var(--blue-hover);
+    color: var(--bg-color);
+    font-weight: bold;
+}
+
+/* === COMPONENTES: CARDS === */
+.vehicles, .agents, .pizza, .ocuMonthly, .GraphIndOcu, .GraphTimeRes, .Ranking_Ocu, .GraphMap, .NgbhInfos {
     background: var(--container-color);
     border-radius: 12px;
-    padding: 0.3rem;
-    height: 10rem;
-    margin-top: 1.5rem;
-    box-shadow: 1px 1px 1px 1px var(--bg-color);
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.vehicles:hover, .agents:hover, .pizza:hover, .ocuMonthly:hover, .GraphIndOcu:hover, .GraphTimeRes:hover, .Ranking_Ocu:hover, .GraphMap:hover, .NgbhInfos:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Set a fixed height for the top row cards to ensure consistency */
+.vehicles, .agents, .pizza, .ocuMonthly {
+    height: 14rem;
+}
+
+.vehicles { grid-area: vehicles; }
+.agents { grid-area: agents; }
+.pizza { grid-area: pizza; }
+.ocuMonthly { grid-area: ocuMonthly; }
+.GraphIndOcu { grid-area: GraphIndOcu; height: 100%; }
+.GraphTimeRes { grid-area: GraphTimeRes; }
+.Ranking_Ocu { grid-area: Ranking_Ocu; overflow: hidden; }
+.GraphMap { grid-area: GraphMap; }
+.NgbhInfos { grid-area: NgbhInfos; overflow: hidden; }
+
+
+/* === HIERARQUIA DE TEXTO NOS CARDS === */
+.vehicles h4, .agents h4, .pizza h4, .ocuMonthly h4, .GraphIndOcu h4, .GraphTimeRes h4, .Ranking_Ocu h4, .GraphMap h4, .NgbhInfos h4 {
+    display: flex;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
 }
 
 .info-vehic {
     display: flex;
     justify-content: space-around;
-    align-content: center;
-    width: 200px;
-    margin-left: 2rem;
+    align-items: center;
+    width: 100%;
 }
 
 .info-vehic h5 {
     font-size: 0.9rem;
-    display: flex;
-    justify-content: center;
     color: var(--text-color);
     margin: 0;
-    width: 7rem;
     text-align: center;
-    align-items: center;
 }
 
-.NumsVehicles {
-    width: 4rem;
+/* Classe .valor genérica para números de destaque */
+.NumsVehicles, .NumOcuMonth, .agents-info {
     font-size: 2rem;
-    display: flex;
-    justify-content: center;
+    font-weight: 700;
     color: var(--blue-components);
-    font-weight: bolder;
-    margin: 0;
-}
-
-.agents {
-    grid-area: agents;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 0.3rem;
-    height: 10rem;
-    margin-top: 1.5rem;
-    box-shadow: 1px 1px 1px 1px var(--blue-letter);
-}
-
-.pizza {
-    grid-area: pizza;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 0.5rem;
-    height: 10rem;
-    box-shadow: 1px 1px 1px 1px var(--container-color);
-}
-
-.ocuMonthly {
-    grid-area: ocuMonthly;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 0.3rem;
-    height: 10rem;
-    width: 16rem;
-    box-shadow: 1px 1px 1px 1px var(--container-color);
-}
-
-.GraphIndOcu {
-    grid-area: GraphIndOcu;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 2rem;
-    min-width: 20rem;
-    box-shadow: 1px 1px 1px 1px var(--container-color);
-}
-
-.GraphTimeRes {
-    grid-area: GraphTimeRes;
-    background: var(--container-color);
-    border-radius: 12px;
-    margin-top: 5rem;
-    padding: 2rem;
-}
-
-.Ranking_Ocu {
-    grid-area: Ranking_Ocu;
-    background: var(--container-color);
-    border-radius: 12px;
-    margin-top: 5rem;
-    padding: 0.5rem;
-    height: 30rem;
-    width: 20rem;
-    overflow: hidden;
-}
-
-.Ranking_Ocu h4{
     display: flex;
     justify-content: center;
-    text-align: center;
-    color: var(--text-color);
+    align-items: center;
+    margin: 0.5rem 0;
 }
 
-.table_ocu {
-    width: 95%;
-    height: 85%;
+.agents-info {
+    margin-top: 2rem;
+}
+
+.NumOcuMonth {
+    font-size: 2.5rem; /* Slightly larger as it's the only content */
+}
+
+/* === COMPONENTES: TABELAS === */
+.Ranking_Ocu h4, .NgbhInfos h4 {
+    text-align: center;
+}
+
+.table_ocu, .table_neighborhoods {
+    width: 100%;
+    height: calc(100% - 40px); /* Adjust based on h4 height */
     overflow-y: auto;
-    overflow-x: hidden;
     display: block;
     border-collapse: collapse;
-    padding: 1rem;
 }
 
-.table_ocu th,
-.table_ocu td {
+.table_ocu th, .table_ocu td, .table_neighborhoods th, .table_neighborhoods td {
     border: 1px solid var(--cinza);
     padding: 10px;
     text-align: center;
 }
 
-.table_ocu td {
+.table_ocu td, .table_neighborhoods td {
     font-weight: bolder;
 }
 
-.table_ocu th {
+.table_ocu th, .table_neighborhoods th {
     background-color: var(--blue-hover);
-    color: var(--cinza);
+    color: var(--bg-color); /* Improved contrast */
     font-weight: bold;
+    position: sticky;
+    top: 0;
 }
 
-.table_ocu tr {
-    background-color: var(--bg-sidebar);
+.table_ocu tr, .table_neighborhoods tr {
+    background-color: transparent; /* Remove the old color */
     color: var(--cinza);
+    border-bottom: 1px solid var(--bg-sidebar);
 }
 
-.table_ocu tr:nth-child(even) {
+.dark-mode .table_ocu tr, .dark-mode .table_neighborhoods tr {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.table_ocu tr:nth-child(even), .table_neighborhoods tr:nth-child(even) {
     background-color: var(--yellow-hover);
     color: var(--bg-color);
 }
 
-.table_ocu tr:hover {
-    background-color: var(--cinza);
-    color: var(--blue-hover);
-}
-
-.GraphMap {
-    grid-area: GraphMap;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 2rem;
-}
-
-.GraphMap h4 {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    color: var(--text-color);
-}
-
-/* Lista do Mapa */
-.NgbhInfos {
-    grid-area: NgbhInfos;
-    background: var(--container-color);
-    padding: 0.5rem;
-    border-radius: 12px;
-    height: 30rem;
-    width: 20rem;
-    overflow: hidden;
-}
-
-.NgbhInfos h4 {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    color: var(--text-color);
-}
-
-.table_neighborhoods {
-    width: 95%;
-    height: 85%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: block;
-    border-collapse: collapse;
-    padding: 1rem;
-}
-
-.table_neighborhoods th,
-.table_neighborhoods td {
-    border: 1px solid var(--cinza);
-    padding: 10px;
-    text-align: center;
-}
-
-.table_neighborhoods td {
-    font-weight: bolder;
-}
-
-.table_neighborhoods th {
-    background-color: var(--blue-hover);
-    color: var(--cinza);
-    font-weight: bold;
-}
-
-.table_neighborhoods tr {
-    background-color: var(--bg-sidebar);
-    color: var(--cinza);
-}
-
-.table_neighborhoods tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: var(--bg-color);
-}
-
-.table_neighborhoods tr:hover {
+.table_ocu tr:hover, .table_neighborhoods tr:hover {
     background-color: var(--cinza);
     color: var(--blue-hover);
     cursor: pointer;
 }
 
-.vehicles h4, .agents h4, .pizza h4, .ocuMonthly h4, .GraphIndOcu h4, .div7 h4, .div8 h4, .div9 h4, .div10 h4, .div11 h4 {
-    display: flex;
-    justify-content: center;
-    font-weight: bolder;
-    color: var(--text-color);
-    margin-bottom: 0;
-}
-
-.category {
-    display: block;
-    justify-content: center;
-    width: 200px;
-}
-
-.NumOcuMonth {
-    font-size: 3rem;
-    display: flex;
-    justify-content: space-around;
-    align-content: center;
-    color: var(--blue-components);
-    font-weight: bold;
-    margin: 0 0 0 3rem;
-}
-
+/* === COMPONENTES: GRÁFICOS === */
 .category-graphs {
     display: flex;
-    justify-content: space-between;
-    gap: 3rem;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
-/* Gráfico Responsivo */
-#bar-chart {
+#bar-chart, #Graph_Time_Line, #map-chart, #graph-pie {
     width: 100% !important;
-    height: 100% !important;
     border-radius: 12px;
 }
 
@@ -520,20 +293,20 @@ body {
     justify-content: right;
 }
 
-.agents-info {
-    font-size: 2.05rem;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    align-content: center;
-    align-items: center;
-    margin-top: 1.5rem;
-    margin-right: 5rem;
+/* === SCROLLBAR PERSONALIZADO === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--blue-hover);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--bg-sidebar);
 }
 
-/* --- Responsive Design --- */
-
-/* Medium devices (tablets, less than 1200px) */
+/* === RESPONSIVIDADE === */
 @media (max-width: 1200px) {
     .page-content {
         grid-template-columns: repeat(2, 1fr);
@@ -545,22 +318,22 @@ body {
             "Ranking_Ocu Ranking_Ocu"
             "GraphMap GraphMap"
             "NgbhInfos NgbhInfos";
+        margin-left: 12em;
     }
 
     .GraphTimeRes, .Ranking_Ocu {
         margin-top: 1rem;
     }
-
-    .Ranking_Ocu, .NgbhInfos {
-        width: auto;
-        height: auto;
-    }
 }
 
-/* Small devices (landscape phones, 768px and up) */
 @media (max-width: 992px) {
     .sidebar {
         width: 5em;
+    }
+
+    .page-content {
+        margin-left: 6em;
+        padding: 1.5rem;
     }
 
     .sidebar-title {
@@ -577,22 +350,13 @@ body {
         height: 3rem;
         width: 3rem;
     }
-
-    .page-content {
-        margin-left: 6em;
-        padding: 1.5rem;
-    }
-
-    .info-vehic {
-        flex-direction: column;
-        align-items: center;
-        margin-left: 0;
-        gap: 0.5rem;
-    }
 }
 
-/* Extra small devices (phones, less than 768px) */
 @media (max-width: 768px) {
+    .parent {
+        grid-template-columns: 1fr;
+    }
+
     .sidebar {
         display: none;
     }
@@ -615,13 +379,6 @@ body {
         box-sizing: border-box;
     }
 
-    .vehicles, .agents, .pizza, .ocuMonthly, .GraphIndOcu, .GraphTimeRes, .Ranking_Ocu, .GraphMap, .NgbhInfos {
-        height: auto;
-        margin-top: 1rem;
-        padding: 1rem;
-        box-sizing: border-box;
-    }
-
     .ocuMonthly, .Ranking_Ocu, .NgbhInfos {
         width: 100%;
     }
@@ -635,25 +392,17 @@ body {
     }
 }
 
-/* Extra small devices (phones, less than 480px) */
 @media (max-width: 480px) {
-    h4 {
-        font-size: 1.1rem;
+    .vehicles h4, .agents h4, .pizza h4, .ocuMonthly h4, .GraphIndOcu h4, .GraphTimeRes h4, .Ranking_Ocu h4, .GraphMap h4, .NgbhInfos h4 {
+        font-size: 1rem;
     }
 
-    .NumsVehicles {
+    .NumsVehicles, .agents-info {
         font-size: 1.5rem;
     }
 
     .NumOcuMonth {
         font-size: 2rem;
-        margin: 0;
-        justify-content: center;
-    }
-
-    .agents-info {
-        font-size: 1.5rem;
-        margin: 1rem 0 0 0;
     }
 }
 
@@ -661,12 +410,4 @@ body {
     .page-content {
         margin: 10px auto 10px 13em;
     }
-}
-
-.card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-  transition: box-shadow 0.3s ease;
-}
-.card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
 }

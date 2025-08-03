@@ -189,8 +189,6 @@ def update_static_graphs(theme):
             )
         ],
         layout=go.Layout(
-            height=140,
-            width=250,
             showlegend=False,
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
@@ -204,8 +202,6 @@ def update_static_graphs(theme):
     graphOcurrence = go.Figure(
         data=[go.Bar(x=['Jan', 'Fev', 'Mar', 'Abr', 'Mai'], y=[10, 20, 30, 15, 45], marker=dict(color=marker_color))],
         layout=go.Layout(
-            height=350,
-            width=430,
             plot_bgcolor=plot_bg_color,
             paper_bgcolor=paper_bg_color,
             title={"text": "Índice de ocorrências", "x": 0.5, "xanchor": "center", "font": {"color": font_color}},
@@ -225,7 +221,6 @@ def update_static_graphs(theme):
     )
     GraphMapOcurrence.update_layout(
         mapbox_style=map_style,
-        height=350,
         margin=dict(t=0, b=0, l=0, r=0)
     )
 
@@ -251,7 +246,6 @@ def att_graph(year_selected, theme):
     fig = go.Figure(
         data=[go.Scatter(x=meses, y=tempos, mode='lines+markers', line=dict(color=marker_color))],
         layout=go.Layout(
-            height=350,
             margin=dict(t=30, b=20, l=20, r=20),
             plot_bgcolor=plot_bg_color,
             paper_bgcolor=paper_bg_color,
