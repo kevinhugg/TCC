@@ -1,10 +1,11 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback, ctx, State
 import unicodedata
 from collections import Counter
 import plotly.express as px
 from datetime import datetime
 import pandas as pd
+import dash_bootstrap_components as dbc
 
 from data.dados import agents, Ocur_Vehicles
 
@@ -128,15 +129,31 @@ layout = html.Div([
 
         html.Div([
             html.Div([
-                html.A(id='rem_vehicle', children='Remover Serviço', className='rem_serv')
+                html.A(id='rem_vehicle_serv', children='Remover Serviço', className='rem_serv')
             ], className='btn'),
 
             html.Div([
-                html.A(id='add_vehicle', children='Adicionar Serviço', className='btn_add')
+                html.A(id='btn_add', children='Adicionar Serviço', className='btn_add')
             ], className='btn'),
         ], className='btn_rem_add_pdf'),
 
     ], className='graph_tipes'),
+
+    #modal p add serviço
+    dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle('Novo Serviço')),
+            dbc.ModalBody([
+                dbc.Input(id='input-tipo', placeholder='Digite o novo tipo...', type='text'),
+            ]),
+            dbc.ModalFooter([
+                dbc.Button('Adicionar', id='btn-add-confirm', className='btn-confirm', n_clicks=0),
+                dbc.Button('Cancelar', id='btn-cancel', className='btn-cancel', n_clicks=0),
+            ]),
+        ],
+        id='modal-add',
+        is_open=False,
+    )
 
 ], className='page-content')
 
@@ -196,3 +213,34 @@ def update_list(search_value, mes):
     pdf_link = f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes}"
 
     return rows, pdf_link
+
+@callback(
+    Output('modal-add', 'is_open'),
+    Input('btn_add', 'n_clicks'),
+    Input('btn-cancel', 'n_clicks'),
+    Input('btn-add-confirm', 'n_clicks'),
+    State('modal-add', 'is_open'),
+    prevent_initial_call=True
+)
+def toggle_modal(n_add, n_cancel, n_confirm, is_open):
+    trigger = ctx.triggered_id
+    if trigger in ['btn_add', 'btn-cancel', 'btn-add-confirm']:
+        return not is_open
+    return is_open
+
+@callback(
+    Output('fig_serv', 'figure'),
+    Output('input-tipo', 'value'),
+    Input('btn-add-confirm', 'n_clicks'),
+    State('input-tipo', 'value'),
+    prevent_initial_call='initial_duplicate'
+)
+def adicionar_tipo(n_clicks, novo_tipo):
+    if not novo_tipo:
+        raise dash.exceptions.PreventUpdate
+
+    novo_tipo = novo_tipo.strip().capitalize()
+    if novo_tipo and novo_tipo not in tipos:
+        tipos.append(novo_tipo)
+        tipos.sort()
+    return [{'label': t, 'value': t} for t in tipos], ""
