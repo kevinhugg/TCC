@@ -300,6 +300,7 @@ body {
     display: flex;
     justify-content: center;
     align-content: center;
+    color: var(--text-color);
 }
 
 /* Lista do Mapa */
@@ -559,4 +560,31 @@ body {
 }
 ::-webkit-scrollbar-track {
   background-color: var(--bg-sidebar);
+}
+
+.vehicles:hover,
+.agents:hover,
+.pizza:hover,
+.ocuMonthly:hover,
+.GraphIndOcu:hover,
+.GraphTimeRes:hover,
+.Ranking_Ocu:hover,
+.GraphMap:hover,
+.NgbhInfos:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.2); /* azul suave */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.vehicles,
+.agents,
+.pizza,
+.ocuMonthly,
+.GraphIndOcu,
+.GraphTimeRes,
+.Ranking_Ocu,
+.GraphMap,
+.NgbhInfos {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
