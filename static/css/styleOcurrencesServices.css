@@ -192,6 +192,10 @@ body {
     color: white;
 }
 
+.oco-table tr, .serv-table tr {
+    color: black;
+}
+
 .oco-table tr:hover, .serv-table tr:hover {
     background-color: #cdcdcd;
     color: black;
@@ -292,4 +296,20 @@ body {
 
 .filter-month {
     width: 11rem;
+}
+
+media (max-width: 768px) {
+    .page-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "oco_serv_container"
+            "graph_tipes";
+        margin-left: 0;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .oco_serv_container, .graph_tipes {
+        width: 100%;
+    }
 }

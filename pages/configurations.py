@@ -38,3 +38,11 @@ layout = html.Div([
             ],className="config-list-container"),
 
 ],id='page-content',  className='page-content')
+
+@callback(
+    Output('theme', 'data'),
+    Input('dark-mode-toggle', 'value'),
+    prevent_initial_call=True
+)
+def toogle_dark_mode(value):
+    return 'dark' if value else 'light'

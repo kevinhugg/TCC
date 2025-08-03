@@ -331,3 +331,19 @@ body {
     text-align: center;
     margin-top: 1rem;
 }
+
+@media (max-width: 768px) {
+    .page-content {
+        grid-template-columns: 2fr;
+        grid-template-areas:
+            "vehicles"
+            "Ranking_Ocu" "graph-line";
+        margin-left: 5em;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .vehicles, .Ranking_Ocu, .graph-line {
+        width: 100%;
+    }
+}

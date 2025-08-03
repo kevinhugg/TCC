@@ -358,3 +358,20 @@ body {
     transition: 0.3s ease-in;
     color: white;
 }
+
+@media (max-width: 768px) {
+    .page-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "details-container"
+            "table-ocurrences"
+            "agents-container";
+        margin-left: 5em;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .details-container, .ocurrences, .agents-container {
+        width: 100%;
+    }
+}

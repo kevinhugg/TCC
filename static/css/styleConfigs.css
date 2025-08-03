@@ -102,12 +102,11 @@ body {
     grid-template-rows: auto;
     grid-template-areas:
         "config-list-container";
-    grid-gap: 20px;
     padding: 2rem;
     margin-left: 5em;
     margin-top: 10px;
-    width: 78vw;
-    height: 110vh
+    width: 85vw;
+    height: 120vh
 }
 
 .config-list-container {
@@ -145,7 +144,7 @@ body {
     display: flex;
     align-items: center;
     margin-left: calc(78vw - 25vw);
-    max-width: 100px;
+    min-width: 100px;
 }
 
 .config-item.dark-mode-item {

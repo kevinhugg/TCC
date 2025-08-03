@@ -192,15 +192,16 @@ body {
     border: 1px solid #d7d7d7;
     padding: 10px;
     text-align: center;
+    color: black;
 }
 
 .table-ocurrences-serv td {
     font-weight: bolder;
+    color: black;
 }
 
 .table-ocurrences-serv th {
     background-color: var(--blue-components);
-    color: white;
     font-weight: bold;
 }
 
@@ -358,4 +359,22 @@ body {
     background: var(--blue-components);
     transition: 0.3s ease-in;
     color: white;
+}
+
+media (max-width: 768px) {
+    .page-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "details-container"
+            "ocurrences"
+            "services"
+            "agents-container";
+        margin-left: 0;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .details-container, .ocurrences, .services, .agents-container {
+        width: 100%;
+    }
 }

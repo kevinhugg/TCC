@@ -95,20 +95,22 @@ body {
     margin: 1rem 1rem 0 0;
 }
 
-.page-content {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto auto auto;
-    grid-template-areas:
-        "agents_container agents_container  "
-        "agents_container agents_container  "
-        "Ranking_Ocu Ranking_Ocu graph-line graph-line"
-        "Ranking_Ocu Ranking_Ocu graph-line graph-line";
-    grid-gap: 20px;
-    padding: 2rem;
-    margin-left: 5em;
-    margin-top: 10px;
-    width: 72rem;
+@media (max-width: 768px) {
+    .page-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "agents_container"
+            "agents_container"
+            "Ranking_Ocu"
+            "graph-line";
+        margin-left: 0;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .agents_container {
+        width: 100%;
+    }
 }
 
 .searchbar {
@@ -138,6 +140,7 @@ body {
     border-radius: 12px;
     height: 30rem;
     width: 68rem;
+    margin: 5em 13rem;
     overflow: hidden;
 }
 
@@ -167,6 +170,10 @@ body {
     background-color: var(--blue-components);
     color: white;
     font-weight: bold;
+}
+
+.agents-table tr {
+    color: black;
 }
 
 .agents-table tr:nth-child(even) {

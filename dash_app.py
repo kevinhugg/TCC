@@ -1,5 +1,5 @@
 import dash
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output, callback
 import dash_bootstrap_components as dbc
 
 from sidebar import get_sidebar
@@ -33,5 +33,15 @@ def create_dash_app(flask_app):
         ])
 
     ], className='parent')
+
+    # Modo escuro
+    @callback(
+        Output('theme', 'className'),
+        Input('theme-mode', 'data')
+    )
+    def att_theme(mode):
+        if mode == 'dark':
+            return 'dark-mode',
+        return 'light-mode'
 
     return dash_app

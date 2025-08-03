@@ -169,22 +169,36 @@ def gerar_pdf_viaturas():
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
             <style>
+                 body {
+                    font-family: DejaVu Sans;
+                    margin: 20px;
+                }
+                h2 {
+                    text-align: center;
+                    margin-bottom: 2rem;
+                    font-size: 2rem;
+                }
+                h3.section-title {
+                    margin-top: 2rem;
+                    margin-bottom: 0.5rem;
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 4px;
+                    font-size: 1.5rem;
+                }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-family: DejaVu Sans;
+                    margin-bottom: 2rem;
+                    font-size: 1.2rem;
                 }
                 th, td {
-                    border: 1px solid #888;
+                    border: 1px solid black;
                     padding: 8px;
-                    text-align: center;
+                    text-align: left;
+                    vertical-align: top;
                 }
                 th {
-                    background-color: #f5d100;
-                    color: black;
-                }
-                tr:nth-child(even) {
-                    background-color: #f0f0f0;
+                    background-color: #f2f2f2;
                 }
             </style>
         </head>
@@ -256,21 +270,33 @@ def gerar_pdf_viatura_detalhes(numero):
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
             <style>
-                body {
+                 body {
                     font-family: DejaVu Sans;
+                    margin: 20px;
                 }
-                .title {
+                h2 {
                     text-align: center;
+                    margin-bottom: 2rem;
+                    font-size: 2rem;
+                }
+                h3.section-title {
+                    margin-top: 2rem;
+                    margin-bottom: 0.5rem;
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 4px;
+                    font-size: 1.5rem;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin-top: 20px;
+                    margin-bottom: 2rem;
+                    font-size: 1.2rem;
                 }
                 th, td {
                     border: 1px solid black;
-                    padding: 5px;
+                    padding: 8px;
                     text-align: left;
+                    vertical-align: top;
                 }
                 th {
                     background-color: #f2f2f2;
@@ -288,7 +314,7 @@ def gerar_pdf_viatura_detalhes(numero):
         </head>
         <body>
             <h2 class="title"> Relatório da Viatura - {{ numero }}</h2>
-            <h3 class="title">Mes: {{ mes }}</h3>
+            <h3 class="section-title">Mes: {{ mes }}</h3>
             
             <h3 class="tittle">Última foto da viatura<h3/>
             <img src="{{ imagem }}" class="img-final">
@@ -376,20 +402,31 @@ def gerar_pdf_agentes():
             <style>
                 body {
                     font-family: DejaVu Sans;
-                    font-size: 12px;
+                    margin: 20px;
                 }
-                h1 {
+                h2 {
                     text-align: center;
+                    margin-bottom: 2rem;
+                    font-size: 2rem;
+                }
+                h3.section-title {
+                    margin-top: 2rem;
+                    margin-bottom: 0.5rem;
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 4px;
+                    font-size: 1.5rem;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin-top: 20px;
+                    margin-bottom: 2rem;
+                    font-size: 1.2rem;
                 }
                 th, td {
                     border: 1px solid black;
-                    padding: 5px;
+                    padding: 8px;
                     text-align: left;
+                    vertical-align: top;
                 }
                 th {
                     background-color: #f2f2f2;
@@ -453,22 +490,33 @@ def gerar_pdf_agentes_oco():
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
             <style>
-                body {
+                 body {
                     font-family: DejaVu Sans;
-                    font-size: 12px;
+                    margin: 20px;
                 }
-                h1 {
+                h2 {
                     text-align: center;
+                    margin-bottom: 2rem;
+                    font-size: 2rem;
+                }
+                h3.section-title {
+                    margin-top: 2rem;
+                    margin-bottom: 0.5rem;
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 4px;
+                    font-size: 1.5rem;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin-top: 20px;
+                    margin-bottom: 2rem;
+                    font-size: 1.2rem;
                 }
                 th, td {
                     border: 1px solid black;
-                    padding: 5px;
+                    padding: 8px;
                     text-align: left;
+                    vertical-align: top;
                 }
                 th {
                     background-color: #f2f2f2;
@@ -582,22 +630,33 @@ def gerar_pdf_servicos_gerais():
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
             <style>
-                body {
+                 body {
                     font-family: DejaVu Sans;
-                    font-size: 12px;
+                    margin: 20px;
                 }
-                h1 {
+                h2 {
                     text-align: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 2rem;
+                    font-size: 2rem;
+                }
+                h3.section-title {
+                    margin-top: 2rem;
+                    margin-bottom: 0.5rem;
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 4px;
+                    font-size: 1.5rem;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
+                    margin-bottom: 2rem;
+                    font-size: 1.2rem;
                 }
                 th, td {
                     border: 1px solid black;
-                    padding: 5px;
+                    padding: 8px;
                     text-align: left;
+                    vertical-align: top;
                 }
                 th {
                     background-color: #f2f2f2;
@@ -674,7 +733,7 @@ def gerar_pdf_detalhes_ocorrencia(ocorrencia_id):
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
             <style>
-                body {
+                 body {
                     font-family: DejaVu Sans;
                     margin: 20px;
                 }
