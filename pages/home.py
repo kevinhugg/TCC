@@ -152,7 +152,6 @@ layout = html.Div([
                 ])
             ], className='table_neighborhoods'),
         ], className='NgbhInfos'),
-
     ], className='page-content'),
 ])
 
@@ -165,10 +164,10 @@ layout = html.Div([
 def update_static_graphs(theme):
     is_dark = theme == 'dark'
 
-    plot_bg_color = '#1e40af' if is_dark else 'white'
-    paper_bg_color = '#1e40af' if is_dark else 'white'
+    plot_bg_color = '#295678' if is_dark else 'white'
+    paper_bg_color = '#295678' if is_dark else 'white'
     font_color = '#fff' if is_dark else '#000'
-    marker_color = '#FACC15'
+    marker_color = '#f5d100'
     pie_marker_colors = ['#f5d100', '#555' if is_dark else '#d9d9d9']
     map_style = 'carto-darkmatter' if is_dark else 'open-street-map'
 
@@ -241,8 +240,8 @@ def update_static_graphs(theme):
 def att_graph(year_selected, theme):
     is_dark = theme == 'dark'
 
-    plot_bg_color = '#1e40af' if is_dark else 'white'
-    paper_bg_color = '#1e40af' if is_dark else 'white'
+    plot_bg_color = '#295678' if is_dark else 'white'
+    paper_bg_color = '#295678' if is_dark else 'white'
     font_color = '#fff' if is_dark else '#000'
     marker_color = '#f5d100'
 
@@ -282,11 +281,11 @@ def att_flux(n, theme):
 
     if entered > logouted:
         icon_class = 'fas fa-arrow-up'
-        cor = '#10B981'
+        cor = '#40f415'
         flux_text = f'{Agents_loged + entered}'
     else:
         icon_class = 'fas fa-arrow-down'
-        cor = '#10B981'
+        cor = 'red'
         flux_text = f'{Agents_loged - logouted}'
 
     return (

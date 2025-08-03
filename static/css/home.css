@@ -662,25 +662,11 @@ body {
         margin: 10px auto 10px 13em;
     }
 }
-.card h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.card .valor {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--blue-components);
-}
 
 .card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
-  background-color: var(--container-color);
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.3s ease;
 }
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
 }
