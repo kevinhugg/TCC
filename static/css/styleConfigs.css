@@ -103,7 +103,7 @@ body {
     grid-template-areas:
         "config-list-container";
     padding: 2rem;
-    margin-left: 5em;
+    margin-left: 4em;
     margin-top: 10px;
     width: 85vw;
     height: 120vh

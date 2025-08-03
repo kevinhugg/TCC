@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback, State
 import plotly.graph_objects as go
 import plotly.express as px
 import random
@@ -21,72 +21,6 @@ servDones = 15000
 Agents_loged = 2930
 entered = 50
 logouted = 30
-
-graphPieServices = go.Figure(
-    data=[
-        go.Pie(
-            labels = ['Realizados', 'Pendentes'],
-            values = [servDones, services  - servDones],
-            hole = 0.6,
-            sort=False,
-            marker=dict(colors=['#f5d100', '#d9d9d9'], line=dict(color='white', width=2)),
-            textinfo='none',
-            textfont=dict(size=14, family='Segoe UI', color='#333'),
-            hoverinfo='label+percent+value',
-            direction='clockwise',
-            rotation=45,
-            pull=[0.05, 0],
-        )
-    ],
-
-layout=go.Layout(
-        height=140,
-        width=250,
-        showlegend=False,
-        legend=dict(
-            orientation='h',
-            yanchor='bottom',
-            y=-0.15,
-            xanchor='center',
-            x=0.5,
-            font=dict(size=12)
-        ),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=0, b=25, l=70, r=20),
-        transition={'duration': 700, 'easing': 'cubic-in-out'},
-    )
-)
-
-graphOcurrence = go.Figure(
-    data=[go.Bar(x=['Jan', 'Fev', 'Mar', 'Abr', 'Mai'], y=[10, 20, 30, 15, 45], marker=dict(color='#f5d100'))],
-
-    layout=go.Layout(
-        height=350,
-        width=430,
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        title={"text": "Índice de ocorrências", "x": 0.5, "xanchor": "center"},
-        margin=dict(t=40, b=30, l=30, r=30)
-    )
-)
-
-#Gerar Mapa
-GraphMapOcurrence = px.scatter_mapbox(
-    Ocur_Neighborhoods,
-    lat=[b['latitude'] for b in Ocur_Neighborhoods],
-    lon=[b['longitude'] for b in Ocur_Neighborhoods],
-    size=[b['quantidade'] for b in Ocur_Neighborhoods],
-    hover_name=[b['bairro'] for b in Ocur_Neighborhoods],
-    zoom=12,
-    color_discrete_sequence=['#f5d100']
-)
-
-GraphMapOcurrence.update_layout(
-    mapbox_style="open-street-map",
-    height=350,
-    margin=dict(t=20, b=0, l=0, r=0)
-)
 
 layout = html.Div([
 
@@ -111,7 +45,7 @@ layout = html.Div([
         html.Div([
             html.H4('Agentes Logados'),
             html.Div([
-                html.Div(id='value-agents', style={'color': '#fff', 'z-index': '1000'}),
+                html.Div(id='value-agents', style={'z-index': '1000'}),
                 html.Div(id='flux'),
             ], className='agents-info'),
             dcc.Interval(id='interval', interval=3000, n_intervals=0)
@@ -122,10 +56,7 @@ layout = html.Div([
             html.Div([
                 dcc.Graph(
                     id='graph-pie',
-                    figure=graphPieServices,
-                    config={
-                        'displayModeBar': False,
-                    },
+                    config={'displayModeBar': False},
                 ),
             ], className='category-graphs'),
            ], className="pizza"),
@@ -140,7 +71,6 @@ layout = html.Div([
         html.Div([
             dcc.Graph(
                 id='bar-chart',
-                figure=graphOcurrence,
                 config={
                     'modeBarButtonsToRemove': [
                         'zoom2d', 'pan2d', 'select2d', 'lasso2d',
@@ -199,7 +129,7 @@ layout = html.Div([
 
             html.Div([
                 dcc.Graph(
-                    figure=GraphMapOcurrence,
+                    id='map-chart',
                     config={'displayModeBar': False},
                 )
             ]),
@@ -223,28 +153,115 @@ layout = html.Div([
             ], className='table_neighborhoods'),
         ], className='NgbhInfos'),
 
-    ], className='page-content'),  # AQUI precisa estar a grid
+    ], className='page-content'),
 ])
 
 @callback(
-    Output('Graph_Time_Line', 'figure'),
-    Input('dropdown-year', 'value')
+    Output('graph-pie', 'figure'),
+    Output('bar-chart', 'figure'),
+    Output('map-chart', 'figure'),
+    Input('theme-mode', 'data')
 )
+def update_static_graphs(theme):
+    is_dark = theme == 'dark'
 
-def att_graph(year_selected):
+    plot_bg_color = '#295678' if is_dark else 'white'
+    paper_bg_color = '#295678' if is_dark else 'white'
+    font_color = '#fff' if is_dark else '#000'
+    marker_color = '#f5d100'
+    pie_marker_colors = ['#f5d100', '#555' if is_dark else '#d9d9d9']
+    map_style = 'carto-darkmatter' if is_dark else 'open-street-map'
+
+    # Gráfico de Pizza
+    graphPieServices = go.Figure(
+        data=[
+            go.Pie(
+                labels=['Realizados', 'Pendentes'],
+                values=[servDones, services - servDones],
+                hole=0.6,
+                sort=False,
+                marker=dict(colors=pie_marker_colors, line=dict(color='white', width=2)),
+                textinfo='none',
+                textfont=dict(size=14, family='Segoe UI', color=font_color),
+                hoverinfo='label+percent+value',
+                direction='clockwise',
+                rotation=45,
+                pull=[0.05, 0],
+            )
+        ],
+        layout=go.Layout(
+            height=140,
+            width=250,
+            showlegend=False,
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(t=0, b=25, l=70, r=20),
+            transition={'duration': 700, 'easing': 'cubic-in-out'},
+            font_color=font_color
+        )
+    )
+
+    # Gráfico de Barras
+    graphOcurrence = go.Figure(
+        data=[go.Bar(x=['Jan', 'Fev', 'Mar', 'Abr', 'Mai'], y=[10, 20, 30, 15, 45], marker=dict(color=marker_color))],
+        layout=go.Layout(
+            height=350,
+            width=430,
+            plot_bgcolor=plot_bg_color,
+            paper_bgcolor=paper_bg_color,
+            title={"text": "Índice de ocorrências", "x": 0.5, "xanchor": "center", "font": {"color": font_color}},
+            margin=dict(t=40, b=30, l=30, r=30),
+            font_color=font_color
+        )
+    )
+
+    # Mapa
+    GraphMapOcurrence = px.scatter_mapbox(
+        Ocur_Neighborhoods,
+        lat=[b['latitude'] for b in Ocur_Neighborhoods],
+        lon=[b['longitude'] for b in Ocur_Neighborhoods],
+        size=[b['quantidade'] for b in Ocur_Neighborhoods],
+        hover_name=[b['bairro'] for b in Ocur_Neighborhoods],
+        zoom=12,
+        color_discrete_sequence=[marker_color]
+    )
+    GraphMapOcurrence.update_layout(
+        mapbox_style=map_style,
+        height=350,
+        margin=dict(t=0, b=0, l=0, r=0)
+    )
+
+    return graphPieServices, graphOcurrence, GraphMapOcurrence
+
+
+@callback(
+    Output('Graph_Time_Line', 'figure'),
+    Input('dropdown-year', 'value'),
+    Input('theme-mode', 'data')
+)
+def att_graph(year_selected, theme):
+    is_dark = theme == 'dark'
+
+    plot_bg_color = '#295678' if is_dark else 'white'
+    paper_bg_color = '#295678' if is_dark else 'white'
+    font_color = '#fff' if is_dark else '#000'
+    marker_color = '#f5d100'
+
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
     tempos = time_response[year_selected]
 
     fig = go.Figure(
-        data=[go.Scatter(x=meses, y=tempos, mode='lines+markers', line=dict(color='#f5d100'))],
+        data=[go.Scatter(x=meses, y=tempos, mode='lines+markers', line=dict(color=marker_color))],
         layout=go.Layout(
             height=350,
             margin=dict(t=30, b=20, l=20, r=20),
-            plot_bgcolor='white',
-            paper_bgcolor='white',
-            title={'text': f'Tempo Médio de Resposta em {year_selected}', 'x': 0.5, "xanchor": "center"},
+            plot_bgcolor=plot_bg_color,
+            paper_bgcolor=paper_bg_color,
+            title={'text': f'Tempo Médio de Resposta em {year_selected}', 'x': 0.5, "xanchor": "center",
+                   "font": {"color": font_color}},
             yaxis_title='Tempo (minutos)',
-            xaxis_title='Mês'
+            xaxis_title='Mês',
+            font_color=font_color
         )
     )
     return fig
@@ -252,18 +269,21 @@ def att_graph(year_selected):
 @callback(
     Output('value-agents', 'children'),
     Output('flux', 'children'),
-    Input('interval', 'n_intervals')
+    Input('interval', 'n_intervals'),
+    State('theme-mode', 'data')
 )
-def att_flux(n):
+def att_flux(n, theme):
     global Agents_loged, entered, logouted
 
     entered = random.randint(10, 100)
     logouted = random.randint(10, 100)
     Agents_loged += (entered - logouted)
 
+    is_dark = theme == 'dark'
+
     if entered > logouted:
         icon_class = 'fas fa-arrow-up'
-        cor = 'green'
+        cor = '#40f415'
         flux_text = f'{Agents_loged + entered}'
     else:
         icon_class = 'fas fa-arrow-down'
@@ -271,7 +291,7 @@ def att_flux(n):
         flux_text = f'{Agents_loged - logouted}'
 
     return (
-        f'{Agents_loged}',
+        html.Span(f'{Agents_loged}', style={'color': 'transparent'}),
         html.Div([
             html.I(className=icon_class, style={'color': cor, 'transition': 'color 0.5s ease'}),
             html.Span(flux_text, style={'color': cor, 'transition': 'color 0.5s ease'})

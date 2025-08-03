@@ -11,6 +11,7 @@ tipos = sorted(list({item.get('class', '').capitalize() for item in Ocur_Vehicle
 layout = html.Div([
 
     html.Link(rel='stylesheet', href='/static/css/styleConfigs.css'),
+    dcc.Store(id='theme-mode', storage_type='local'),
 
             html.Div([
                 html.H2("Configurações", style={"marginBottom": "10px"}),
@@ -40,9 +41,11 @@ layout = html.Div([
 ],id='page-content',  className='page-content')
 
 @callback(
-    Output('theme', 'data'),
-    Input('dark-mode-toggle', 'value'),
-    prevent_initial_call=True
+    Output('theme-mode', 'data'),
+    Input('dark-mode-toggle', 'on')
 )
-def toogle_dark_mode(value):
-    return 'dark' if value else 'light'
+def update_theme(on):
+    if on:
+        return 'dark'
+    else:
+        return 'light'
