@@ -152,6 +152,7 @@ layout = html.Div([
                 ])
             ], className='table_neighborhoods'),
         ], className='NgbhInfos'),
+
     ], className='page-content'),
 ])
 
@@ -164,10 +165,10 @@ layout = html.Div([
 def update_static_graphs(theme):
     is_dark = theme == 'dark'
 
-    plot_bg_color = '#295678' if is_dark else 'white'
-    paper_bg_color = '#295678' if is_dark else 'white'
+    plot_bg_color = '#273c5a' if is_dark else 'white'
+    paper_bg_color = '#273c5a' if is_dark else 'white'
     font_color = '#fff' if is_dark else '#000'
-    marker_color = '#f5d100'
+    marker_color = '#FACC15'
     pie_marker_colors = ['#f5d100', '#555' if is_dark else '#d9d9d9']
     map_style = 'carto-darkmatter' if is_dark else 'open-street-map'
 
@@ -189,10 +190,12 @@ def update_static_graphs(theme):
             )
         ],
         layout=go.Layout(
+            height=120,
+            width=300,
             showlegend=False,
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(t=0, b=25, l=70, r=20),
+            margin=dict(t=0, b=10, l=160, r=0),
             transition={'duration': 700, 'easing': 'cubic-in-out'},
             font_color=font_color
         )
@@ -235,8 +238,8 @@ def update_static_graphs(theme):
 def att_graph(year_selected, theme):
     is_dark = theme == 'dark'
 
-    plot_bg_color = '#295678' if is_dark else 'white'
-    paper_bg_color = '#295678' if is_dark else 'white'
+    plot_bg_color = '#273c5a' if is_dark else 'white'
+    paper_bg_color = '#273c5a' if is_dark else 'white'
     font_color = '#fff' if is_dark else '#000'
     marker_color = '#f5d100'
 
@@ -275,11 +278,11 @@ def att_flux(n, theme):
 
     if entered > logouted:
         icon_class = 'fas fa-arrow-up'
-        cor = '#40f415'
+        cor = '#10B981'
         flux_text = f'{Agents_loged + entered}'
     else:
         icon_class = 'fas fa-arrow-down'
-        cor = 'red'
+        cor = '#10B981'
         flux_text = f'{Agents_loged - logouted}'
 
     return (
