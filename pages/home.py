@@ -215,7 +215,6 @@ def update_static_graphs(theme):
         )
     )
 
-    # Mapa
     GraphMapOcurrence = px.scatter_mapbox(
         Ocur_Neighborhoods,
         lat=[b['latitude'] for b in Ocur_Neighborhoods],
