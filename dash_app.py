@@ -10,7 +10,10 @@ def create_dash_app(flask_app):
         server=flask_app,
         url_base_pathname='/dashboard/',
         use_pages=True,
-        external_stylesheets=[dbc.themes.DARKLY],
+        external_stylesheets=[
+            '/static/css/global.css',
+            "https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+        ],
     )
 
     dash_app.layout = html.Div([

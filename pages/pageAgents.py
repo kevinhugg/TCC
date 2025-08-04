@@ -60,7 +60,7 @@ layout = html.Div([
                 ], className='btn'),
             ], className='btn_rem_add_pdf'),
 
-        ], className='agents_container'),
+        ], className='agents_container card'),
     ])
 
 ], className='page-content')

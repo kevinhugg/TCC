@@ -8,19 +8,17 @@ from data.dados import Ocur_Neighborhoods, time_response, Most_common_Ocu
 
 dash.register_page(__name__, path='/', name='Home')
 
-#VEÍCULOS
+# VEÍCULOS
 vehiclesTot = 521
 damagedVehic = 152
 perfectVehic = vehiclesTot - damagedVehic
 
-#SERVIÇOS
+# SERVIÇOS
 services = 20000
 servDones = 15000
 
-#agentes
+# agentes
 Agents_loged = 2930
-entered = 50
-logouted = 30
 
 layout = html.Div([
 
@@ -32,15 +30,15 @@ layout = html.Div([
             html.H4('Viaturas'),
             html.Div([
                 html.Div([
-                html.H5('Com avarias:'),
-                html.P(damagedVehic, className='NumsVehicles'),
-                    ], className='info-vehic'),
+                    html.H5('Com avarias:'),
+                    html.P(damagedVehic, className='NumsVehicles'),
+                ], className='info-vehic'),
                 html.Div([
-                html.H5('Sem avarias:'),
-                html.P(perfectVehic, className='NumsVehicles'),
-                    ], className='info-vehic')
+                    html.H5('Sem avarias:'),
+                    html.P(perfectVehic, className='NumsVehicles'),
+                ], className='info-vehic')
             ], className='category'),
-        ], className="vehicles"),
+        ], className="vehicles card"),
 
         html.Div([
             html.H4('Agentes Logados'),
@@ -49,7 +47,7 @@ layout = html.Div([
                 html.Div(id='flux'),
             ], className='agents-info'),
             dcc.Interval(id='interval', interval=3000, n_intervals=0)
-        ], className="agents"),
+        ], className="agents card"),
 
         html.Div([
             html.H4('Serviços Feitos'),
@@ -59,14 +57,14 @@ layout = html.Div([
                     config={'displayModeBar': False},
                 ),
             ], className='category-graphs'),
-           ], className="pizza"),
+        ], className="pizza card"),
 
         html.Div([
             html.H4('Ocorrências no Mês'),
             html.Div([
-            html.P('1950', className='NumOcuMonth'),
+                html.P('1950', className='NumOcuMonth'),
             ], className='category'),
-            ], className="ocuMonthly"),
+        ], className="ocuMonthly card"),
 
         html.Div([
             dcc.Graph(
@@ -80,7 +78,7 @@ layout = html.Div([
                     'displaylogo': False
                 }
             )
-        ], className="GraphIndOcu"),
+        ], className="GraphIndOcu card"),
 
         html.Div([
             dcc.Graph(
@@ -102,7 +100,7 @@ layout = html.Div([
                 clearable=False,
                 style={'width': '70px'}
             )
-        ], className="GraphTimeRes"),
+        ], className="GraphTimeRes card"),
 
         html.Div([
             html.H4('Ocorrências Mais Comuns'),
@@ -122,7 +120,7 @@ layout = html.Div([
                 ])
             ], className='table_ocu')
 
-        ], className="Ranking_Ocu"),
+        ], className="Ranking_Ocu card"),
 
         html.Div([
             html.H4('Distrubuição Geográfica das Ocorrências'),
@@ -133,7 +131,7 @@ layout = html.Div([
                     config={'displayModeBar': False},
                 )
             ]),
-        ], className='GraphMap'),
+        ], className='GraphMap card'),
 
         html.Div([
             html.H4('Bairros com mais ocorrências'),
@@ -151,10 +149,11 @@ layout = html.Div([
                     ]) for bairro in Ocur_Neighborhoods
                 ])
             ], className='table_neighborhoods'),
-        ], className='NgbhInfos'),
+        ], className='NgbhInfos card'),
 
     ], className='page-content'),
 ])
+
 
 @callback(
     Output('graph-pie', 'figure'),
@@ -276,6 +275,7 @@ def att_graph(year_selected, theme):
     )
     return fig
 
+
 @callback(
     Output('value-agents', 'children'),
     Output('flux', 'children'),
@@ -283,27 +283,27 @@ def att_graph(year_selected, theme):
     State('theme-mode', 'data')
 )
 def att_flux(n, theme):
-    global Agents_loged, entered, logouted
+    # Simulate agent flux without using global variables for incrementing
+    entered = random.randint(10, 50)
+    logouted = random.randint(10, 50)
 
-    entered = random.randint(10, 100)
-    logouted = random.randint(10, 100)
-    Agents_loged += (entered - logouted)
+    current_agents = Agents_loged + (entered - logouted)
 
     is_dark = theme == 'dark'
 
     if entered > logouted:
         icon_class = 'fas fa-arrow-up'
-        cor = '#10B981'
-        flux_text = f'{Agents_loged + entered}'
+        cor = '#10B981'  # Green for increase
     else:
         icon_class = 'fas fa-arrow-down'
-        cor = '#10B981'
-        flux_text = f'{Agents_loged - logouted}'
+        cor = '#ef4444'  # Red for decrease
+
+    flux_text = f'{entered - logouted:+}'
 
     return (
-        html.Span(f'{Agents_loged}', style={'color': 'transparent'}),
+        html.Span(f'{current_agents}', style={'color': 'var(--primary-text-color)'}),
         html.Div([
-            html.I(className=icon_class, style={'color': cor, 'transition': 'color 0.5s ease'}),
-            html.Span(flux_text, style={'color': cor, 'transition': 'color 0.5s ease'})
+            html.I(className=icon_class, style={'color': cor, 'margin-right': '8px'}),
+            html.Span(flux_text, style={'color': cor})
         ])
     )

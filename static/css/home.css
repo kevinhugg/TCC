@@ -1,127 +1,3 @@
-.light-mode {
-    --bg-color: #f8f9fa;
-    --sidebar-bg-color: #111827;
-    --card-bg-color: #ffffff;
-    --primary-text-color: #1f2937;
-    --secondary-text-color: #6b7280;
-    --border-color: #e5e7eb;
-    --accent-color: #3b82f6;
-    --accent-color-hover: #2563eb;
-    --table-stripe-color: #f9fafb;
-}
-
-.dark-mode {
-    --bg-color: #0f172a;
-    --sidebar-bg-color: #1f2937;
-    --card-bg-color: #1f293b;
-    --primary-text-color: #f9fafb;
-    --secondary-text-color: #9ca3af;
-    --border-color: #374151;
-    --accent-color: #60a5fa;
-    --accent-color-hover: #93c5fd;
-    --table-stripe-color: #374151;
-}
-
-html {
-  background-color: var(--bg-color);
-}
-
-body {
-    transition: background-color 0.4s ease, color 0.4s ease;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--primary-text-color);
-    line-height: 1.6;
-    min-height: 100vh;
-    max-width: 100vw;
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-}
-
-.parent {
-    display: grid;
-    grid-template-columns: 0.3fr 1fr;
-    grid-template-rows: auto;
-    height: 100%;
-    width: 100%;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 11em;
-    padding: 2rem 1rem;
-    background-color: var(--sidebar-bg-color);
-    font-size: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    overflow-y: auto;
-    z-index: 1000;
-}
-
-.sidebar-link {
-    display: block;
-    width: 9em;
-    color: var(--accent-color);
-    text-decoration: none;
-    font-weight: bold;
-    padding: 10px 15px;
-    text-align: center;
-    border-radius: 6px;
-    transition: background-color 0.5s ease, color 0.3s ease;
-    align-self: center;
-}
-
-.sidebar-link:hover {
-    background-color: var(--accent-color-hover);
-    color: var(--card-bg-color);
-}
-
-.logo-title-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0;
-    margin-left: -1rem;
-    margin-top: -1rem;
-}
-
-.semurb-logo {
-    height: 4rem;
-    width: 4rem;
-}
-
-.sidebar-title {
-    color: var(--accent-color);
-    font-size: 1.5rem;
-    margin-top: 1rem;
-}
-
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0;
-    z-index:500;
-    color: var(--card-bg-color);
-    font-size: 1.2rem;
-    background-color: var(--bg-color);
-}
-
-.profile-pic {
-    height: 3.5rem;
-    width: 3.5rem;
-    margin: 1rem 1rem 0 0;
-}
-
 .page-content {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -130,42 +6,18 @@ body {
         "vehicles agents pizza ocuMonthly"
         "GraphIndOcu GraphIndOcu GraphTimeRes GraphTimeRes"
         "GraphMap GraphMap Ranking_Ocu NgbhInfos";
-    grid-gap: 1.5rem; /* 24px */
-    padding: 2rem;
-    margin-left: 5em;
-    margin-top: 10px;
-    height: 100%;
-    width: 100%;
-    max-width: 1400px; /* Reduced width */
-    background-color: var(--bg-color);
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 10px auto;
 }
 
-/* A generic card style for all dashboard widgets */
-.vehicles, .agents, .pizza, .ocuMonthly, .GraphIndOcu, .GraphTimeRes, .Ranking_Ocu, .GraphMap, .NgbhInfos {
-    background: var(--card-bg-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.vehicles:hover, .agents:hover, .pizza:hover, .ocuMonthly:hover, .GraphIndOcu:hover, .GraphTimeRes:hover, .Ranking_Ocu:hover, .GraphMap:hover, .NgbhInfos:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    cursor: pointer;
-}
-
-/* Specific grid areas and adjustments */
 .vehicles { grid-area: vehicles; }
 .agents { grid-area: agents; }
 .pizza { grid-area: pizza; }
 .ocuMonthly { grid-area: ocuMonthly; }
 .GraphIndOcu {
     grid-area: GraphIndOcu;
-    height: 25rem; /* Fixed height for the graph container */
+    height: 25rem;
 }
 .GraphTimeRes { grid-area: GraphTimeRes; }
 .Ranking_Ocu { grid-area: Ranking_Ocu; overflow: hidden; }
@@ -173,7 +25,6 @@ body {
 .NgbhInfos { grid-area: NgbhInfos; overflow: hidden; }
 
 
-/* Content-specific styles for cards */
 .info-vehic {
     display: flex;
     flex-direction: column;
@@ -198,7 +49,6 @@ body {
     margin: 0;
 }
 
-/* Modern Table Styles */
 .table_ocu, .table_neighborhoods {
     width: 100%;
     height: 100%;
@@ -228,20 +78,18 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Remove border from the last row for a cleaner look */
 .table_ocu tr:last-child td,
 .table_neighborhoods tr:last-child td {
     border-bottom: none;
 }
 
-/* Hover effect for table rows */
 .table_ocu tr:hover,
 .table_neighborhoods tr:hover {
-    background-color: var(--accent-color);
-    color: var(--card-bg-color);
+    background-color: var(--table-row-hover-bg-color);
+    color: var(--table-row-hover-text-color);
 }
 
-.vehicles h4, .agents h4, .pizza h4, .ocuMonthly h4, .GraphIndOcu h4, .div7 h4, .div8 h4, .div9 h4, .div10 h4, .div11 h4 {
+.card h4 {
     display: flex;
     justify-content: center;
     font-weight: bolder;
@@ -274,7 +122,6 @@ body {
     gap: 3rem;
 }
 
-/* Gráfico Responsivo */
 #bar-chart {
     width: 100% !important;
     height: 100% !important;
@@ -296,9 +143,6 @@ body {
     margin-top: 1.5rem;
 }
 
-/* --- Responsive Design --- */
-
-/* Medium devices (tablets, less than 1200px) */
 @media (max-width: 1200px) {
     .page-content {
         grid-template-columns: repeat(2, 1fr);
@@ -311,57 +155,9 @@ body {
             "GraphMap GraphMap"
             "NgbhInfos NgbhInfos";
     }
-
-    .GraphTimeRes, .Ranking_Ocu {
-        margin-top: 1rem;
-    }
-
-    .Ranking_Ocu, .NgbhInfos {
-        width: auto;
-        height: auto;
-    }
 }
 
-/* Small devices (landscape phones, 768px and up) */
-@media (max-width: 992px) {
-    .sidebar {
-        width: 5em;
-    }
-
-    .sidebar-title {
-        display: none;
-    }
-
-    .sidebar-link {
-        width: 90%;
-        font-size: 0.8rem;
-        padding: 8px 5px;
-    }
-
-    .semurb-logo {
-        height: 3rem;
-        width: 3rem;
-    }
-
-    .page-content {
-        margin-left: 6em;
-        padding: 1.5rem;
-    }
-
-    .info-vehic {
-        flex-direction: column;
-        align-items: center;
-        margin-left: 0;
-        gap: 0.5rem;
-    }
-}
-
-/* Extra small devices (phones, less than 768px) */
 @media (max-width: 768px) {
-    .sidebar {
-        display: none;
-    }
-
     .page-content {
         grid-template-columns: 1fr;
         grid-template-areas:
@@ -374,95 +170,20 @@ body {
             "Ranking_Ocu"
             "GraphMap"
             "NgbhInfos";
-        width: 100%;
-        margin-left: 0;
-        padding: 1rem;
-        box-sizing: border-box;
-    }
-
-    .vehicles, .agents, .pizza, .ocuMonthly, .GraphIndOcu, .GraphTimeRes, .Ranking_Ocu, .GraphMap, .NgbhInfos {
-        height: auto;
-        margin-top: 1rem;
-        padding: 1rem;
-        box-sizing: border-box;
-    }
-
-    .ocuMonthly, .Ranking_Ocu, .NgbhInfos {
-        width: 100%;
-    }
-
-    .header {
-        justify-content: center;
-    }
-
-    .profile-pic {
-        margin: 0.5rem 0;
     }
 }
 
-/* Extra small devices (phones, less than 480px) */
 @media (max-width: 480px) {
-    h4 {
+    .card h4 {
         font-size: 1.1rem;
     }
-
     .NumsVehicles {
         font-size: 1.5rem;
     }
-
     .NumOcuMonth {
         font-size: 2rem;
-        margin: 0;
-        justify-content: center;
     }
-
     .agents-info {
         font-size: 1.5rem;
-        margin: 1rem 0 0 0;
     }
-}
-
-/* Large devices (desktops, 1600px and up) */
-@media (min-width: 1600px) {
-    .page-content {
-        margin: 10px auto 10px 13em;
-    }
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: var(--accent-color-hover);
-  border-radius: 8px;
-}
-::-webkit-scrollbar-track {
-  background-color: var(--sidebar-bg-color);
-}
-
-.vehicles:hover,
-.agents:hover,
-.pizza:hover,
-.ocuMonthly:hover,
-.GraphIndOcu:hover,
-.GraphTimeRes:hover,
-.Ranking_Ocu:hover,
-.GraphMap:hover,
-.NgbhInfos:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 0 15px rgba(96, 165, 250, 0.2); /* azul suave */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-}
-
-.vehicles,
-.agents,
-.pizza,
-.ocuMonthly,
-.GraphIndOcu,
-.GraphTimeRes,
-.Ranking_Ocu,
-.GraphMap,
-.NgbhInfos {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

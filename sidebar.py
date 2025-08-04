@@ -2,34 +2,41 @@ import dash
 from dash import html
 
 def get_sidebar():
-
-    ordem_paginas = [
-        "/",
-        "/pageVehicles",
-        "/pageAgents",
-        "/services",
-        "/ocurrences",
-        "/historic",
-        "/configurations",
-    ]
+    # Define a mapping of page paths to icons and names
+    page_map = {
+        "/": {"name": "Home", "icon": "fas fa-home"},
+        "/pageVehicles": {"name": "Viaturas", "icon": "fas fa-car"},
+        "/pageAgents": {"name": "Agentes", "icon": "fas fa-users"},
+        "/services": {"name": "Serviços", "icon": "fas fa-concierge-bell"},
+        "/ocurrences": {"name": "Ocorrências", "icon": "fas fa-exclamation-triangle"},
+        "/historic": {"name": "Histórico", "icon": "fas fa-history"},
+        "/configurations": {"name": "Configurações", "icon": "fas fa-cog"},
+    }
 
     links = []
-    for path in ordem_paginas:
-        page = next((p for p in dash.page_registry.values() if p["path"] == path), None)
-        if page:
-            links.append(
-                html.Div(
-                    html.A(page["name"], href=f"/dashboard{page['path']}", className="sidebar-link")
-                )
+    for path, details in page_map.items():
+        links.append(
+            html.A(
+                [
+                    html.I(className=details["icon"]),
+                    html.Span(details["name"], className="sidebar-link-text")
+                ],
+                href=f"/dashboard{path}",
+                className="sidebar-link"
             )
+        )
 
-    sidebar = html.Div([
-        html.Div([
-        html.Img(src="/static/assets/img/logoSemurb.png", alt="Logo da SEMURB", className="semurb-logo"),
-        html.H2("SEMURB", className="sidebar-title"),  # Título no topo
-        ], className="logo-title-container"),
-
-        *links  # Desempacota a lista de links
-    ], className="div6")
+    sidebar = html.Div(
+        [
+            html.Div(
+                [
+                    html.Img(src="/static/assets/img/logoSemurb.png", alt="Logo da SEMURB", className="semurb-logo"),
+                    html.H2("SEMURB", className="sidebar-title"),
+                ],
+                className="logo-title-container"
+            ),
+            html.Nav(links, className="sidebar-nav"),
+        ]
+    )
 
     return sidebar

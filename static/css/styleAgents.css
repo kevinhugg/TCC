@@ -1,276 +1,122 @@
-:root {
-    --white-snow: #f0f0f0;
-    --black: #000;
-    --blue-components: #295678;
-    --blue-hover: #6ABDF8;
-    --blue-letter: #0D1F2C;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #e7e7f1;
-}
-
-.parent {
-    display: grid;
-    grid-template-columns: 0.3fr 1fr; /* Sidebar + conteúdo */
-    grid-template-rows: auto;
-    height: 100%;
+.agents_container {
     width: 100%;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 11em;
-    padding: 2rem 1rem;
-    background-color: var(--blue-letter);
-    font-size: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    overflow-y: auto;
-}
-
-.sidebar-link {
-    display: block;
-    width: 9em;
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 10px 15px;
-    text-align: center;
-    border-radius: 6px;
-    transition: background-color 0.5s ease, color 0.3s ease;
-    align-self: center;
-}
-
-.sidebar-link:hover {
-    background-color: #2c3e50;
-    color: white;
-}
-
-.logo-title-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0;
-    margin-left: -1rem;
-    margin-top: -1rem;
-}
-
-.semurb-logo {
-    height: 4rem;
-    width: 4rem;
-}
-
-.sidebar-title {
-    color: white;
-    font-size: 1.5rem;
-    margin-top: 1rem;
-}
-
-/* Header */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0;
-    z-index: 1000;
-    color: white;
-    font-size: 1.2rem;
-}
-
-.profile-pic {
-    height: 3.5rem;
-    width: 3.5rem;
-    margin: 1rem 1rem 0 0;
-}
-
-@media (max-width: 768px) {
-    .page-content {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "agents_container"
-            "agents_container"
-            "Ranking_Ocu"
-            "graph-line";
-        margin-left: 0;
-        padding: 1rem;
-        width: 100%;
-    }
-
-    .agents_container {
-        width: 100%;
-    }
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 1.5rem;
+    overflow: hidden;
 }
 
 .searchbar {
     display: flex;
     justify-content: center;
-    margin: 1rem 0
+    margin-bottom: 1.5rem;
 }
 
+
 .input-search {
-    width: 35%;
-    height: 2rem;
-    padding: 0.5rem 1rem;
-    font-size: 1.2rem;
-    border: 2px solid var(--yellow-components);
+    width: 50%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--primary-text-color);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     outline: none;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .input-search:focus {
-    border-color: var(--yellow-hover);
-}
-
-.agents_container {
-    grid-area: agents_container;
-    background: white;
-    border-radius: 12px;
-    height: 30rem;
-    width: 68rem;
-    margin: 5em 13rem;
-    overflow: hidden;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
 }
 
 .agents-table {
     width: 100%;
     height: 70%;
     overflow-y: auto;
-    overflow-x: hidden;
     display: block;
     border-collapse: collapse;
-    padding: 1rem;
-    justify-items: center;
 }
 
 .agents-table th, .agents-table td {
-    border: 1px solid #d7d7d7;
-    padding: 10px;
-    text-align: center;
-}
-
-.agents-table td {
-    font-weight: bolder;
-    padding: 15px 50px;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-text-color);
 }
 
 .agents-table th {
-    background-color: var(--blue-components);
-    color: white;
-    font-weight: bold;
-}
-
-.agents-table tr {
-    color: black;
-}
-
-.agents-table tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: white;
+    background-color: var(--table-header-bg-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
 }
 
 .agents-table tr:hover {
-    background-color: #cdcdcd;
-    color: black;
+    background-color: var(--table-row-hover-bg-color);
 }
 
-.btn-pdf {
-    height: 3rem;
-    width: 7rem;
-    padding: 10px;
-    background-color: #f5d100;
-    color: black;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
-    margin-top: 1rem;
-}
-
-.btn-pdf:hover {
-    background-color: #e4c800;
-}
-
-.btn-pdf-agent {
-    display: flex;
-    justify-content: center;
+.agents-table td.not-found {
     text-align: center;
-}
-
-.btn_view a,
-.btn_veh a {
-    text-decoration: none;
-    color: black;
-}
-
-.btn_view a:hover,
-.btn_veh a:hover {
-    color: white;
-}
-
-.btn_veh:hover,
-.btn_view:hover{
-    background: var(--blue-components);
-    transition: 0.3s ease-in;
-    color: white;
+    padding: 2rem;
+    color: var(--secondary-text-color);
 }
 
 .btn_rem_add_pdf {
-    display: grid;
-    grid-template-columns: 200px 200px 200px;
-    justify-content: space-around;
-    x-index: 100;
-}
-
-.btn {
-    color: white;
     display: flex;
     justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn a, .btn-pdf-agent a {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
     text-decoration: none;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-align: center;
+}
+
+.btn-pdf {
+    background-color: var(--accent-color);
+    color: var(--button-text-color);
+}
+
+.btn-pdf:hover {
+    background-color: var(--accent-color-hover);
 }
 
 .add_agents, .rem_agents {
-    height: 3rem;
-    padding: 10px 0;
-    width: 20rem;
-    background-color: var(--blue-components);
-    color: white;
-    font-width: 0.5rem;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
-    margin-top: 0.5rem;
+    color: var(--button-text-color);
+    border: 2px solid transparent;
 }
 
 .add_agents {
-    border: 2px solid #1cc51c;
-}
-
-.rem_agents {
-    border: 2px solid #d81818;
+    background-color: #10b981;
 }
 
 .add_agents:hover {
-    color: black;
-    background-color: #1cc51c;
+    background-color: #059669;
+}
+
+.rem_agents {
+    background-color: #ef4444;
 }
 
 .rem_agents:hover {
-    color: black;
-    background-color: #d81818;
+    background-color: #dc2626;
+}
+
+.btn_view a, .btn_veh a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn_view a:hover, .btn_veh a:hover {
+    text-decoration: underline;
 }
