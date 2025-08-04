@@ -203,7 +203,7 @@ def update_static_graphs(theme):
             showlegend=False,
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(t=20, b=0, l=160, r=0),
+            margin=dict(t=20, b=0, l=0, r=60),
             transition={'duration': 700, 'easing': 'cubic-in-out'},
             font_color=font_color
         )

@@ -13,13 +13,13 @@
 
 .vehicles { grid-area: vehicles; }
 .agents { grid-area: agents; }
-.pizza { grid-area: pizza; }
+.pizza { grid-area: pizza; width: 10rem;}
 .ocuMonthly { grid-area: ocuMonthly; }
 .GraphIndOcu {
     grid-area: GraphIndOcu;
     height: 25rem;
 }
-.GraphTimeRes { grid-area: GraphTimeRes; }
+.GraphTimeRes { grid-area: GraphTimeRes; max-height: 400px; }
 .Ranking_Ocu { grid-area: Ranking_Ocu; overflow: hidden; }
 .GraphMap { grid-area: GraphMap; }
 .NgbhInfos { grid-area: NgbhInfos; overflow: hidden; }
