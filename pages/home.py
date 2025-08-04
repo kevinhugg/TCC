@@ -29,7 +29,7 @@ layout = html.Div([
     html.Div([
 
         html.Div([
-            html.H4('Viaturas'),  # Título
+            html.H4('Viaturas'),
             html.Div([
                 html.Div([
                 html.H5('Com avarias:'),
@@ -165,11 +165,20 @@ layout = html.Div([
 def update_static_graphs(theme):
     is_dark = theme == 'dark'
 
-    plot_bg_color = '#273c5a' if is_dark else 'white'
-    paper_bg_color = '#273c5a' if is_dark else 'white'
-    font_color = '#fff' if is_dark else '#000'
-    marker_color = '#FACC15'
-    pie_marker_colors = ['#f5d100', '#555' if is_dark else '#d9d9d9']
+    # Theme colors corresponding to the new CSS variables
+    if is_dark:
+        plot_bg_color = '#1f293b'
+        paper_bg_color = '#1f293b'
+        font_color = '#f9fafb'
+        marker_color = '#60a5fa'
+        pie_marker_colors = ['#60a5fa', '#374151']
+    else:
+        plot_bg_color = '#ffffff'
+        paper_bg_color = '#ffffff'
+        font_color = '#1f2937'
+        marker_color = '#3b82f6'
+        pie_marker_colors = ['#3b82f6', '#e5e7eb']
+
     map_style = 'carto-darkmatter' if is_dark else 'open-street-map'
 
     # Gráfico de Pizza
@@ -195,7 +204,7 @@ def update_static_graphs(theme):
             showlegend=False,
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(t=0, b=10, l=160, r=0),
+            margin=dict(t=20, b=0, l=160, r=0),
             transition={'duration': 700, 'easing': 'cubic-in-out'},
             font_color=font_color
         )
@@ -238,10 +247,16 @@ def update_static_graphs(theme):
 def att_graph(year_selected, theme):
     is_dark = theme == 'dark'
 
-    plot_bg_color = '#273c5a' if is_dark else 'white'
-    paper_bg_color = '#273c5a' if is_dark else 'white'
-    font_color = '#fff' if is_dark else '#000'
-    marker_color = '#f5d100'
+    if is_dark:
+        plot_bg_color = '#1f293b'
+        paper_bg_color = '#1f293b'
+        font_color = '#f9fafb'
+        marker_color = '#60a5fa'
+    else:
+        plot_bg_color = '#ffffff'
+        paper_bg_color = '#ffffff'
+        font_color = '#1f2937'
+        marker_color = '#3b82f6'
 
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
     tempos = time_response[year_selected]

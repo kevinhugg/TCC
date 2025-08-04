@@ -1,28 +1,25 @@
 .light-mode {
-    --bg-color: #f4f6f8;
-    --bg-sidebar: var(--bg-sidebar);
-    --text-color: #1a1a1a;
-    --container-color: var(--container-color);
-    --hover-text: #1f2a36;
-    --blue-components: #1E3A8A;
-    --blue-hover: #3B82F6;
-    --yellow-hover: #FFE066;
-    --yellow-components: #FFF4B2;
-    --cinza: #d9d9d9;
-    --blue-bg: var(--bg-sidebar);
+    --bg-color: #f8f9fa;
+    --sidebar-bg-color: #111827;
+    --card-bg-color: #ffffff;
+    --primary-text-color: #1f2937;
+    --secondary-text-color: #6b7280;
+    --border-color: #e5e7eb;
+    --accent-color: #3b82f6;
+    --accent-color-hover: #2563eb;
+    --table-stripe-color: #f9fafb;
 }
 
 .dark-mode {
     --bg-color: #0f172a;
-    --bg-sidebar: #1e293b;
-    --text-color: #e5e7eb;
-    --container-color: #273c5a;
-    --blue-components: #60a5fa;
-    --blue-hover: #1e3a8a;
-    --yellow-hover: #FFD60A;
-    --yellow-components: #fef9c3;
-    --blue-bg: #3B82F6;
-    --cinza: #d1d5db;
+    --sidebar-bg-color: #1f2937;
+    --card-bg-color: #1f293b;
+    --primary-text-color: #f9fafb;
+    --secondary-text-color: #9ca3af;
+    --border-color: #374151;
+    --accent-color: #60a5fa;
+    --accent-color-hover: #93c5fd;
+    --table-stripe-color: #374151;
 }
 
 html {
@@ -33,7 +30,7 @@ body {
     transition: background-color 0.4s ease, color 0.4s ease;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-color);
-    color: var(--text-color);
+    color: var(--primary-text-color);
     line-height: 1.6;
     min-height: 100vh;
     max-width: 100vw;
@@ -57,7 +54,7 @@ body {
     bottom: 0;
     width: 11em;
     padding: 2rem 1rem;
-    background-color: var(--bg-sidebar);
+    background-color: var(--sidebar-bg-color);
     font-size: 1rem;
     display: flex;
     flex-direction: column;
@@ -69,7 +66,7 @@ body {
 .sidebar-link {
     display: block;
     width: 9em;
-    color: var(--blue-components);
+    color: var(--accent-color);
     text-decoration: none;
     font-weight: bold;
     padding: 10px 15px;
@@ -80,8 +77,8 @@ body {
 }
 
 .sidebar-link:hover {
-    background-color: var(--blue-hover);
-    color: var(--container-color);
+    background-color: var(--accent-color-hover);
+    color: var(--card-bg-color);
 }
 
 .logo-title-container {
@@ -98,7 +95,7 @@ body {
 }
 
 .sidebar-title {
-    color: var(--blue-components);
+    color: var(--accent-color);
     font-size: 1.5rem;
     margin-top: 1rem;
 }
@@ -114,7 +111,7 @@ body {
     align-items: center;
     padding: 0;
     z-index:500;
-    color: var(--container-color);
+    color: var(--card-bg-color);
     font-size: 1.2rem;
     background-color: var(--bg-color);
 }
@@ -130,252 +127,135 @@ body {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: auto;
     grid-template-areas:
-        "GraphIndOcu GraphIndOcu GraphIndOcu GraphIndOcu"
-        "vehicles vehicles agents agents"
-        "pizza pizza ocuMonthly ocuMonthly"
-        "GraphTimeRes GraphTimeRes GraphTimeRes Ranking_Ocu"
-        "NgbhInfos GraphMap GraphMap GraphMap";
-    grid-gap: 68px;
+        "vehicles agents pizza ocuMonthly"
+        "GraphIndOcu GraphIndOcu GraphTimeRes GraphTimeRes"
+        "GraphMap GraphMap Ranking_Ocu NgbhInfos";
+    grid-gap: 1.5rem; /* 24px */
     padding: 2rem;
-    margin-left: 6em;
+    margin-left: 5em;
     margin-top: 10px;
     height: 100%;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1400px; /* Reduced width */
     background-color: var(--bg-color);
 }
 
-
-/* Blocos Superiores */
-.vehicles {
-    grid-area: vehicles;
-    background: var(--container-color);
+/* A generic card style for all dashboard widgets */
+.vehicles, .agents, .pizza, .ocuMonthly, .GraphIndOcu, .GraphTimeRes, .Ranking_Ocu, .GraphMap, .NgbhInfos {
+    background: var(--card-bg-color);
     border-radius: 12px;
-    padding: 0.3rem;
-    height: 10rem;
-    box-shadow: 1px 1px 1px 1px var(--bg-color);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
+.vehicles:hover, .agents:hover, .pizza:hover, .ocuMonthly:hover, .GraphIndOcu:hover, .GraphTimeRes:hover, .Ranking_Ocu:hover, .GraphMap:hover, .NgbhInfos:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    cursor: pointer;
+}
+
+/* Specific grid areas and adjustments */
+.vehicles { grid-area: vehicles; }
+.agents { grid-area: agents; }
+.pizza { grid-area: pizza; }
+.ocuMonthly { grid-area: ocuMonthly; }
+.GraphIndOcu {
+    grid-area: GraphIndOcu;
+    height: 25rem; /* Fixed height for the graph container */
+}
+.GraphTimeRes { grid-area: GraphTimeRes; }
+.Ranking_Ocu { grid-area: Ranking_Ocu; overflow: hidden; }
+.GraphMap { grid-area: GraphMap; }
+.NgbhInfos { grid-area: NgbhInfos; overflow: hidden; }
+
+
+/* Content-specific styles for cards */
 .info-vehic {
     display: flex;
-    justify-content: space-around;
-    align-content: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    margin-left: 6rem;
+    height: 100%;
+    gap: 0.5rem;
 }
 
 .info-vehic h5 {
     font-size: 0.9rem;
-    display: flex;
-    justify-content: center;
-    color: var(--text-color);
+    color: var(--secondary-text-color);
     margin: 0;
-    width: 7rem;
     text-align: center;
-    align-items: center;
 }
 
 .NumsVehicles {
-    width: 4rem;
     font-size: 2rem;
-    display: flex;
-    justify-content: center;
-    color: var(--blue-components);
-    font-weight: bolder;
+    color: var(--primary-text-color);
+    font-weight: 700;
     margin: 0;
 }
 
-.agents {
-    grid-area: agents;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 0.3rem;
-    height: 10rem;
-    box-shadow: 1px 1px 1px 1px var(--blue-letter);
-}
-
-.pizza {
-    grid-area: pizza;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 0.5rem;
-    height: 10rem;
-    box-shadow: 1px 1px 1px 1px var(--container-color);
-}
-
-.ocuMonthly {
-    grid-area: ocuMonthly;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 0.3rem;
-    height: 10rem;
-    box-shadow: 1px 1px 1px 1px var(--container-color);
-}
-
-.GraphIndOcu {
-    grid-area: GraphIndOcu;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 2rem;
-    min-width: 20rem;
-    box-shadow: 1px 1px 1px 1px var(--container-color);
-}
-
-.GraphTimeRes {
-    grid-area: GraphTimeRes;
-    background: var(--container-color);
-    border-radius: 12px;
-    margin-top: 5rem;
-    padding: 2rem;
-}
-
-.Ranking_Ocu {
-    grid-area: Ranking_Ocu;
-    background: var(--container-color);
-    border-radius: 12px;
-    margin-top: 5rem;
-    padding: 0.5rem;
-    width: 20rem;
-    overflow: hidden;
-}
-
-.Ranking_Ocu h4{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    color: var(--text-color);
-}
-
-.table_ocu {
-    width: 95%;
-    height: 85%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: block;
-    border-collapse: collapse;
-    padding: 1rem;
-}
-
-.table_ocu th,
-.table_ocu td {
-    border: 1px solid var(--cinza);
-    padding: 10px;
-    text-align: center;
-}
-
-.table_ocu td {
-    font-weight: bolder;
-}
-
-.table_ocu th {
-    background-color: var(--blue-hover);
-    color: var(--cinza);
-    font-weight: bold;
-}
-
-.table_ocu tr {
-    background-color: var(--bg-sidebar);
-    color: var(--cinza);
-}
-
-.table_ocu tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: var(--bg-color);
-}
-
-.table_ocu tr:hover {
-    background-color: var(--cinza);
-    color: var(--blue-hover);
-}
-
-.GraphMap {
-    grid-area: GraphMap;
-    background: var(--container-color);
-    border-radius: 12px;
-    padding: 2rem;
-}
-
-.GraphMap h4 {
+/* Modern Table Styles */
+.table_ocu, .table_neighborhoods {
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    color: var(--text-color);
-}
-
-/* Lista do Mapa */
-.NgbhInfos {
-    grid-area: NgbhInfos;
-    background: var(--container-color);
-    padding: 0.5rem;
-    border-radius: 12px;
-    width: 20rem;
-    overflow: hidden;
-}
-
-.NgbhInfos h4 {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    color: var(--text-color);
-}
-
-.table_neighborhoods {
-    width: 95%;
-    height: 85%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: block;
+    height: 100%;
     border-collapse: collapse;
-    padding: 1rem;
+    overflow-y: auto;
+    display: block;
 }
 
-.table_neighborhoods th,
-.table_neighborhoods td {
-    border: 1px solid var(--cinza);
-    padding: 10px;
-    text-align: center;
+.table_ocu th, .table_ocu td,
+.table_neighborhoods th, .table_neighborhoods td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.table_neighborhoods td {
-    font-weight: bolder;
+.table_ocu td, .table_neighborhoods td {
+    font-weight: normal;
+    color: var(--secondary-text-color);
 }
 
-.table_neighborhoods th {
-    background-color: var(--blue-hover);
-    color: var(--cinza);
-    font-weight: bold;
+.table_ocu th, .table_neighborhoods th {
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
 }
 
-.table_neighborhoods tr {
-    background-color: var(--bg-sidebar);
-    color: var(--cinza);
+/* Remove border from the last row for a cleaner look */
+.table_ocu tr:last-child td,
+.table_neighborhoods tr:last-child td {
+    border-bottom: none;
 }
 
-.table_neighborhoods tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: var(--bg-color);
-}
-
+/* Hover effect for table rows */
+.table_ocu tr:hover,
 .table_neighborhoods tr:hover {
-    background-color: var(--cinza);
-    color: var(--blue-hover);
-    cursor: pointer;
+    background-color: var(--accent-color);
+    color: var(--card-bg-color);
 }
 
 .vehicles h4, .agents h4, .pizza h4, .ocuMonthly h4, .GraphIndOcu h4, .div7 h4, .div8 h4, .div9 h4, .div10 h4, .div11 h4 {
     display: flex;
     justify-content: center;
     font-weight: bolder;
-    color: var(--text-color);
+    color: var(--primary-text-color);
     margin-bottom: 0;
 }
 
 .category {
-    display: block;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
-    width: 200px;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 .NumOcuMonth {
@@ -383,9 +263,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--blue-components);
+    color: var(--accent-color);
     font-weight: bold;
-    margin: 1rem 0 0 14rem;
+    margin: 0;
 }
 
 .category-graphs {
@@ -412,10 +292,8 @@ body {
     display: flex;
     justify-content: center;
     text-align: center;
-    align-content: center;
     align-items: center;
     margin-top: 1.5rem;
-    margin-right: 5rem;
 }
 
 /* --- Responsive Design --- */
@@ -555,11 +433,11 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: var(--blue-hover);
+  background-color: var(--accent-color-hover);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-track {
-  background-color: var(--bg-sidebar);
+  background-color: var(--sidebar-bg-color);
 }
 
 .vehicles:hover,
