@@ -1,4 +1,4 @@
-.home-grid {
+.page-content {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: auto;
@@ -13,7 +13,7 @@
 
 .vehicles { grid-area: vehicles; }
 .agents { grid-area: agents; }
-.pizza { grid-area: pizza;}
+.pizza { grid-area: pizza; width: 10rem;}
 .ocuMonthly { grid-area: ocuMonthly; }
 .GraphIndOcu {
     grid-area: GraphIndOcu;
@@ -24,16 +24,21 @@
 .GraphMap { grid-area: GraphMap; }
 .NgbhInfos { grid-area: NgbhInfos; overflow: hidden; }
 
+
 .info-vehic {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-right: 4rem;
+    width: 100%;
+    height: 100%;
+    gap: 0.5rem;
 }
 
 .info-vehic h5 {
     font-size: 0.9rem;
     color: var(--secondary-text-color);
+    margin: 0;
     text-align: center;
 }
 
@@ -89,7 +94,7 @@
     justify-content: center;
     font-weight: bolder;
     color: var(--primary-text-color);
-    margin: 0;
+    margin-bottom: 0;
 }
 
 .category {
@@ -98,6 +103,7 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+    width: 100%;
 }
 
 .NumOcuMonth {
@@ -126,7 +132,6 @@
     width: 100% !important;
     display: flex;
     justify-content: right;
-    margin-top: -1rem;
 }
 
 .agents-info {
@@ -138,36 +143,12 @@
     margin-top: 1.5rem;
 }
 
-@media (max-width: 1440px) {
-    .home-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-areas:
-            "vehicles agents pizza"
-            "GraphIndOcu GraphIndOcu ocuMonthly"
-            "GraphTimeRes GraphTimeRes Ranking_Ocu"
-            "GraphMap GraphMap NgbhInfos";
-    }
-}
-
 @media (max-width: 1200px) {
-    .home-grid {
+    .page-content {
         grid-template-columns: repeat(2, 1fr);
         grid-template-areas:
             "vehicles agents"
             "pizza ocuMonthly"
-            "GraphIndOcu GraphIndOcu"
-            "GraphTimeRes GraphTimeRes"
-            "Ranking_Ocu GraphMap"
-            "NgbhInfos NgbhInfos";
-    }
-}
-
-@media (max-width: 992px) {
-    .home-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-areas:
-            "vehicles pizza"
-            "agents ocuMonthly"
             "GraphIndOcu GraphIndOcu"
             "GraphTimeRes GraphTimeRes"
             "Ranking_Ocu Ranking_Ocu"
@@ -177,7 +158,7 @@
 }
 
 @media (max-width: 768px) {
-    .home-grid {
+    .page-content {
         grid-template-columns: 1fr;
         grid-template-areas:
             "vehicles"
