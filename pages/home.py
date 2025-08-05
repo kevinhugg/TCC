@@ -23,6 +23,7 @@ Agents_loged = 2930
 layout = html.Div([
 
     html.Link(rel='stylesheet', href='/static/css/home.css'),
+    html.Link(rel='stylesheet', href='/static/css/.css'),
 
     html.Div([
 
@@ -43,7 +44,7 @@ layout = html.Div([
         html.Div([
             html.H4('Agentes Logados'),
             html.Div([
-                html.Div(id='value-agents', style={'z-index': '1000'}),
+                html.Div(id='value-agents'),
                 html.Div(id='flux'),
             ], className='agents-info'),
             dcc.Interval(id='interval', interval=3000, n_intervals=0)
@@ -81,6 +82,13 @@ layout = html.Div([
         ], className="GraphIndOcu card"),
 
         html.Div([
+            dcc.Dropdown(
+                id='dropdown-year',
+                options=[{'label': ano, 'value': ano} for ano in time_response.keys()],
+                value='2025',
+                clearable=False,
+                style={'width': '70px'}
+            ),
             dcc.Graph(
                 id='Graph_Time_Line',
                 config={
@@ -92,14 +100,6 @@ layout = html.Div([
                     'displaylogo': False
                 }
             ),
-
-            dcc.Dropdown(
-                id='dropdown-year',
-                options=[{'label': ano, 'value': ano} for ano in time_response.keys()],
-                value='2025',
-                clearable=False,
-                style={'width': '70px'}
-            )
         ], className="GraphTimeRes card"),
 
         html.Div([
@@ -203,7 +203,7 @@ def update_static_graphs(theme):
             showlegend=False,
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            margin=dict(t=20, b=0, l=0, r=60),
+            margin=dict(t=10, b=20, l=0, r=0),
             transition={'duration': 700, 'easing': 'cubic-in-out'},
             font_color=font_color
         )
