@@ -1,0 +1,201 @@
+/* Light/Dark Mode Theme Variables */
+.light-mode {
+    --bg-color: #f8f9fa;
+    --sidebar-bg-color: #111827;
+    --card-bg-color: #ffffff;
+    --primary-text-color: #1f2937;
+    --secondary-text-color: #6b7280;
+    --border-color: #e5e7eb;
+    --accent-color: #3b82f6;
+    --accent-color-hover: #2563eb;
+    --table-header-bg-color: #f9fafb;
+    --table-row-hover-bg-color: #eff6ff;
+    --table-row-hover-text-color: #1d4ed8;
+    --button-bg-color: #3b82f6;
+    --button-text-color: #ffffff;
+    --button-hover-bg-color: #2563eb;
+}
+
+.dark-mode {
+    --bg-color: #0f172a;
+    --sidebar-bg-color: #1f2937;
+    --card-bg-color: #1f293b;
+    --primary-text-color: #f9fafb;
+    --secondary-text-color: #9ca3af;
+    --border-color: #374151;
+    --accent-color: #60a5fa;
+    --accent-color-hover: #93c5fd;
+    --table-header-bg-color: #374151;
+    --table-row-hover-bg-color: #1e293b;
+    --table-row-hover-text-color: #dbeafe;
+    --button-bg-color: #60a5fa;
+    --button-text-color: #1e293b;
+    --button-hover-bg-color: #93c5fd;
+}
+
+/* Base Styles */
+html {
+  background-color: var(--bg-color);
+}
+
+body {
+    transition: background-color 0.4s ease, color 0.4s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 8em;
+    padding: 1rem;
+    background-color: var(--sidebar-bg-color);
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    z-index: 1000;
+    transition: width 0.3s ease;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: background-color 0.5s ease, color 0.3s ease;
+}
+
+.sidebar-link .fas {
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-link-text {
+    display: inline-block;
+}
+
+.sidebar-link:hover {
+    background-color: var(--accent-color-hover);
+    color: var(--card-bg-color);
+}
+
+.logo-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+    margin-left: 0;
+    margin-top: 0;
+}
+
+.semurb-logo {
+    height: 3rem;
+    width: 3rem;
+}
+
+.sidebar-title {
+    display: none;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    width: calc(100% - 2rem);
+    height: 60px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 2rem;
+    z-index: 500;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease, width 0.3s ease;
+}
+
+.profile-pic {
+    height: 3rem;
+    width: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.page-content {
+    background-color: var(--bg-color);
+    padding: 2rem;
+    margin-left: 4em !important;
+    margin-top: 60px;
+    transition: margin-left 0.3s ease;
+    max-width: 100rem;
+}
+
+.card {
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+    cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color-hover);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--sidebar-bg-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    /* On medium screens, the sidebar is already at its compact size,
+       so no changes are needed for the sidebar itself.
+       We just need to adjust the content margin if needed. */
+    .page-content {
+        margin-left: 5em;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none; /* Hide sidebar completely on small screens */
+    }
+    .header {
+        width: 100%;
+        left: 0;
+        justify-content: center; /* Center header content */
+    }
+    .page-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    .profile-pic {
+        margin: 0;
+    }
+}
