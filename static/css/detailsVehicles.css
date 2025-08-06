@@ -87,7 +87,7 @@
 
 .table-ocurrences {
     width: 100%;
-    height: 100%;
+    height: 30rem;
     overflow-y: auto;
     display: block;
     border-collapse: collapse;
@@ -136,10 +136,12 @@
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin-top: 1rem;
 }
 
 .btn, .btn-pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--button-text-color);
     background-color: var(--button-bg-color);
     padding: 0.5rem 1.5rem;
@@ -149,6 +151,7 @@
     transition: all 0.3s ease-in-out;
     border: 1px solid transparent;
     text-align: center;
+    margin-top: 1rem;
 }
 
 .btn:hover, .btn-pdf:hover {
@@ -201,6 +204,14 @@
     margin-bottom: 1rem;
 }
 
+.img_agent {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 25%;
+    margin-bottom: 1rem;
+}
+
 .agent-name {
     font-weight: bold;
     text-align: center;
@@ -231,6 +242,10 @@
     background: var(--table-row-hover-bg-color);
     color: var(--table-row-hover-text-color);
     transition: 0.2s ease-in;
+}
+
+.link-ag-vt:hover {
+    text-decoration: underline;
 }
 
 /* Responsive adjustments */

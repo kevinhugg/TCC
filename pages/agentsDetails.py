@@ -57,7 +57,7 @@ def layout(id=None):
                 ], className='btn_rem'),
             ], className='btn_rem_add'),
 
-        ], className='details-container'),
+        ], className='details-container card'),
 
         html.Div([
             html.H4("Histórico do Agente"),
@@ -72,7 +72,7 @@ def layout(id=None):
             html.Div([
                 html.A(id='detalhes-agente-pdf', children='Gerar PDF', target="_blank", className='btn-pdf')
             ], style={'margin-bottom': '2rem'}),
-        ], className='ocurrences'),
+        ], className='ocurrences card'),
 
         html.Div([
             html.H3(f"Equipe do Mês", className='tittle'),
@@ -113,7 +113,7 @@ def layout(id=None):
             ], className='agents-grid'),
 
 
-        ], className='agents-container'),
+        ], className='agents-container card'),
 
     ], className='page-content')
 
