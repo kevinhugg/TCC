@@ -63,6 +63,7 @@ fig_tipos.update_layout(
 layout = html.Div([
 
     html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
+    html.Link(rel='stylesheet', href='/static/css/modal.css'),
 
     dcc.Store(id='filtro-search'),
 
@@ -141,7 +142,7 @@ layout = html.Div([
 
     dbc.Modal(
         [
-            dbc.ModalHeader(dbc.ModalTitle('Novo Serviço')),
+            dbc.ModalHeader(dbc.ModalTitle('Novo Serviço'), close_button=True),
             dbc.ModalBody([
                 dbc.Input(id='input-tipo', placeholder='Digite o novo tipo...', type='text'),
             ]),
@@ -152,6 +153,7 @@ layout = html.Div([
         ],
         id='modal-add',
         is_open=False,
+        className='modal',
     )
 
 ], className='page-content')

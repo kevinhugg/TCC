@@ -171,46 +171,6 @@ body {
   background-color: var(--sidebar-bg-color);
 }
 
-/* Modal styles */
-.modal {
-    position: absolute;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background-color: var(--card-bg-color);
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    width: 100%;
-    max-width: 500px;
-    border-radius: 12px;
-    position: relative;
-    z-index: 1000;
-}
-
-.modal-close-button {
-    color: var(--secondary-text-color);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.modal-close-button:hover,
-.modal-close-button:focus {
-    color: var(--primary-text-color);
-    text-decoration: none;
-}
-
 /* Add agent card styles */
 .add-driver-box, .add-agent-box {
     cursor: pointer;

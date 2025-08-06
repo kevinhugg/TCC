@@ -75,7 +75,20 @@ def layout(numero=None):
         ], className='ocurrences card'),
 
         html.Div([
-            html.H3(f"Responsáveis do Mês", className='tittle'),
+            html.Div([
+                html.H3(f"Responsáveis do Mês", className='tittle'),
+                dcc.Dropdown(
+                    id='dropdown-turnos',
+                    options=[
+                        {'label': 'Manhã', 'value': 'manha'},
+                        {'label': 'Tarde', 'value': 'tarde'},
+                        {'label': 'Noite', 'value': 'noite'},
+                    ],
+                    placeholder='Selecione um turno',
+                    className='dropdown-turnos',
+                    style={'height': '40px', 'width': '200px'}
+                ),
+            ], className='dropdown-title'),
 
             html.Div([
                 html.Div([
@@ -96,6 +109,7 @@ def layout(numero=None):
                             html.P(f"{agente['nome']}", className='agent-name'),
                             html.P(f"Função: {agente['func_mes'].capitalize()}", className='agent-role'),
                             html.P(f"{agente['cargo_at']}", className='agent-cargo'),
+                            html.P("Turno não iniciado", className='turno-status'),
                         ], className='agent-box'),
                         href=f"/dashboard/agent/{agente['id']}", className='link-ag-vt'
                     ) for agente in another_agents
@@ -118,19 +132,25 @@ def layout(numero=None):
                 html.Div(
                     className='modal-content',
                     children=[
-                        html.Span(id='modal-close-button', className='modal-close-button', children='×'),
-                        html.H2('Adicionar Agente'),
-                        dcc.Dropdown(
-                            id='agent-filter-dropdown',
-                            options=[
-                                {'label': 'Todos os Agentes', 'value': 'all'},
-                                {'label': 'Agentes Sem Função', 'value': 'unassigned'},
-                            ],
-                            value='all',
-                            clearable=False
-                        ),
-                        dcc.RadioItems(id='agent-list', value=None),
-                        html.Button('Atribuir Agente', id='assign-agent-button', className='btn')
+                        html.Div(className='modal-header', children=[
+                            html.H2('Adicionar Agente'),
+                            html.Span(id='modal-close-button', className='modal-close-button', children='×'),
+                        ]),
+                        html.Div(className='modal-body', children=[
+                            dcc.Dropdown(
+                                id='agent-filter-dropdown',
+                                options=[
+                                    {'label': 'Todos os Agentes', 'value': 'all'},
+                                    {'label': 'Agentes Sem Função', 'value': 'unassigned'},
+                                ],
+                                value='all',
+                                clearable=False
+                            ),
+                            dcc.RadioItems(id='agent-list', value=None),
+                        ]),
+                        html.Div(className='modal-footer', children=[
+                            html.Button('Atribuir Agente', id='assign-agent-button', className='btn')
+                        ]),
                     ]
                 )
             ]

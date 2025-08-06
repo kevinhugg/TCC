@@ -72,6 +72,21 @@
     margin: 0;
 }
 
+.loc_av {
+    color: var(--primary-text-color);
+}
+
+.dropdown-title {
+    display: flex;
+    align-items: right;
+    justify-content: right;
+    gap: 40rem;
+}
+
+.dropdown-turnos {
+    margin-top: 1rem;
+}
+
 /* Table Styles */
 .filter-month {
     width: 200px;
