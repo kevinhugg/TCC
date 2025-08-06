@@ -23,7 +23,6 @@ Agents_loged = 2930
 layout = html.Div([
 
     html.Link(rel='stylesheet', href='/static/css/home.css'),
-    html.Link(rel='stylesheet', href='/static/css/.css'),
 
     html.Div([
 
