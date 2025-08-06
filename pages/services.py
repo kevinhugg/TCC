@@ -72,6 +72,7 @@ layout = html.Div([
 
             html.Div([
                 html.H3('Serviços Gerais', className='title'),
+                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...', className='input-search'),
                 dcc.Dropdown(
                     id='filter-month',
                     options=dropdown_options,
@@ -79,7 +80,6 @@ layout = html.Div([
                     placeholder="Filtrar por mês...",
                     className='filter-month'
                 ),
-                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...', className='input-search'),
             ], className='searchbar'),
 
             html.Table([
@@ -106,7 +106,7 @@ layout = html.Div([
                         ),
                     ])
                     for item in servicos
-                ])
+                ], className='sla')
             ], className='serv-table'),
 
 
@@ -121,7 +121,7 @@ layout = html.Div([
                 ], className='btn-pdf-serv'),
             ], className='btn_rem_add_pdf'),
 
-        ], className='oco_serv_container'),
+        ], className='oco_serv_container card'),
     ]),
 
     html.Div([
@@ -137,7 +137,7 @@ layout = html.Div([
             ], className='btn'),
         ], className='btn_rem_add_pdf'),
 
-    ], className='graph_tipes'),
+    ], className='graph_tipes card'),
 
     #modal p add serviço
     dbc.Modal(
@@ -207,7 +207,7 @@ def update_list(search_value, mes):
                 html.Td(
                     dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}"), className='btn_view'
                 ),
-        ])
+        ], className='sla')
         rows.append(row)
 
     pdf_link = f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes}"
