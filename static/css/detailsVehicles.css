@@ -1,377 +1,246 @@
-:root {
-    --white-snow: #f0f0f0;
-    --black: #000;
-    --blue-components: #295678;
-    --blue-hover: #6ABDF8;
-    --blue-letter: #0D1F2C;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
+.page-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 2rem;
+    margin-left: 4em;
+    margin-top: 30px;
+    transition: margin-left 0.3s ease;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #e7e7f1;
-}
-
-.parent {
-    display: grid;
-    grid-template-columns: 0.3fr 1fr; /* Sidebar + conteúdo */
-    grid-template-rows: auto;
-    height: 100%;
-    width: 100%;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 11em;
-    padding: 2rem 1rem;
-    background-color: var(--blue-letter);
-    font-size: 1rem;
+.details-container,
+.ocurrences,
+.agents-container {
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     display: flex;
     flex-direction: column;
-    align-items: start;
-    overflow-y: auto;
-}
-
-.sidebar-link {
-    display: block;
-    width: 9em;
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 10px 15px;
-    text-align: center;
-    border-radius: 6px;
-    transition: background-color 0.5s ease, color 0.3s ease;
-    align-self: center;
-}
-
-.sidebar-link:hover {
-    background-color: #2c3e50;
-    color: white;
-}
-
-.logo-title-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0;
-    margin-left: -1rem;
-    margin-top: -1rem;
-}
-
-.semurb-logo {
-    height: 4rem;
-    width: 4rem;
-}
-
-.sidebar-title {
-    color: white;
-    font-size: 1.5rem;
-    margin-top: 1rem;
-}
-
-/* Header */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0;
-    z-index: 1000;
-    color: white;
-    font-size: 1.2rem;
-}
-
-.profile-pic {
-    height: 3.5rem;
-    width: 3.5rem;
-    margin: 1rem 1rem 0 0;
-}
-
-.page-content {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto auto auto;
-    grid-template-areas:
-        "details-container details-container table-ocurrences table-ocurrences"
-        "details-container details-container table-ocurrences table-ocurrences"
-        "agents-container agents-container table-ocurrences table-ocurrences"
-        "agents-container agents-container table-ocurrences table-ocurrences";
-    grid-gap: 20px;
-    padding: 2rem;
-    margin-left: 5em;
-    margin-top: 10px;
-    width: 72rem;
-}
-
-.tittle {
-    display: flex;
-    justify-content: center;
 }
 
 .details-container {
-    grid-area: details-container;
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    height: 22rem;
-    box-shadow: 1px 1px 1px 1px #eff0f8;
+    flex: 1 1 400px;
+    height: 20rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.ocurrences {
+    flex: 2 1 500px;
+    align-items: center;
+    justify-content: center;
+}
+
+.agents-container {
+    flex: 2 1 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.tittle {
+    text-align: center;
+    color: var(--primary-text-color);
+    margin-bottom: 1.5rem;
 }
 
 .details-items {
     display: flex;
     flex-direction: row;
     gap: 2rem;
-    padding: 1rem 0;
     align-items: center;
 }
 
 .texts-det {
     display: flex;
     flex-direction: column;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     gap: 1rem;
+    color: var(--secondary-text-color);
 }
 
 .img {
-    height: 200px;
+    height: 150px;
     width: 200px;
+    border-radius: 8px;
+    object-fit: cover;
 }
 
 .det {
-    color: black;
-    margin: 0.05rem 0;
+    color: var(--primary-text-color);
+    margin: 0;
 }
 
-/* tabela das ocorrências mensais */
+/* Table Styles */
 .filter-month {
     width: 200px;
-    margin: 1rem auto;
+    margin: 0 auto 1rem auto;
 }
 
-.ocurrences {
-    grid-area: table-ocurrences;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.ocurrences h4{
-    display: flex;
-    justify-content: center;
+.ocurrences h4 {
     text-align: center;
-    margin-top: 1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-text-color);
 }
 
 .table-ocurrences {
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    overflow-x: hidden;
     display: block;
     border-collapse: collapse;
-    padding: 1rem;
 }
 
 .table-ocurrences th,
 .table-ocurrences td {
-    border: 1px solid #d7d7d7;
+    border: 1px solid var(--border-color);
     padding: 10px;
     text-align: center;
 }
 
 .table-ocurrences td {
-    font-weight: bolder;
+    color: var(--primary-text-color);
 }
 
 .table-ocurrences th {
-    background-color: var(--blue-components);
-    color: white;
+    background-color: var(--table-header-bg-color);
+    color: var(--primary-text-color);
     font-weight: bold;
 }
 
+.table-ocurrences tr {
+    color: var(--primary-text-color);
+}
 .table-ocurrences tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: white;
+    background-color: var(--bg-color);
+    color: var(--secondary-text-color);
 }
 
 .table-ocurrences tr:hover {
-    background-color: #cdcdcd;
-    color: black;
+    background-color: var(--table-row-hover-bg-color);
+    color: var(--table-row-hover-text-color);
 }
 
-.btn-pdf {
-    height: 3rem;
-    width: 8rem;
-    padding: 10px;
-    background-color: #f5d100;
-    color: black;
-    font-weight: bold;
+.btn_view {
     text-decoration: none;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
 }
 
+.btn_view {
+    color: var(--accent-color-hover);
+}
+
+/* Buttons */
 .btn_rem_add {
     display: flex;
     justify-content: center;
-    x-index: 100;
+    gap: 20px;
+    margin-top: 1rem;
 }
 
-.btn {
-    color: white;
-    display: flex;
-    justify-content: center;
+.btn, .btn-pdf {
+    color: var(--button-text-color);
+    background-color: var(--button-bg-color);
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
     text-decoration: none;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    border: 1px solid transparent;
+    text-align: center;
 }
 
-.btn_rem {
-    background: var(--blue-components);
-    border-radius: 10px;
-    border: 2px solid #d81818;
+.btn:hover, .btn-pdf:hover {
+    background-color: var(--button-hover-bg-color);
 }
 
 .btn_rem:hover {
-    color: black;
-    background-color: #d81818;
+    border-color: #ef4444;
+    background-color: transparent;
+    color: #ef4444;
 }
 
-/* Agentes */
-
-.agents-container {
-    grid-area: agents-container;
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    height: 24rem;
-    margin-top: 3rem;
-    box-shadow: 1px 1px 1px 1px #eff0f8;
-}
-
+/* Agents Section */
 .agents-grid {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 1rem;
+    gap: 1.5rem;
+    width: 60rem;
     overflow-x: auto;
-    padding-bottom: 1rem;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2rem;
 }
 
 .agent-box {
     flex: 0 0 auto;
-    min-width: 180px;
-    scroll-snap-align: start;
+    width: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 2px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1rem;
-    background-color: #f9f9f9;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    background-color: var(--bg-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.agent-box:hover {
+    transform: translatex(4px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .agent-box.motorista {
-    background-color: var(--yellow-components);
-    border: 2px solid var(--yellow-hover);
+    border-left: 4px solid var(--accent-color);
 }
 
-.agent-box.motorista:hover{
-    transition: 0.5s ease;
-    color: var(--blue-letter);
-    background-color: var(--blue-hover);
-    border: 2px solid var(--blue-components);
-}
-
-.viat:hover {
-    color: var(--yellow-hover);
-    transition: 0.3s ease;
-}
-
-.agent-box .img {
+.agent-box .img_agent {
     width: 100px;
     height: 100px;
     object-fit: cover;
     border-radius: 50%;
-    margin-bottom: 0.5rem;
-}
-
-.agent-box:hover {
-    transition: 0.5s ease;
-    color: var(--blue-letter);
-    background-color: var(--blue-hover);
-    border: 2px solid var(--blue-components);
-}
-
-.img_agent {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 30%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .agent-name {
     font-weight: bold;
     text-align: center;
+    color: var(--primary-text-color);
 }
 
-.agent-role {
+.agent-role, .agent-cargo {
     font-size: 0.9rem;
     text-align: center;
-}
-
-.agent-cargo {
-    font-size: 0.9rem;
-    text-align: center;
+    color: var(--secondary-text-color);
 }
 
 .link-ag-vt {
     text-decoration: none;
-    color: black;
+    color: inherit;
 }
 
-.btn_view {
+.btn_view a {
     text-decoration: none;
-    color: black;
+    color: inherit;
 }
 
-.btn_view a:hover {
-    color: white;
+.btn_view td {
+    cursor: pointer;
 }
 
 .btn_view td:hover {
-    background: var(--blue-components);
-    transition: 0.3s ease-in;
-    color: white;
+    background: var(--table-row-hover-bg-color);
+    color: var(--table-row-hover-text-color);
+    transition: 0.2s ease-in;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
     .page-content {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "details-container"
-            "table-ocurrences"
-            "agents-container";
-        margin-left: 5em;
+        margin-left: 0;
         padding: 1rem;
-        width: 100%;
     }
 
-    .details-container, .ocurrences, .agents-container {
-        width: 100%;
+    .details-items {
+        flex-direction: column;
     }
 }

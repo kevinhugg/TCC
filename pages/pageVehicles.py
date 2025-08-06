@@ -97,7 +97,7 @@ layout = html.Div([
             ], className='btn_add'),
         ], className='btn_rem_add'),
 
-    ], className='vehicles'),
+    ], className='vehicles card'),
 
     html.Div([
         html.H4('Viaturas danificadas'),
@@ -128,12 +128,12 @@ layout = html.Div([
             html.Div([
                 html.A(id='link-pdf', children='Gerar PDF', target="_blank", className='btn-pdf')
             ], style={'margin': '1rem 10rem'})
-    ], className="Ranking_Ocu"),
+    ], className="Ranking_Ocu card"),
 
     html.Div([
         html.H4('Danos por Data'),
         graph_bar_horizontal
-    ], className='graph-line'),
+    ], className='graph-line card'),
 
 ], className='page-content'),
 
@@ -194,10 +194,7 @@ def filtrar_ocorrencias(status):
                 ]) for item in filtradas
             ])
         ], className='table_ocu'),
-        html.Div([
-            html.A(id='link-pdf', children='Gerar PDF', target="_blank", className='btn-pdf')
-        ], style={'margin': '1rem 10rem'})
-    ], className='Ranking_Ocu'),
+    ]),
 
 #callback pdf
 @callback(

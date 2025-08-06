@@ -1,123 +1,34 @@
-:root {
-    --white-snow: #f0f0f0;
-    --black: #000;
-    --blue-components: #295678;
-    --blue-hover: #6ABDF8;
-    --blue-letter: #0D1F2C;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
+.page-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 2rem;
+    margin-left: 4em; /* Corresponds to sidebar width */
+    margin-top: 30px; /* Corresponds to header height */
+    transition: margin-left 0.3s ease;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #e7e7f1;
-}
-
-.parent {
-    display: grid;
-    grid-template-columns: 0.3fr 1fr; /* Sidebar + conteúdo */
-    grid-template-rows: auto;
-    height: 100%;
-    width: 100%;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 11em;
-    padding: 2rem 1rem;
-    background-color: var(--blue-letter);
-    font-size: 1rem;
+.vehicles,
+.Ranking_Ocu,
+.graph-line {
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     display: flex;
     flex-direction: column;
-    align-items: start;
-    overflow-y: auto;
-}
-
-.sidebar-link {
-    display: block;
-    width: 9em;
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 10px 15px;
-    text-align: center;
-    border-radius: 6px;
-    transition: background-color 0.5s ease, color 0.3s ease;
-    align-self: center;
-}
-
-.sidebar-link:hover {
-    background-color: #2c3e50;
-    color: white;
-}
-
-.logo-title-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0;
-    margin-left: -1rem;
-    margin-top: -1rem;
-}
-
-.semurb-logo {
-    height: 4rem;
-    width: 4rem;
-}
-
-.sidebar-title {
-    color: white;
-    font-size: 1.5rem;
-    margin-top: 1rem;
-}
-
-/* Header */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0;
-    z-index: 1000;
-    color: white;
-    font-size: 1.2rem;
-}
-
-.profile-pic {
-    height: 3.5rem;
-    width: 3.5rem;
-    margin: 1rem 1rem 0 0;
-}
-
-.page-content {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto auto auto;
-    grid-template-areas:
-        "vehicles vehicles vehicles vehicles"
-        "vehicles vehicles vehicles vehicles"
-        "Ranking_Ocu Ranking_Ocu graph-line graph-line"
-        "Ranking_Ocu Ranking_Ocu graph-line graph-line";
-    grid-gap: 20px;
-    padding: 2rem;
-    margin-left: 5em;
-    margin-top: 10px;
-    width: 72rem;
 }
 
 .vehicles {
-    grid-area: vehicles;
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    height: 35rem;
-    box-shadow: 1px 1px 1px 1px #eff0f8;
+    flex: 2 1 600px; /* Flex-grow, flex-shrink, flex-basis */
+    width: 100%;
+}
+
+.Ranking_Ocu,
+.graph-line {
+    flex: 1 1 300px; /* They will take up equal space */
+    height: 40rem;
 }
 
 .searchbar {
@@ -127,62 +38,66 @@ body {
 }
 
 .input-search {
-    width: 35%;
+    width: 50%;
     height: 2rem;
     padding: 0.5rem 1rem;
     font-size: 1.2rem;
-    border: 2px solid var(--yellow-components);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
     border-radius: 8px;
     outline: none;
     transition: border-color 0.3s ease;
 }
 
 .input-search:focus {
-    border-color: var(--yellow-hover);
+    border-color: var(--accent-color);
 }
 
 .list-vehicles {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    max-height: calc(100% - 8rem);
+    gap: 15px;
+    max-height: 25rem;
     overflow-y: auto;
-    padding-right: 5px;
+    padding-right: 10px;
 }
 
 .list-header {
     display: grid;
-    grid-template-columns: 120px 150px 150px 150px 150px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     font-weight: bold;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     margin-bottom: 1rem;
-    padding: 0 2rem;
-    border-bottom: 2px solid var(--yellow-components);
+    padding: 0 1rem;
+    border-bottom: 2px solid var(--border-color);
     text-align: center;
-    gap: 40px;
+    gap: 10px;
 }
 
 .header-item {
     display: flex;
     justify-content: center;
     align-items: center;
+    color: var(--primary-text-color);
 }
 
 .card-vehicles {
     display: grid;
-    grid-template-columns: 120px 150px 150px 150px 150px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     align-items: center;
-    background-color: var(--blue-components);
+    background-color: var(--sidebar-bg-color);
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 1rem;
     text-align: center;
-    gap: 40px;
+    gap: 10px;
+    color: var(--primary-text-color-light);
 }
 
 .img-vehicle {
-    width: 120px;
-    height: 80px;
+    width: 100px;
+    height: 65px;
     object-fit: cover;
     border-radius: 8px;
     justify-self: center;
@@ -191,159 +106,165 @@ body {
 .card-vehicles p {
     text-align: center;
     font-weight: bold;
-    font-size: 1.5rem;
-    color: white;
+    font-size: 1.1rem;
+    color: #ffffff; /* Explicitly white for this card */
 }
 
 .situation-ava {
-    color: #d81818 !important;
+    color: #ef4444 !important; /* Red */
 }
 
 .situation-op {
-    color: #1cc51c !important;
+    color: #22c55e !important; /* Green */
 }
 
 .btn_rem_add {
-    display: grid;
-    grid-template-columns: 160px 160px;
-    justify-content: space-around;
-    x-index: 100;
-    padding: 0.5rem 0;
-}
-
-.btn {
-    color: white;
     display: flex;
     justify-content: center;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-.btn_add {
-    background: var(--blue-components);
-    border-radius: 10px;
-    border: 1px solid #1cc51c;
-}
-
-.btn_add:hover {
-    color: black;
-    background-color: #1cc51c;
-}
-
-.btn_rem {
-    background: var(--blue-components);
-    border-radius: 10px;
-    border: 2px solid #d81818;
-}
-
-.btn_rem:hover {
-    color: black;
-    background-color: #d81818;
-}
-
-/* Tabela veiculos danificados */
-.Ranking_Ocu {
-    grid-area: Ranking_Ocu;
-    background: white;
-    border-radius: 12px;
-    height: 40rem;
-    width: 30rem;
-    overflow: hidden;
-}
-
-.Ranking_Ocu h4{
-    display: flex;
-    justify-content: center;
-    text-align: center;
+    gap: 20px;
     margin-top: 1rem;
 }
 
+.btn {
+    color: var(--button-text-color);
+    background-color: var(--button-bg-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid transparent;
+}
+
+.btn:hover {
+    background-color: var(--button-hover-bg-color);
+}
+
+.btn_rem:hover {
+    border-color: #ef4444;
+    background-color: transparent;
+    color: #ef4444;
+}
+
+.btn_add:hover {
+    border-color: #22c55e;
+    background-color: transparent;
+    color: #22c55e;
+}
+
+.Ranking_Ocu h4, .graph-line h4 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-text-color);
+}
+
 .table_ocu {
-    width: 95%;
-    height: 75%;
+    width: 100%;
+    height: 30rem;
     overflow-y: auto;
-    overflow-x: hidden;
     display: block;
     border-collapse: collapse;
-    padding: 1rem;
+    align-content: center;
+    justify-items: center;
 }
 
 .table_ocu th,
 .table_ocu td {
-    border: 1px solid #d7d7d7;
+    border: 1px solid var(--border-color);
     padding: 10px;
     text-align: center;
 }
 
 .table_ocu td {
-    font-weight: bolder;
+    font-weight: normal;
 }
 
 .table_ocu th {
-    background-color: var(--blue-components);
-    color: white;
+    background-color: var(--table-header-bg-color);
+    color: var(--primary-text-color);
     font-weight: bold;
 }
 
+.table_ocu tr {
+    color: var(--primary-text-color);
+}
+
 .table_ocu tr:nth-child(even) {
-    background-color: var(--yellow-hover);
-    color: white;
+    background-color: var(--bg-color);
+    color: var(--secondary-text-color);
 }
 
 .table_ocu tr:hover {
-    background-color: #cdcdcd;
-    color: black;
+    background-color: var(--table-row-hover-bg-color);
+    color: var(--table-row-hover-text-color);
 }
 
-/* botão para gerar o pdf */
+/* PDF button */
 .btn-pdf {
-    height: 3rem;
-    width: 8rem;
-    padding: 10px;
-    background-color: #f5d100;
-    color: black;
+    padding: 10px 15px;
+    background-color: var(--accent-color);
+    color: var(--button-text-color);
     font-weight: bold;
     text-decoration: none;
     border-radius: 8px;
     transition: background-color 0.3s ease;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin-top: 1rem;
 }
 
 .btn-pdf:hover {
-    background-color: #e4c800;
+    background-color: var(--accent-color-hover);
 }
 
 .drop-date {
     display: flex;
     justify-content: center;
+    margin-bottom: 1rem;
 }
 
-/* Gráfico de linhas veículos danificados */
+/* Graph */
 .graph-line {
-    grid-area: graph-line;
-    background: white;
-    border-radius: 12px;
-    height: 40rem;
-    overflow: hidden;
+    padding: 1.5rem;
 }
 
-.graph-line h4 {
-    text-align: center;
-    margin-top: 1rem;
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .vehicles {
+        flex-basis: 100%;
+    }
 }
 
 @media (max-width: 768px) {
     .page-content {
-        grid-template-columns: 2fr;
-        grid-template-areas:
-            "vehicles"
-            "Ranking_Ocu" "graph-line";
-        margin-left: 5em;
+        margin-left: 0;
         padding: 1rem;
-        width: 100%;
     }
 
-    .vehicles, .Ranking_Ocu, .graph-line {
-        width: 100%;
+    .list-header {
+        display: none; /* On small screens, the grid is too crowded. Hide header. */
+    }
+
+    .card-vehicles {
+        grid-template-columns: 1fr; /* Stack items vertically */
+        text-align: center;
+        gap: 10px;
+        padding: 1rem;
+    }
+
+    .img-vehicle {
+        width: 150px; /* Larger image when stacked */
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    .card-vehicles p {
+        font-size: 1rem;
+    }
+
+    .btn_rem_add {
+        flex-direction: column;
     }
 }
