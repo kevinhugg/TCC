@@ -2,24 +2,21 @@ import dash
 from dash import html, dcc, Input, Output, callback, State
 from datetime import datetime
 
-from data.dados import viaturas, Ocur_Vehicles, agents
+import firebase_functions as fb
 
 dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
 
 
 def layout(numero=None):
-    dados = next((v for v in viaturas if v['numero'] == numero), None)
-
-    resp_veh = [a for a in agents if a['viatura_mes'] == numero]
-    motorista = next((a for a in resp_veh if a['func_mes'].lower() == 'motorista'), None)
-    another_agents = [a for a in resp_veh if a != motorista]
+    dados = fb.get_vehicle_by_number(numero)
+    ocorrencias = fb.get_ocurrences_by_vehicles(numero)
 
     if not (dados):
         return html.H3("Veículo não encontrado")
 
     meses_unicos = sorted(set(
         datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
-        for o in Ocur_Vehicles if o['viatura'] == numero
+        for o in ocorrencias
     ))
 
     dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
@@ -34,18 +31,21 @@ def layout(numero=None):
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
 
         dcc.Store(id='vehicle-store', data=numero),
+        dcc.Store(id='agent-assignment-trigger', data=0),
 
         html.Div([
             html.H3(f"Viatura - {dados['numero']}", className='tittle'),
 
             html.Div([
-                html.Img(src=dados['imagem'], className='img'),
+                html.Img(src=dados.get('imagem', '/static/assets/img/imageNot.png'), className='img'),
                 html.Div([
-                    html.P(f"Placa: {dados['placa']}", className='det placa'),
-                    html.P(f"Tipo: {dados['veiculo']}", className='det tipo'),
-                    html.P(f"Situação: {'Avariada' if dados['avariada'] else 'Operante'}",
-                           className='det avariada' if dados['avariada'] else 'det operante'),
-                    html.P(f"Local: {dados['loc_av'] if dados['avariada'] else ''}",
+                    html.P(f"Placa: {dados.get('placa', '---')}", className='det placa'),
+                    html.P(f"Tipo: {dados.get('veiculo', '---')}", className='det tipo'),
+                    html.P(
+                        f"Situação: {'Avariada' if dados.get('avariada') else 'Operante'}",
+                        className='det avariada' if dados.get('avariada') else 'det operante'
+                    ),
+                    html.P(f"Local: {dados.get('loc_av', '') if dados.get('avariada') else ''}",
                            className='det loc_av'),
                 ], className='texts-det'),
             ], className='details-items'),
@@ -80,47 +80,19 @@ def layout(numero=None):
                 dcc.Dropdown(
                     id='dropdown-turnos',
                     options=[
+                        {'label': 'Todos os Turnos', 'value': 'todos'},
                         {'label': 'Manhã', 'value': 'manha'},
                         {'label': 'Tarde', 'value': 'tarde'},
                         {'label': 'Noite', 'value': 'noite'},
                     ],
-                    placeholder='Selecione um turno',
+                    value='todos',
+                    clearable=False,
                     className='dropdown-turnos',
                     style={'height': '40px', 'width': '200px'}
                 ),
             ], className='dropdown-title'),
 
-            html.Div([
-                html.Div([
-                    html.Img(src=motorista['foto_agnt'], className='img_agent'),
-                    html.P(f"{motorista['nome']}", className='agent-name'),
-                    html.P(f"Função: {motorista['func_mes'].capitalize()}", className='agent-role'),
-                    html.P(f"{motorista['cargo_at']}", className='agent-cargo'),
-                ], className='agent-box motorista') if motorista else html.Div(
-                    html.Div([
-                        html.P("Sem motorista", className='agent-name'),
-                    ], className='add-driver-box-content'),
-                    id='add-driver-button', className='agent-box add-driver-box', title='Adicionar motorista'
-                ),
-                *[
-                    dcc.Link(
-                        html.Div([
-                            html.Img(src=agente['foto_agnt'], className='img_agent'),
-                            html.P(f"{agente['nome']}", className='agent-name'),
-                            html.P(f"Função: {agente['func_mes'].capitalize()}", className='agent-role'),
-                            html.P(f"{agente['cargo_at']}", className='agent-cargo'),
-                            html.P("Turno não iniciado", className='turno-status'),
-                        ], className='agent-box'),
-                        href=f"/dashboard/agent/{agente['id']}", className='link-ag-vt'
-                    ) for agente in another_agents
-                ],
-
-                html.Div(
-                    html.Div(
-                        html.H1("+", className='add-agent-icon'),
-                        id='add-agent-button', className='agent-box add-agent-box', title='Adicionar agente'),
-                )
-            ], className='agents-grid'),
+            html.Div(id='agents-grid', className='agents-grid'),
 
         ], className='agents-container card'),
 
@@ -147,6 +119,28 @@ def layout(numero=None):
                                 clearable=False
                             ),
                             dcc.RadioItems(id='agent-list', value=None),
+                            html.Hr(),
+                            html.P('Selecione o Turno:', style={'marginTop': '1rem'}),
+                            dcc.Dropdown(
+                                id='assign-shift-dropdown',
+                                options=[
+                                    {'label': 'Manhã', 'value': 'manha'},
+                                    {'label': 'Tarde', 'value': 'tarde'},
+                                    {'label': 'Noite', 'value': 'noite'},
+                                ],
+                                placeholder="Selecione um turno...",
+                                style={'marginBottom': '1rem'}
+                            ),
+                            html.P('Selecione a Função:'),
+                            dcc.Dropdown(
+                                id='assign-role-dropdown',
+                                options=[
+                                    {'label': 'Motorista', 'value': 'Motorista'},
+                                    {'label': 'Encarregado', 'value': 'Encarregado'},
+                                    {'label': 'Auxiliar', 'value': 'Auxiliar'},
+                                ],
+                                placeholder="Selecione uma função...",
+                            ),
                         ]),
                         html.Div(className='modal-footer', children=[
                             html.Button('Atribuir Agente', id='assign-agent-button', className='btn')
@@ -163,8 +157,8 @@ def layout(numero=None):
     Input('filter-month', 'value'),
     Input('vehicle-store', 'data')
 )
-def att_tabela_oco(mes, viatura):
-    ocorrencias = [o for o in Ocur_Vehicles if o['viatura'] == viatura and o.get('class') == 'ocorrencia']
+def att_tabela_oco(mes, numero):
+    ocorrencias = fb.get_ocurrences_by_vehicles(numero)
 
     if mes != 'todos':
         ocorrencias = [
@@ -235,22 +229,141 @@ def toggle_modal(add_driver_clicks, add_agent_clicks, close_clicks):
 )
 def update_agent_list(filter_value):
     if filter_value == 'unassigned':
-        filtered_agents = [a for a in agents if not a.get('func_mes') or a.get('func_mes').lower() == '']
+        filtered_agents = fb.get_unassigned_agents()
     else:
-        filtered_agents = agents
+        filtered_agents = fb.get_all_agents()
 
-    return [{'label': f"{a['nome']} ({a['cargo_at']})", 'value': a['id']} for a in filtered_agents]
+    return [
+        {'label': f"{a.get('nome')} ({a.get('funcao')})", 'value': a.get('id')}
+        for a in filtered_agents
+    ]
+
+@callback(
+    [Output('agent-modal', 'style', allow_duplicate=True),
+     Output('agent-assignment-trigger', 'data')],
+    Input('assign-agent-button', 'n_clicks'),
+    [State('agent-list', 'value'),
+     State('vehicle-store', 'data'),
+     State('assign-shift-dropdown', 'value'),
+     State('assign-role-dropdown', 'value'),
+     State('agent-assignment-trigger', 'data')],
+    prevent_initial_call=True
+)
+def assign_agent(n_clicks, agent_id, vehicle_numero, shift, role, trigger):
+    if n_clicks and agent_id and vehicle_numero and shift and role:
+        fb.update_agent(agent_id, {
+            'viatura_mes': vehicle_numero,
+            'turno': shift,
+            'func_mes': role
+        })
+        print(f"Assigned agent {agent_id} to vehicle {vehicle_numero} with shift {shift} and role {role}")
+        return {'display': 'none'}, trigger + 1
+    return dash.no_update, dash.no_update
 
 
 @callback(
-    Output('agent-modal', 'style', allow_duplicate=True),
-    Input('assign-agent-button', 'n_clicks'),
-    State('agent-list', 'value'),
-    State('vehicle-store', 'data'),
+    Output('agents-grid', 'children'),
+    [Input('dropdown-turnos', 'value'),
+     Input('agent-assignment-trigger', 'data')],
+    State('vehicle-store', 'data')
+)
+def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
+    if not vehicle_numero:
+        return []
+
+    all_agents_for_vehicle = fb.get_agents_by_vehicle(vehicle_numero)
+
+    # 2. Filtra por turno
+    if selected_shift and selected_shift != 'todos':
+        agents_to_display = [a for a in all_agents_for_vehicle if a.get('turno') == selected_shift]
+    else:
+        agents_to_display = all_agents_for_vehicle
+
+    # 3. Separa motorista e outros agentes
+    motorista = next((a for a in agents_to_display if a.get('func_mes', '').lower() == 'motorista'), None)
+    another_agents = [a for a in agents_to_display if a != motorista]
+
+    # 4. Cria os componentes HTML
+    children = []
+
+    # Box do Motorista
+    if motorista:
+        children.append(
+            html.Div([
+                html.Img(src=motorista.get('foto_agnt'), className='img_agent'),
+                html.P(f"{motorista.get('nome')}", className='agent-name'),
+                html.P(f"Função: {motorista.get('func_mes', '').capitalize()}", className='agent-role'),
+                html.P(f"{motorista.get('cargo_at')}", className='agent-cargo'),
+                html.Button('Remover', id={'type': 'remove-agent-button', 'agent_id': motorista.get('id')},
+                            className='btn-remover')
+            ], className='agent-box motorista')
+        )
+    else:
+        children.append(
+            html.Div(
+                html.Div([
+                    html.P("Sem motorista para este turno", className='agent-name'),
+                ], className='add-driver-box-content'),
+                id='add-driver-button', className='agent-box add-driver-box', title='Adicionar motorista'
+            )
+        )
+
+    # Boxes dos outros agentes
+    for agente in another_agents:
+        children.append(
+            html.Div([
+                dcc.Link(
+                    html.Div([
+                        html.Img(src=agente.get('foto_agnt'), className='img_agent'),
+                        html.P(f"{agente.get('nome')}", className='agent-name'),
+                        html.P(f"Função: {agente.get('func_mes', '').capitalize()}", className='agent-role'),
+                        html.P(f"{agente.get('cargo_at')}", className='agent-cargo'),
+                        html.P(f"Turno: {agente.get('turno', 'N/A').capitalize()}", className='turno-status'),
+                    ], className='agent-box-link'),
+                    href=f"/dashboard/agent/{agente.get('id')}", className='link-ag-vt'
+                ),
+                html.Button('Remover', id={'type': 'remove-agent-button', 'agent_id': agente.get('id')},
+                            className='btn-remover')
+            ], className='agent-box')
+        )
+
+    # Box para adicionar agente
+    children.append(
+        html.Div(
+            html.Div(
+                html.H1("+", className='add-agent-icon'),
+                id='add-agent-button', className='agent-box add-agent-box', title='Adicionar agente'
+            )
+        )
+    )
+
+    return children
+
+
+@callback(
+    Output('agent-assignment-trigger', 'data', allow_duplicate=True),
+    Input({'type': 'remove-agent-button', 'agent_id': dash.ALL}, 'n_clicks'),
+    State('agent-assignment-trigger', 'data'),
     prevent_initial_call=True
 )
-def assign_agent(n_clicks, agent_id, vehicle_numero):
-    if n_clicks and agent_id and vehicle_numero:
-        print(f"Assigning agent {agent_id} to vehicle {vehicle_numero}")
-        return {'display': 'none'}
+def remove_agent(n_clicks, trigger):
+    # Encontra qual botão foi clicado
+    ctx = dash.callback_context
+    if not ctx.triggered or not any(n_clicks):
+        return dash.no_update
+
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    agent_id_to_remove = eval(button_id)['agent_id']
+
+    agent_to_remove = fb.get_agent_by_id(agent_id_to_remove)
+
+    if agent_to_remove:
+        fb.update_agent(agent_id_to_remove, {
+            'viatura_mes': '',
+            'func_mes': '',
+            'turno': ''
+        })
+        print(f"Removed agent {agent_id_to_remove} from their vehicle.")
+        return trigger + 1
+
     return dash.no_update

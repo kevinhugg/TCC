@@ -10,6 +10,8 @@ agents = [
     {'id': '2a', 'nome': 'Kleber Rochas', 'cargo_at': 'Arquiteto Urbanista', 'func_mes': 'Motorista', 'viatura_mes': 'V001', 'foto_agnt': '/static/assets/img/agent_photo.jpeg', 'turno': 'tarde'},
     {'id': '3a', 'nome': 'Armando Silva', 'cargo_at': 'Engenheiro Ambiental', 'func_mes': 'Encarregado', 'viatura_mes': 'V001', 'foto_agnt': '/static/assets/img/agent_photo.jpeg', 'turno': 'noite'},
     {'id': '4a', 'nome': 'Joares Santos', 'cargo_at': 'Engenheiro Civil', 'func_mes': 'encarregado', 'viatura_mes': 'V004', 'foto_agnt': '/static/assets/img/agent_photo.jpeg', 'turno': 'manha'},
+    {'id': '5a', 'nome': 'cauaa Santos', 'cargo_at': 'Engenheiro Civil', 'func_mes': 'encarregado', 'viatura_mes': 'V004', 'foto_agnt': '/static/assets/img/agent_photo.jpeg', 'turno': 'manha'},
+
 ]
 
 damVehicles = [
