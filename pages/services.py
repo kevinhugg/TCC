@@ -139,7 +139,6 @@ layout = html.Div([
 
     ], className='graph_tipes card'),
 
-    #modal p add serviço
     dbc.Modal(
         [
             dbc.ModalHeader(dbc.ModalTitle('Novo Serviço')),

@@ -1,19 +1,20 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback, State
 from datetime import datetime
 
 from data.dados import viaturas, Ocur_Vehicles, agents
 
 dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
 
+
 def layout(numero=None):
     dados = next((v for v in viaturas if v['numero'] == numero), None)
 
     resp_veh = [a for a in agents if a['viatura_mes'] == numero]
     motorista = next((a for a in resp_veh if a['func_mes'].lower() == 'motorista'), None)
-    another_agents = [a for a in resp_veh if a !=motorista]
+    another_agents = [a for a in resp_veh if a != motorista]
 
-    if not(dados):
+    if not (dados):
         return html.H3("Veículo não encontrado")
 
     meses_unicos = sorted(set(
@@ -30,6 +31,7 @@ def layout(numero=None):
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/detailsVehicles.css'),
+        html.Link(rel='stylesheet', href='/static/css/modal.css'),
 
         dcc.Store(id='vehicle-store', data=numero),
 
@@ -41,7 +43,8 @@ def layout(numero=None):
                 html.Div([
                     html.P(f"Placa: {dados['placa']}", className='det placa'),
                     html.P(f"Tipo: {dados['veiculo']}", className='det tipo'),
-                    html.P(f"Situação: {'Avariada' if dados['avariada'] else 'Operante'}", className='det avariada' if dados['avariada'] else 'det operante'),
+                    html.P(f"Situação: {'Avariada' if dados['avariada'] else 'Operante'}",
+                           className='det avariada' if dados['avariada'] else 'det operante'),
                     html.P(f"Local: {dados['loc_av'] if dados['avariada'] else ''}",
                            className='det loc_av'),
                 ], className='texts-det'),
@@ -57,7 +60,7 @@ def layout(numero=None):
 
         html.Div([
             html.H4("Histórico de ocorrências da Viatura"),
-            #colocar um icone para filtrar aqui por local da avaria, ocorrencia ou serviço
+            # colocar um icone para filtrar aqui por local da avaria, ocorrencia ou serviço
             dcc.Dropdown(
                 id='filter-month',
                 options=dropdown_options,
@@ -75,33 +78,65 @@ def layout(numero=None):
             html.H3(f"Responsáveis do Mês", className='tittle'),
 
             html.Div([
-                dcc.Link(
+                html.Div([
+                    html.Img(src=motorista['foto_agnt'], className='img_agent'),
+                    html.P(f"{motorista['nome']}", className='agent-name'),
+                    html.P(f"Função: {motorista['func_mes'].capitalize()}", className='agent-role'),
+                    html.P(f"{motorista['cargo_at']}", className='agent-cargo'),
+                ], className='agent-box motorista') if motorista else html.Div(
                     html.Div([
-                        html.Img(src=motorista['foto_agnt'] if motorista else '/static/img/default-user.png', className='img'),
-                        html.P(f"{motorista['nome']}" if motorista else "Motorista não encontrado", className='agent-name'),
-                        html.P(f"Função: {motorista['func_mes'].capitalize()}" if motorista else "", className='agent-role'),
-                        html.P(f"{motorista['cargo_at']}" if motorista else "", className='agent-cargo'),
-                    ], className='agent-box motorista'),
-                href=f"/dashboard/agent/{motorista['id']}", className='link-ag-vt'
-                ) if motorista else [],
-
+                        html.P("Sem motorista", className='agent-name'),
+                    ], className='add-driver-box-content'),
+                    id='add-driver-button', className='agent-box add-driver-box', title='Adicionar motorista'
+                ),
                 *[
                     dcc.Link(
                         html.Div([
-                            html.Img(src=agente['foto_agnt'], className='img'),
+                            html.Img(src=agente['foto_agnt'], className='img_agent'),
                             html.P(f"{agente['nome']}", className='agent-name'),
                             html.P(f"Função: {agente['func_mes'].capitalize()}", className='agent-role'),
                             html.P(f"{agente['cargo_at']}", className='agent-cargo'),
                         ], className='agent-box'),
-                        href=f"/dashboard/agent/{agente['id']}", className = 'link-ag-vt'
+                        href=f"/dashboard/agent/{agente['id']}", className='link-ag-vt'
                     ) for agente in another_agents
-                ]
+                ],
+
+                html.Div(
+                    html.Div(
+                        html.H1("+", className='add-agent-icon'),
+                        id='add-agent-button', className='agent-box add-agent-box', title='Adicionar agente'),
+                )
             ], className='agents-grid'),
 
         ], className='agents-container card'),
 
-    ], className='page-content')
+        html.Div(
+            id='agent-modal',
+            className='modal',
+            style={'display': 'none'},
+            children=[
+                html.Div(
+                    className='modal-content',
+                    children=[
+                        html.Span(id='modal-close-button', className='modal-close-button', children='×'),
+                        html.H2('Adicionar Agente'),
+                        dcc.Dropdown(
+                            id='agent-filter-dropdown',
+                            options=[
+                                {'label': 'Todos os Agentes', 'value': 'all'},
+                                {'label': 'Agentes Sem Função', 'value': 'unassigned'},
+                            ],
+                            value='all',
+                            clearable=False
+                        ),
+                        dcc.RadioItems(id='agent-list', value=None),
+                        html.Button('Atribuir Agente', id='assign-agent-button', className='btn')
+                    ]
+                )
+            ]
+        ),
 
+    ], className='page-content'),
 
 @callback(
     Output('table-ocurrences-vehicles', 'children'),
@@ -137,9 +172,10 @@ def att_tabela_oco(mes, viatura):
                     className="btn_view"
                 )
             ])
-        for o in ocorrencias
+            for o in ocorrencias
         ])
     ], className='table-ocurrences')
+
 
 @callback(
     Output('detalhes-pdf', 'href'),
@@ -148,3 +184,53 @@ def att_tabela_oco(mes, viatura):
 )
 def atualizar_link_pdf(filtro_status, numero):
     return f"/pdf_detalhes_viatura_{numero}?status={filtro_status}"
+
+
+@callback(
+    Output('agent-modal', 'style'),
+    Input('add-driver-button', 'n_clicks'),
+    Input('add-agent-button', 'n_clicks'),
+    Input('modal-close-button', 'n_clicks'),
+    prevent_initial_call=True
+)
+def toggle_modal(add_driver_clicks, add_agent_clicks, close_clicks):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return {'display': 'none'}
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id in ['add-driver-button', 'add-agent-button']:
+        return {'display': 'block'}
+
+    if trigger_id == 'modal-close-button':
+        return {'display': 'none'}
+
+    return {'display': 'none'}
+
+
+@callback(
+    Output('agent-list', 'options'),
+    Input('agent-filter-dropdown', 'value')
+)
+def update_agent_list(filter_value):
+    if filter_value == 'unassigned':
+        filtered_agents = [a for a in agents if not a.get('func_mes') or a.get('func_mes').lower() == '']
+    else:
+        filtered_agents = agents
+
+    return [{'label': f"{a['nome']} ({a['cargo_at']})", 'value': a['id']} for a in filtered_agents]
+
+
+@callback(
+    Output('agent-modal', 'style', allow_duplicate=True),
+    Input('assign-agent-button', 'n_clicks'),
+    State('agent-list', 'value'),
+    State('vehicle-store', 'data'),
+    prevent_initial_call=True
+)
+def assign_agent(n_clicks, agent_id, vehicle_numero):
+    if n_clicks and agent_id and vehicle_numero:
+        print(f"Assigning agent {agent_id} to vehicle {vehicle_numero}")
+        return {'display': 'none'}
+    return dash.no_update
