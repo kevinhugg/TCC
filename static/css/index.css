@@ -29,6 +29,11 @@ border-top-right-radius: 0px;
 border-bottom-right-radius: 0px;
 }
 
+.logo_semurb {
+    height: 15rem;
+    width: 15rem;
+}
+
 .logo h1{
     color: white;
     text-shadow: black 0px 5px 1px;
