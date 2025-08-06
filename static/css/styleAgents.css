@@ -1,9 +1,16 @@
+.page-content {
+    padding: 2rem;
+    margin-left: 4em; /* Corresponds to sidebar width */
+    margin-top: 30px; /* Corresponds to header height */
+    transition: margin-left 0.3s ease;
+}
+
 .agents_container {
-    width: 100%;
-    max-width: 68rem;
-    margin-top: 30px;
-    margin-left: 30px;
+    background: var(--card-bg-color);
+    border-radius: 12px;
     padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .searchbar {
@@ -26,98 +33,90 @@
 
 .input-search:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2); /* Using a direct mapping of accent color */
-}
-
-.agents-table-wrapper {
-    width: 100%;
-    overflow-x: auto; /* For responsiveness on small screens */
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
 .agents-table {
     width: 100%;
-    min-width: 600px; /* Prevent table from getting too squished */
     border-collapse: collapse;
+    margin-top: 1.5rem;
 }
 
 .agents-table th, .agents-table td {
-    padding: 12px 15px;
-    text-align: left;
+    padding: 1rem 1.5rem;
+    text-align: center;
     border-bottom: 1px solid var(--border-color);
     color: var(--primary-text-color);
+    vertical-align: middle;
 }
 
 .agents-table th {
     background-color: var(--table-header-bg-color);
-    font-weight: 600;
+    font-weight: bold;
     text-transform: uppercase;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     letter-spacing: 0.5px;
 }
 
 .agents-table tr:hover {
-    background-color: var(--table-row-hover-bg-color);
+    background-color: var(--table-header-bg-color);
+    color: var(--table-row-hover-text-color);
 }
 
-.agents-table td.not-found {
-    text-align: center;
-    padding: 2rem;
+.agents-table tr {
+    color: var(--primary-text-color);
+}
+
+.agents-table tr:nth-child(even) {
+    background-color: var(--bg-color);
     color: var(--secondary-text-color);
 }
 
-.btn-container {
+.btn_rem_add_pdf {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
 }
 
-.btn {
-    display: inline-block;
+.btn, .btn-pdf {
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     text-decoration: none;
     font-weight: bold;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s ease;
     text-align: center;
     border: 1px solid transparent;
     cursor: pointer;
-}
-
-.btn-primary {
-    background-color: var(--accent-color);
+    background-color: var(--button-bg-color);
     color: var(--button-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
 }
 
-.btn-primary:hover {
-    background-color: var(--accent-color-hover);
+.btn:hover, .btn-pdf:hover {
+    background-color: var(--button-hover-bg-color);
 }
 
-.btn-success {
-    background-color: #10b981; /* Consider adding this to theme variables if used often */
-    color: #ffffff;
+.btn.rem_agents:hover {
+    border-color: #ef4444;
+    background-color: transparent;
+    color: #ef4444;
 }
 
-.btn-success:hover {
-    background-color: #059669;
+.btn.add_agents:hover {
+    border-color: #22c55e;
+    background-color: transparent;
+    color: #22c55e;
 }
 
-.btn-danger {
-    background-color: #ef4444; /* Consider adding this to theme variables */
-    color: #ffffff;
-}
-
-.btn-danger:hover {
-    background-color: #dc2626;
-}
-
-.link-view {
+.btn_view, .btn_veh {
     color: var(--accent-color);
     text-decoration: none;
     font-weight: bold;
 }
 
-.link-view:hover {
+.btn_view:hover, .btn_veh:hover {
     text-decoration: underline;
 }

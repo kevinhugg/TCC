@@ -33,12 +33,12 @@ layout = html.Div([
                         html.Td(item['nome']),
                         html.Td(item['cargo_at']),
                         html.Td(item['func_mes']),
-                        html.Td(
-                            dcc.Link(item['viatura_mes'], href=f"/dashboard/veiculo/{item['viatura_mes']}"), className='btn_veh'
-                        ),
-                        html.Td(
-                            dcc.Link('Ver Mais', href=f"/dashboard/agent/{item['nome']}"), className='btn_view'
-                        ),
+                        html.Td([
+                            dcc.Link(item['viatura_mes'], href=f"/dashboard/veiculo/{item['viatura_mes']}", className='btn_veh')
+                        ]),
+                        html.Td([
+                            dcc.Link('Ver Mais', href=f"/dashboard/agent/{item['nome']}",className='btn_view')
+                        ]),
                     ])
                     for item in agents
                 ])
@@ -91,11 +91,11 @@ def update_list(search_value):
             html.Td(item['cargo_at']),
             html.Td(item['func_mes']),
             html.Td([
-                dcc.Link(item['viatura_mes'], href=f"/dashboard/veiculo/{item['viatura_mes']}")
-            ], className='btn_veh'),
+                dcc.Link(item['viatura_mes'], href=f"/dashboard/veiculo/{item['viatura_mes']}", className='btn_veh')
+            ]),
             html.Td([
-                dcc.Link('Ver Mais', href=f"/dashboard/agent/{item['id']}")
-            ], className='btn_view'),
+                dcc.Link('Ver Mais', href=f"/dashboard/agent/{item['id']}", className='btn_view')
+            ]),
         ])
         for item in filtered
     ]
