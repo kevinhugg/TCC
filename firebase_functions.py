@@ -15,6 +15,30 @@ def get_vehicle_by_number(numero):
     docs = db.collection('veiculos').where('numero', '==', numero).stream()
     return next((doc.to_dict() for doc in docs), None)
 
+#busca as partes que estao avariadas
+def get_partes_avariadas(veiculo_id):
+    try:
+        inspecoes_ref = db.collection('veiculos').document(veiculo_id).collection('inspecoes')
+        docs = inspecoes_ref.order_by('__name__', direction=firestore.Query.DESCENDING).limit(1).stream()
+
+        avarias = []
+
+        for doc in docs:
+            dados = doc.to_dict()
+            for parte, info in dados.items():
+                if isinstance(info, dict) and (info.get("0") == 1 or info.get("descricao") or info.get("uriFoto")):
+                    avarias.append({
+                        "parte": parte.capitalize(),
+                        "descricao": info.get("descricao", "Sem descrição"),
+                        "imagem": info.get("uriFoto", "")
+                    })
+
+        return avarias
+
+    except Exception as e:
+        print(f"Erro ao buscar avarias detalhadas: {e}")
+        return []
+
 #busca agentes pela matricula
 def get_agent_by_id(matricula):
     doc_ref = db.collection('agentes').document(matricula)
