@@ -119,7 +119,7 @@ def layout(numero=None):
                                 value='all',
                                 clearable=False
                             ),
-                            dcc.RadioItems(id='agent-list', value=None),
+                            dcc.Checklist(id='agent-list', value=[], style={'display': 'flex', 'flex-direction': 'column'}),
                             html.Hr(),
                             html.P('Selecione o Turno:', style={'marginTop': '1rem'}),
                             dcc.Dropdown(
@@ -240,6 +240,16 @@ def update_agent_list(filter_value):
     ]
 
 @callback(
+    Output('agent-list', 'value'),
+    Input('agent-list', 'value'),
+    prevent_initial_call=True
+)
+def enforce_single_selection(selected_values):
+    if len(selected_values) > 1:
+        return [selected_values[-1]]
+    return selected_values
+
+@callback(
     [Output('agent-modal', 'style', allow_duplicate=True),
      Output('agent-assignment-trigger', 'data')],
     Input('assign-agent-button', 'n_clicks'),
@@ -250,12 +260,13 @@ def update_agent_list(filter_value):
      State('agent-assignment-trigger', 'data')],
     prevent_initial_call=True
 )
-def assign_agent(n_clicks, agent_id, vehicle_numero, shift, role, trigger):
-    if n_clicks and agent_id and vehicle_numero and shift and role:
+def assign_agent(n_clicks, agent_ids, vehicle_numero, shift, role, trigger):
+    if n_clicks and agent_ids and vehicle_numero and shift and role:
+        agent_id = agent_ids[0]  # Extract the single ID from the list
         fb.update_agent(agent_id, {
-            'viatura_mes': vehicle_numero,
+            'viatura ': vehicle_numero,
             'turno': shift,
-            'func_mes': role
+            'funcao': role
         })
         print(f"Assigned agent {agent_id} to vehicle {vehicle_numero} with shift {shift} and role {role}")
         return {'display': 'none'}, trigger + 1
@@ -281,7 +292,7 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
         agents_to_display = all_agents_for_vehicle
 
     # 3. Separa motorista e outros agentes
-    motorista = next((a for a in agents_to_display if a.get('func_mes', '').lower() == 'motorista'), None)
+    motorista = next((a for a in agents_to_display if a.get('funcao', '').lower() == 'motorista'), None)
     another_agents = [a for a in agents_to_display if a != motorista]
 
     # 4. Cria os componentes HTML
@@ -293,8 +304,7 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
             html.Div([
                 html.Img(src=motorista.get('foto_agnt'), className='img_agent'),
                 html.P(f"{motorista.get('nome')}", className='agent-name'),
-                html.P(f"Função: {motorista.get('func_mes', '').capitalize()}", className='agent-role'),
-                html.P(f"{motorista.get('cargo_at')}", className='agent-cargo'),
+                html.P(f"Função: {motorista.get('funcao', '').capitalize()}", className='agent-role'),
                 html.Button('Remover', id={'type': 'remove-agent-button', 'agent_id': motorista.get('id')},
                             className='btn-remover')
             ], className='agent-box motorista')
@@ -317,8 +327,7 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
                     html.Div([
                         html.Img(src=agente.get('foto_agnt'), className='img_agent'),
                         html.P(f"{agente.get('nome')}", className='agent-name'),
-                        html.P(f"Função: {agente.get('func_mes', '').capitalize()}", className='agent-role'),
-                        html.P(f"{agente.get('cargo_at')}", className='agent-cargo'),
+                        html.P(f"Função: {agente.get('funcao', '').capitalize()}", className='agent-role'),
                         html.P(f"Turno: {agente.get('turno', 'N/A').capitalize()}", className='turno-status'),
                     ], className='agent-box-link'),
                     href=f"/dashboard/agent/{agente.get('id')}", className='link-ag-vt'
@@ -340,7 +349,6 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
 
     return children
 
-
 @callback(
     Output('agent-assignment-trigger', 'data', allow_duplicate=True),
     Input({'type': 'remove-agent-button', 'agent_id': dash.ALL}, 'n_clicks'),
@@ -360,8 +368,8 @@ def remove_agent(n_clicks, trigger):
 
     if agent_to_remove:
         fb.update_agent(agent_id_to_remove, {
-            'viatura_mes': '',
-            'func_mes': '',
+            'veiculo': '',
+            'funcao': '',
             'turno': ''
         })
         print(f"Removed agent {agent_id_to_remove} from their vehicle.")
