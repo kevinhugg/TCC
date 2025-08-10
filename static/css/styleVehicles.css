@@ -3,8 +3,8 @@
     flex-wrap: wrap;
     gap: 20px;
     padding: 2rem;
-    margin-left: 4em; /* Corresponds to sidebar width */
-    margin-top: 30px; /* Corresponds to header height */
+    margin-left: 4em;
+    margin-top: 30px;
     transition: margin-left 0.3s ease;
 }
 
@@ -21,13 +21,13 @@
 }
 
 .vehicles {
-    flex: 2 1 600px; /* Flex-grow, flex-shrink, flex-basis */
+    flex: 2 1 600px;
     width: 100%;
 }
 
 .Ranking_Ocu,
 .graph-line {
-    flex: 1 1 300px; /* They will take up equal space */
+    flex: 1 1 300px;
     height: 40rem;
 }
 
@@ -107,15 +107,15 @@
     text-align: center;
     font-weight: bold;
     font-size: 1.1rem;
-    color: #ffffff; /* Explicitly white for this card */
+    color: #ffffff;
 }
 
 .situation-ava {
-    color: #ef4444 !important; /* Red */
+    color: #ef4444 !important;
 }
 
 .situation-op {
-    color: #22c55e !important; /* Green */
+    color: #22c55e !important;
 }
 
 .btn_rem_add {
@@ -200,7 +200,7 @@
     color: var(--table-row-hover-text-color);
 }
 
-/* PDF button */
+
 .btn-pdf {
     padding: 10px 15px;
     background-color: var(--accent-color);
@@ -225,12 +225,12 @@
     margin-bottom: 1rem;
 }
 
-/* Graph */
+
 .graph-line {
     padding: 1.5rem;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 1200px) {
     .vehicles {
         flex-basis: 100%;
@@ -244,18 +244,18 @@
     }
 
     .list-header {
-        display: none; /* On small screens, the grid is too crowded. Hide header. */
+        display: none;
     }
 
     .card-vehicles {
-        grid-template-columns: 1fr; /* Stack items vertically */
+        grid-template-columns: 1fr;
         text-align: center;
         gap: 10px;
         padding: 1rem;
     }
 
     .img-vehicle {
-        width: 150px; /* Larger image when stacked */
+        width: 150px;
         height: auto;
         margin-bottom: 10px;
     }
@@ -267,4 +267,74 @@
     .btn_rem_add {
         flex-direction: column;
     }
+}
+
+
+
+.bar-damVeh .hovertext {
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+    color: black !important;
+    font-family: "Segoe UI" !important;
+}
+
+
+.bar-damVeh .xtick text,
+.bar-damVeh .ytick text {
+    font-size: 12px !important;
+    font-family: "Segoe UI" !important;
+}
+
+
+[data-theme="dark"] .bar-damVeh .modebar {
+    background-color: transparent !important;
+}
+[data-theme="dark"] .bar-damVeh .modebar-btn path {
+    fill: #e5e7eb !important;
+}
+
+
+.data-table,
+.agents-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.data-table th,
+.data-table td,
+.agents-table th,
+.agents-table td {
+    padding: 1rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-text-color);
+    vertical-align: middle;
+}
+
+.data-table th,
+.agents-table th {
+    background-color: var(--table-header-bg-color);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+
+.data-table tr:nth-child(even),
+.agents-table tr:nth-child(even) {
+    background-color: var(--table-row-even-bg-color);
+}
+
+.data-table tr:nth-child(odd),
+.agents-table tr:nth-child(odd) {
+    background-color: var(--table-row-odd-bg-color);
+}
+
+
+.data-table tr:hover,
+.agents-table tr:hover {
+    background-color: var(--table-row-hover-bg-color);
+    color: var(--table-row-hover-text-color);
 }

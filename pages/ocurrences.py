@@ -49,13 +49,15 @@ fig_tipos = px.bar(
     title='Ocorrências Cadastradas'
 )
 
-fig_tipos.update_traces(marker_color='#f7e57d', textposition='outside')
+fig_tipos.update_traces(marker_color='#4682B4', textposition='outside')
 fig_tipos.update_layout(
     title={
         'text': 'Ocorrências Cadastradas',
     },
     title_font_size=26,
-    title_font_color='black',
+    title_font_color='#295678',
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
 )
 
 layout = html.Div([
@@ -111,7 +113,7 @@ layout = html.Div([
 
             html.Div([
                 html.Div([
-                    html.A(id='rem_oco', children='Apagar Ocorrências', className='rem_oco')
+                    html.A(id='rem_oco', children='Apagar Serviços', className='rem_serv btn-danger')
                 ], className='btn'),
 
                 html.Div([
@@ -127,7 +129,7 @@ layout = html.Div([
 
         html.Div([
             html.Div([
-                html.A(id='rem_vehicle', children='Remover Ocorrência', className='rem_oco')
+                html.A(id='rem_vehicle', children='Apagar Serviços', className='rem_serv btn-danger')
             ], className='btn'),
 
             html.Div([

@@ -1,6 +1,7 @@
-#Precisa baixar o Flask antes de iniciar esses:
+# Precisa baixar o Flask antes de iniciar esses:
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, render_template_string, make_response, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, render_template_string, \
+    make_response, send_file
 from flask_mail import Mail, Message
 import random
 import string
@@ -13,6 +14,7 @@ import os
 import base64
 
 from xhtml2pdf.default import DEFAULT_FONT
+
 DEFAULT_FONT['DejaVuSans'] = '/caminho/para/DejaVuSans.ttf'
 
 from dash_app import create_dash_app
@@ -20,38 +22,34 @@ from data.dados import *
 
 app = Flask(__name__)
 
-#dash_app = create_dash_app(app)
-#import sys
-#sys.modules['dash_instance'] = dash_app
-
-#Para isso aqui, precisa do Banco de Dados também, então depois que o Miguel tiver terminado, eu conecto tudo aqui
-
-app.config['MAIL_SERVER'] = 'smtp.gmail.com' 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'seu_email@gmail.com' 
-app.config['MAIL_PASSWORD'] = 'sua_senha_do_app' 
-app.config['MAIL_DEFAULT_SENDER'] = 'seu_email@gmail.com' 
-app.secret_key = 'semurb' 
+app.config['MAIL_USERNAME'] = 'seu_email@gmail.com'
+app.config['MAIL_PASSWORD'] = 'sua_senha_do_app'
+app.config['MAIL_DEFAULT_SENDER'] = 'seu_email@gmail.com'
+app.secret_key = 'semurb'
 
 mail = Mail(app)
 
-#integração do Dash
+# integração do Dash
 dash_app = create_dash_app(app)
+
 
 # Rota para index.html (sua página de login)
 @app.route('/')
 def pagina_login():
     return render_template('login/index.html')
 
-#Rota para o forms de login
+
+# Rota para o forms de login
 @app.route('/login', methods=['POST'])
 def info_login():
     if request.method == 'POST':
-        matricula = request.form['matricula'] 
-        senha = request.form['senha']      
+        matricula = request.form['matricula']
+        senha = request.form['senha']
 
-#Aqui precisa do Banco de Dados, então é tudo hipotético
+    # Aqui precisa do Banco de Dados, então é tudo hipotético
     if matricula == '2' and senha == '2':
         session['usuario_logado'] = True
         flash('Login realizado com sucesso!', 'success')
@@ -60,10 +58,12 @@ def info_login():
         flash('Matrícula ou senha inválidos', 'danger')
         return redirect(url_for('pagina_login'))
 
-#Rota para metodoRecSenha.html
+
+# Rota para metodoRecSenha.html
 @app.route('/rec-senha')
 def metodoRecSenha():
     return render_template('login/metodoRecSenha.html')
+
 
 @app.route('/enviar-codigo', methods=['POST'])
 def enviar_codigo():
@@ -81,7 +81,7 @@ def enviar_codigo():
         mail.send(msg)
         flash('Um código de recuperação foi enviado para o seu e-mail.', 'info')
         return redirect(url_for('pagina_codigo'))
-    
+
     except Exception as e:
         flash(f'Erro ao enviar e-mail: {e}', 'danger')
         print(f"Erro ao enviar e-mail: {e}")
@@ -91,23 +91,23 @@ def enviar_codigo():
 # Rota para a página de inserção do código
 @app.route('/codigo')
 def pagina_codigo():
- 
     if 'reset_email' not in session:
         flash('Por favor, solicite um código primeiro.', 'warning')
         return redirect(url_for('metodoRecSenha'))
     return render_template('login/codigo.html')
 
-# Rota para validar o código 
+
+# Rota para validar o código
 @app.route('/validar-codigo', methods=['POST'])
 def validar_codigo():
     codigo_digitado = request.form['codigo']
-    
-    #Aqui ele olha se tem uma conta já
+
+    # Aqui ele olha se tem uma conta já
     if 'reset_code' not in session or 'reset_code_expiry' not in session:
         flash('Sua sessão de recuperação expirou ou é inválida. Por favor, solicite um novo código.', 'danger')
         return redirect(url_for('metodoRecSenha'))
 
-    #Aqui é para ver se o código expirou
+    # Aqui é para ver se o código expirou
     if datetime.datetime.now() > session['reset_code_expiry']:
         session.pop('reset_code', None)
         session.pop('reset_email', None)
@@ -122,21 +122,20 @@ def validar_codigo():
         # Limpar o código da sessão, mas manter o e-mail para a próxima etapa (redefinição)
         session.pop('reset_code', None)
         session.pop('reset_code_expiry', None)
-        return redirect(url_for('red_senha')) # Próxima etapa
+        return redirect(url_for('red_senha'))  # Próxima etapa
     else:
         flash('Código inválido. Tente novamente.', 'danger')
-        return redirect(url_for('pagina_codigo')) # Volta para a página de código
-    
+        return redirect(url_for('pagina_codigo'))  # Volta para a página de código
 
 
 # Rota para a página de redefinição de senha
 @app.route('/redefinir-senha')
 def red_senha():
-    
     if 'reset_email' not in session:
         flash('Acesso inválido à página de redefinição de senha.', 'danger')
         return redirect(url_for('pagina_login'))
     return render_template('login/redefinirSenha.html')
+
 
 ##LOGOUT
 @app.route('/logout')
@@ -145,15 +144,18 @@ def logout():
     flash('Logout realizado com sucesso!', 'info')
     return redirect(url_for('pagina_login'))
 
+
 @app.before_request
 def proteger_rotas():
-    #se for para a rota de /dashboard ele so deixa usar se estiver logado
+    # se for para a rota de /dashboard ele so deixa usar se estiver logado
     if request.path.startswith('/dashboard') and not session.get('usuario_logado'):
         return redirect(url_for('pagina_login'))
 
-#PDF'S
+
+# PDF'S
 def remover_acentos(txt):
     return ''.join(c for c in unicodedata.normalize('NFD', txt) if unicodedata.category(c) != 'Mn').lower()
+
 
 @app.route('/pdf_viaturas_Danificadas')
 def gerar_pdf_viaturas():
@@ -241,6 +243,7 @@ def gerar_pdf_viaturas():
         'content-Disposition': 'attachment; filename="viaturas_danificadas.pdf"'
     })
 
+
 @app.route(f'/pdf_detalhes_viatura_<numero>')
 def gerar_pdf_viatura_detalhes(numero):
     status = request.args.get('status', 'todos')
@@ -315,10 +318,10 @@ def gerar_pdf_viatura_detalhes(numero):
         <body>
             <h2 class="title"> Relatório da Viatura - {{ numero }}</h2>
             <h3 class="section-title">Mes: {{ mes }}</h3>
-            
+
             <h3 class="tittle">Última foto da viatura<h3/>
             <img src="{{ imagem }}" class="img-final">
-            
+
             <h3 class="tittle">Informações da viatura<h3/>
             <table>
                 <thead>
@@ -338,7 +341,7 @@ def gerar_pdf_viatura_detalhes(numero):
                     </tr>
                 </tbody>
             </table>
-            
+
             <h3 class="tittle">Ocorrências</h3>
             {% if ocorrencias%}
             <table>
@@ -372,7 +375,7 @@ def gerar_pdf_viatura_detalhes(numero):
         numero=numero,
         mes=mes_selecionado,
         ocorrencias=ocorrencias_do_ve,
-        imagem = imagem_embed,
+        imagem=imagem_embed,
     )
 
     pdf_buffer = io.BytesIO()
@@ -386,12 +389,14 @@ def gerar_pdf_viatura_detalhes(numero):
         'content-Disposition': f'attachment; filename="Relatorio_Viatura_{numero}.pdf"'
     })
 
+
 @app.route("/gerar_pdf_agentes")
 def gerar_pdf_agentes():
     filtro = request.args.get('filtro', '').lower()
 
     if filtro:
-        filtrados = [a for a in agents if filtro in a['nome'].lower() or filtro in a['func_mes'].lower() or filtro in a['cargo_at'].lower()]
+        filtrados = [a for a in agents if
+                     filtro in a['nome'].lower() or filtro in a['func_mes'].lower() or filtro in a['cargo_at'].lower()]
     else:
         filtrados = agents
 
@@ -467,6 +472,7 @@ def gerar_pdf_agentes():
 
     return send_file(pdf_buffer, as_attachment=True, download_name='agentes.pdf', mimetype='application/pdf')
 
+
 @app.route("/gerar_pdf_agentes_ocorrencias")
 def gerar_pdf_agentes_oco():
     agente_id = request.args.get('filtro', '')
@@ -526,7 +532,7 @@ def gerar_pdf_agentes_oco():
         <body>
             <h2 class="tittle"> Relatório do Agente - {{ info.nome }}</h2>
             <h3 class="tittle">Mes: {{ mes }}</h3>
-            
+
             <h3 class="tittle">Informações do Agente<h3/>
             <table>
                 <thead>
@@ -546,7 +552,7 @@ def gerar_pdf_agentes_oco():
                     </tr>
                 </tbody>
             </table>
-            
+
             <h3 class="tittle">Ocorrências</h3>
             {% if ocorrencias%}
             <table>
@@ -586,6 +592,7 @@ def gerar_pdf_agentes_oco():
     pdf_buffer.seek(0)
 
     return send_file(pdf_buffer, as_attachment=True, download_name='detalhes_agente.pdf', mimetype='application/pdf')
+
 
 @app.route("/gerar_pdf_servicos_gerais")
 def gerar_pdf_servicos_gerais():
@@ -713,9 +720,9 @@ def gerar_pdf_servicos_gerais():
         mimetype='application/pdf'
     )
 
+
 @app.route(f'/pdf_detalhes_ocorrencia_<ocorrencia_id>')
 def gerar_pdf_detalhes_ocorrencia(ocorrencia_id):
-
     ocorrencia_info = next((o for o in Ocur_Vehicles if o['id'] == ocorrencia_id), None)
     if not ocorrencia_info:
         return "Ocorrência não encontrada.", 404
@@ -768,7 +775,7 @@ def gerar_pdf_detalhes_ocorrencia(ocorrencia_id):
         </head>
         <body>
             <h2 class="title">Relatório - {{ info['nomenclatura'] }}</h2>
-    
+
             {% if info %}
                 <h3 class="section-title">Responsável e Viatura</h3>
                 <table>
@@ -783,7 +790,7 @@ def gerar_pdf_detalhes_ocorrencia(ocorrencia_id):
                         </tr>
                     </tbody>
                 </table>
-    
+
                 <h3 class="section-title">Informações da Ocorrência</h3>
                 <table>
                     <tbody>
@@ -805,7 +812,7 @@ def gerar_pdf_detalhes_ocorrencia(ocorrencia_id):
                         </tr>
                     </tbody>
                 </table>
-    
+
                 <h3 class="section-title">Informações para Contato</h3>
                 <table>
                     <tbody>
@@ -843,6 +850,7 @@ def gerar_pdf_detalhes_ocorrencia(ocorrencia_id):
         'content-Type': 'application/pdf',
         'content-Disposition': f'attachment; filename="Relatorio_ocorrencia_{nome_oco}.pdf"'
     })
+
 
 if __name__ == '__main__':
     app.run(debug=True)

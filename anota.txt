@@ -1,26 +1,3 @@
-.light-mode {
-    --bg-color: #e0e0e0;
-    --bg-sidebar: #0D1F2C;
-    --text-color: #000;
-    --container-color: #fff;
-    --hover-text: #2c3e50;
-    --blue-components: #295678;
-    --blue-hover: #6ABDF8;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
-    --cinza: #d7d7d7;
-    --blue-bg: #0D1F2C;
-}
+Arruma o filter de styleConfig pros icones
 
-.dark-mode {
-    --bg-color: #111827;
-    --bg-sidebar: #2c3e50;
-    --text-color: #fff;
-    --container-color: #295678;
-    --blue-components: #6ABDF8;
-    --blue-hover: #0D1F2C;
-    --yellow-hover: #f5d100;
-    --yellow-components: #f7e57d;
-    --blue-bg: #6ABDF8;
-    --cinza: #d7d7d7;
-}
+arruma o modal q por algum motio ta transparente

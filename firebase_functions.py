@@ -82,7 +82,7 @@ def get_ocurrences_by_vehicles(veiculo_numero):
                     'id': doc.id,
                     'data': data_str,
                     'nome': data.get('nome'),
-                    'agente': data.get('agente')  # opcional, se quiser mostrar
+                    'agente': data.get('agente')
                 })
 
     return ocorrencias

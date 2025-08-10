@@ -21,6 +21,7 @@
 
 .searchbar {
     display: flex;
+    align-items: center;
     justify-content: center;
     width: 100%;
     gap: 2rem;
@@ -136,4 +137,376 @@
     .input-search {
         width: 100%;
     }
+}
+
+.serv-bar-chart {
+    background-color: white;
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+
+[data-theme="dark"] .serv-bar-chart {
+    background-color: var(--card-bg-color);
+    border-color: var(--border-color);
+}
+
+
+.serv-bar-chart .hovertext > path {
+    fill: white !important;
+    stroke: #d1d5db !important;
+}
+
+.serv-bar-chart .hovertext text {
+    fill: black !important;
+    font-family: "Segoe UI" !important;
+    font-size: 12px !important;
+}
+
+
+.serv-bar-chart .textpoint {
+    fill: black !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+}
+
+
+.btn_ag, .btn_veh, .btn_view {
+    color: var(--accent-color) !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.btn_ag:hover, .btn_veh:hover, .btn_view:hover {
+    color: var(--accent-color-hover) !important;
+    text-decoration: underline !important;
+}
+
+
+.rem_serv, .btn_add, .btn-pdf {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+}
+
+.rem_serv {
+    background-color: var(--remove-btn-bg);
+    color: white;
+}
+
+.rem_serv:hover {
+    background-color: var(--remove-btn-hover);
+    transform: translateY(-1px);
+}
+
+.btn_add {
+    background-color: var(--add-btn-bg);
+    color: white;
+}
+
+.btn_add:hover {
+    background-color: var(--add-btn-hover);
+    transform: translateY(-1px);
+}
+
+.btn-pdf {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+}
+
+.btn-pdf:hover {
+    background-color: var(--button-hover-bg-color);
+}
+
+.modal .modal-body {
+    background-color: var(--card-bg-color) !important;
+    color: var(--primary-text-color) !important;
+}
+
+.modal .modal-header, .modal .modal-footer {
+    border-color: var(--border-color) !important;
+}
+
+.modal .btn-confirm {
+    background-color: var(--add-btn-bg) !important;
+    color: white !important;
+}
+
+.modal .btn-cancel {
+    background-color: transparent !important;
+    color: var(--primary-text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+
+.btn, .btn_add, .rem_serv, .btn-pdf {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+
+.btn_add {
+    background-color: var(--add-btn-bg);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn_add:hover {
+    background-color: var(--add-btn-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.rem_serv {
+    background-color: var(--remove-btn-bg);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rem_serv:hover {
+    background-color: var(--remove-btn-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+
+.btn-pdf {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-pdf:hover {
+    background-color: var(--button-hover-bg-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+
+.btn_ag, .btn_veh, .btn_view {
+    color: var(--accent-color) !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-family: inherit !important;
+}
+
+
+.btn_ag:hover, .btn_veh:hover, .btn_view:hover {
+    color: var(--accent-color-hover) !important;
+    text-decoration: underline !important;
+    background-color: transparent !important;
+}
+
+
+.btn_rem_add_pdf {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+
+.modal .btn-confirm {
+    background-color: var(--add-btn-bg) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.modal .btn-cancel {
+    background-color: transparent !important;
+    color: var(--primary-text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+
+:root {
+
+    --add-btn-bg: #22c55e;
+    --add-btn-hover: #16a34a;
+    --remove-btn-bg: #ef4444;
+    --remove-btn-hover: #dc2626;
+    --button-bg-color: #3b82f6;
+    --button-hover-bg-color: #2563eb;
+    --button-text-color: white;
+}
+
+[data-theme="dark"] {
+
+    --add-btn-bg: #14532d;
+    --add-btn-hover: #166534;
+    --remove-btn-bg: #7f1d1d;
+    --remove-btn-hover: #991b1b;
+    --button-bg-color: #1e40af;
+    --button-hover-bg-color: #1e3a8a;
+}
+
+
+.btn_ag, .btn_veh, .btn_view {
+    color: var(--link-color) !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    transition: color 0.2s ease !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+}
+
+
+.btn_ag:hover, .btn_veh:hover, .btn_view:hover {
+    color: var(--link-color) !important;
+    text-decoration: none !important;
+    background-color: transparent !important;
+    opacity: 0.9;
+}
+
+
+:root {
+
+    --link-color: #4b5563;
+}
+
+[data-theme="dark"] {
+
+    --link-color: #e5e7eb;
+}
+
+
+a, .dash-link {
+    all: unset;
+    cursor: pointer;
+}
+
+
+.btn_ag, .btn_veh, .btn_view,
+.serv-table a, .serv-table .dash-link {
+
+    color: var(--link-color) !important;
+    font-weight: 600;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+
+
+    text-decoration: none !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+
+    transition: opacity 0.2s ease;
+}
+
+
+.btn_ag:hover, .btn_veh:hover, .btn_view:hover,
+.serv-table a:hover, .serv-table .dash-link:hover {
+    opacity: 0.8;
+    text-decoration: none !important;
+}
+
+
+
+.dash-table-container .dash-spreadsheet-container a {
+    color: var(--link-color) !important;
+    text-decoration: none !important;
+    background: none !important;
+}
+
+
+
+
+.btn_rem_add_pdf {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+
+.btn-pdf, .btn-excluir {
+    min-width: 150px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.data-table,
+.agents-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.data-table th,
+.data-table td,
+.agents-table th,
+.agents-table td {
+    padding: 1rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-text-color);
+    vertical-align: middle;
+}
+
+
+.serv-table tr.even-row {
+    background-color: var(--table-row-even-bg-color);
+}
+
+.serv-table tr.odd-row {
+    background-color: var(--table-row-odd-bg-color);
+}
+
+.serv-table tr:hover {
+    background-color: var(--table-row-hover-bg-color);
+    color: var(--table-row-hover-text-color);
+}
+
+
+:root {
+    --table-row-even-bg-color: #f8f9fa;
+    --table-row-odd-bg-color: #ffffff;
+    --table-row-hover-bg-color: #e9ecef;
+    --table-row-hover-text-color: #000000;
+}
+
+[data-theme="dark"] {
+    --table-row-even-bg-color: #2d3748;
+    --table-row-odd-bg-color: #1a202c;
+    --table-row-hover-bg-color: #4a5568;
+    --table-row-hover-text-color: #ffffff;
+}
+
+.filter-month {
+    width: 12rem;
 }

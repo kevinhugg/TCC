@@ -4,9 +4,9 @@
 */
 
 .page-content {
-    padding: 2rem;
-    margin-left: 8em; /* Corresponds to sidebar width */
-    margin-top: 60px; /* Corresponds to header height */
+    padding: 5rem;
+    margin-left: 4em; /* Corresponds to sidebar width */
+    margin-top: 10px; /* Corresponds to header height */
     transition: margin-left 0.3s ease;
 }
 
@@ -22,8 +22,9 @@
 
 .config-item {
     display: flex;
-    align-items: center;
-    justify-content: space-between; /* Creates space between text and toggle/button */
+    align-items: left;
+    justify-content: left;
+    gap: 2rem;
     padding: 1rem 0;
     border-bottom: 1px solid var(--border-color);
 }
@@ -55,6 +56,10 @@
 .dark-mode-wrapper {
     display: flex;
     align-items: center;
+}
+
+.dark-mode-item {
+    justify-content: space-between;
 }
 
 @media (max-width: 768px) {

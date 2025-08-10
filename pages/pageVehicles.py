@@ -73,7 +73,7 @@ layout = html.Div([
                 html.Div([
                     dcc.Link(
                         html.Img(src=v['imagem'], className='img-vehicle'),
-                        href=f"/dashboard/veiculo/{v['numero'].upper()}"
+                        href=f"/dashboard/veiculo/{v['numero']}"
                     ),
                     html.P(f"{v['placa']}", className='infoVehicle'),
                     html.P(f"{v['numero']}", className='infoVehicle'),

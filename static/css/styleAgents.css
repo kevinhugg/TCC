@@ -1,7 +1,7 @@
 .page-content {
     padding: 2rem;
-    margin-left: 4em; /* Corresponds to sidebar width */
-    margin-top: 30px; /* Corresponds to header height */
+    margin-left: 4em;
+    margin-top: 30px;
     transition: margin-left 0.3s ease;
 }
 
@@ -78,45 +78,324 @@
     gap: 1rem;
 }
 
-.btn, .btn-pdf {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    text-align: center;
-    border: 1px solid transparent;
-    cursor: pointer;
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
+
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    align-items: center;
     justify-content: center;
-    margin-top: 1.5rem;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
 }
 
-.btn:hover, .btn-pdf:hover {
+.modal-content {
+    background-color: var(--card-bg-color);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border: 1px solid var(--border-color);
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-title {
+    color: rgb(0 0 0);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    color: rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.modal-dropdown {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    color: var(--primary-text-color);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.modal-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.modal-button.cancel {
+    background-color: transparent;
+    color: var(--secondary-text-color);
+    border-color: var(--border-color);
+}
+
+.modal-button.cancel:hover {
+    background-color: var(--table-header-bg-color);
+    color: var(--primary-text-color);
+}
+
+.modal-button.submit {
+    background-color: var(--accent-color);
+    color: rgb(255, 255, 255);
+}
+
+.modal-button.submit:hover {
+    background-color: var(--accent-hover-color);
+    transform: translateY(-1px);
+}
+
+
+
+.agent-checkbox .dash-checklist__input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.agent-checkbox .dash-checklist__input:checked {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.agent-checkbox .dash-checklist__input:checked::after {
+    content: "✓";
+    position: absolute;
+    color: white;
+    font-size: 12px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .modal-button {
+        width: 100%;
+    }
+
+}
+
+:root, [data-theme="light"] {
+
+    --modal-bg-color: #ffffff;
+    --modal-text-color: #1a1a1a;
+    --modal-border-color: #e2e8f0;
+    --modal-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --modal-input-bg: #f8fafc;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --modal-cancel-bg: transparent;
+    --modal-cancel-text: #64748b;
+    --modal-cancel-border: #e2e8f0;
+    --modal-cancel-hover: #f1f5f9;
+    --modal-submit-bg: #3b82f6;
+    --modal-submit-hover: #2563eb;
+
+
+    --add-btn-bg: #22c55e;
+    --add-btn-hover: #16a34a;
+    --remove-btn-bg: #ef4444;
+    --remove-btn-hover: #dc2626;
+}
+
+[data-theme="dark"] {
+
+    --modal-bg-color: #1e293b;
+    --modal-text-color: #f8fafc;
+    --modal-border-color: #334155;
+    --modal-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+    --modal-input-bg: #0f172a;
+    --modal-overlay: rgba(0, 0, 0, 0.75);
+    --modal-cancel-bg: transparent;
+    --modal-cancel-text: #94a3b8;
+    --modal-cancel-border: #334155;
+    --modal-cancel-hover: #1e293b;
+    --modal-submit-bg: #1e40af;
+    --modal-submit-hover: #1e3a8a;
+
+
+    --add-btn-bg: #14532d;
+    --add-btn-hover: #166534;
+    --remove-btn-bg: #7f1d1d;
+    --remove-btn-hover: #991b1b;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: var(--button-text-color);
+}
+.btn-primary:hover {
+    background-color: var(--accent-color-hover);
+}
+.btn-success {
+    background-color: #10b981;
+    color: #ffffff;
+}
+.btn-success:hover {
+    background-color: #059669;
+}
+.btn-danger {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+
+
+.rem_serv {
+    background-color: var(--remove-btn-bg);
+    color: white;
+}
+
+.rem_serv:hover {
+    background-color: var(--remove-btn-hover);
+    transform: translateY(-1px);
+}
+
+.btn_add {
+    background-color: var(--add-btn-bg);
+    color: white;
+}
+
+.btn_add:hover {
+    background-color: var(--add-btn-hover);
+    transform: translateY(-1px);
+}
+
+.btn-pdf {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+}
+
+.btn-pdf:hover {
     background-color: var(--button-hover-bg-color);
 }
 
-.btn.rem_agents:hover {
-    border-color: #ef4444;
-    background-color: transparent;
-    color: #ef4444;
+.btn-danger {
+    background-color: var(--remove-btn-bg) !important;
+    color: white !important;
+    border: none !important;
 }
 
-.btn.add_agents:hover {
-    border-color: #22c55e;
-    background-color: transparent;
-    color: #22c55e;
+.btn-danger:hover {
+    background-color: var(--remove-btn-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.btn_view, .btn_veh {
-    color: var(--accent-color);
-    text-decoration: none;
-    font-weight: bold;
+
+.btn-success {
+    background-color: var(--add-btn-bg) !important;
+    color: white !important;
+    border: none !important;
 }
 
-.btn_view:hover, .btn_veh:hover {
-    text-decoration: underline;
+.btn-success:hover {
+    background-color: var(--add-btn-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+:root, [data-theme="light"] {
+    --remove-btn-bg: #ef4444;
+    --remove-btn-hover: #dc2626;
+    --add-btn-bg: #22c55e;
+    --add-btn-hover: #16a34a;
+}
+
+[data-theme="dark"] {
+    --remove-btn-bg: #7f1d1d;
+    --remove-btn-hover: #991b1b;
+    --add-btn-bg: #14532d;
+    --add-btn-hover: #166534;
+}
+
+
+
+.btn_rem_add_pdf {
+    position: relative;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+
+.btn {
+    position: relative;
+    z-index: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    margin: 0;
+    border: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+
+.btn::before, .btn::after {
+    content: none !important;
+}
+
+
+.btn-danger {
+    background-color: var(--remove-btn-bg) !important;
+    color: white !important;
 }

@@ -119,7 +119,7 @@ def layout(numero=None):
                                 value='all',
                                 clearable=False
                             ),
-                            dcc.Checklist(id='agent-list', value=[], style={'display': 'flex', 'flex-direction': 'column'}),
+                            dcc.Dropdown(id='agent-list', placeholder="Selecione um agente...", style={'display': 'flex', 'flex-direction': 'column'}),
                             html.Hr(),
                             html.P('Selecione o Turno:', style={'marginTop': '1rem'}),
                             dcc.Dropdown(

@@ -30,7 +30,7 @@ dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
     } for m in meses_unicos
 ]
 
-#grafico ocorrencias registradas e seus dados
+# grafico ocorrencias registradas e seus dados
 tipos = [item['nomenclatura'].strip() for item in servicos]
 contagem_tipos = Counter(tipos)
 
@@ -51,13 +51,20 @@ fig_tipos = px.bar(
     title='Serviços Cadastrados'
 )
 
-fig_tipos.update_traces(marker_color='#f7e57d', textposition='outside')
+fig_tipos.update_traces(
+    marker_color='#4682B4',
+    textposition='outside',
+    textfont=dict(color='black'),
+    hovertemplate='<b>Tipo</b>: %{x}<br><b>Quantidade</b>: %{y}<extra></extra>'  # Mantém o tooltip original
+)
 fig_tipos.update_layout(
     title={
         'text': 'Serviços Cadastrados',
     },
     title_font_size=26,
-    title_font_color='black',
+    title_font_color='#295678',
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
 )
 
 layout = html.Div([
@@ -73,7 +80,8 @@ layout = html.Div([
 
             html.Div([
                 html.H3('Serviços Gerais', className='title'),
-                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...', className='input-search'),
+                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...',
+                          className='input-search'),
                 dcc.Dropdown(
                     id='filter-month',
                     options=dropdown_options,
@@ -110,15 +118,13 @@ layout = html.Div([
                 ], className='sla')
             ], className='serv-table'),
 
-
-
             html.Div([
                 html.Div([
                     html.A(id='rem_serv', children='Apagar Serviços', className='rem_serv')
                 ], className='btn'),
 
                 html.Div([
-                   html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
+                    html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
                 ], className='btn-pdf-serv'),
             ], className='btn_rem_add_pdf'),
 
@@ -142,7 +148,7 @@ layout = html.Div([
 
     dbc.Modal(
         [
-            dbc.ModalHeader(dbc.ModalTitle('Novo Serviço'), close_button=True),
+            dbc.ModalHeader(dbc.ModalTitle('Novo Serviço'), close_button=False),
             dbc.ModalBody([
                 dbc.Input(id='input-tipo', placeholder='Digite o novo tipo...', type='text'),
             ]),
@@ -158,18 +164,22 @@ layout = html.Div([
 
 ], className='page-content')
 
+
 def remover_acentos(txt):
     return ''.join(
         c for c in unicodedata.normalize('NFD', txt)
         if unicodedata.category(c) != 'Mn'
     ).lower()
 
-@callback(
+
+callback(
     Output('serv-table', 'children'),
     Output('pdf_serv_gerar', 'href'),
     Input('input-search', 'value'),
     Input('filter-month', 'value')
 )
+
+
 def update_list(search_value, mes):
     if not search_value:
         filtered = servicos
@@ -178,7 +188,8 @@ def update_list(search_value, mes):
         filtered = [
             item for item in servicos
             if search_value in remover_acentos(item['viatura'].lower()) or
-               any(search_value in remover_acentos(a['nome'].lower()) for a in agents if a['viatura_mes'] == item['viatura'])
+               any(search_value in remover_acentos(a['nome'].lower()) for a in agents if
+                   a['viatura_mes'] == item['viatura'])
         ]
 
     if mes != 'todos':
@@ -193,27 +204,32 @@ def update_list(search_value, mes):
         ]), f"/gerar_pdf_servicos_gerais?filtro={search_value}"
 
     rows = []
-    for item in filtered:
+    for index, item in enumerate(filtered):
         responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
         respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
+
+        # Adicione uma classe baseada no índice (par ou ímpar)
+        row_class = 'even-row' if index % 2 == 0 else 'odd-row'
+
         row = html.Tr([
-                html.Td(item['data']),
-                html.Td(
-                    dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
-                ),
-                html.Td(item['nomenclatura']),
-                html.Td(
-                    dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
-                ),
-                html.Td(
-                    dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}"), className='btn_view'
-                ),
-        ], className='sla')
+            html.Td(item['data']),
+            html.Td(
+                dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
+            ),
+            html.Td(item['nomenclatura']),
+            html.Td(
+                dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
+            ),
+            html.Td(
+                dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}"), className='btn_view'
+            ),
+        ], className=f'sla {row_class}')
         rows.append(row)
 
     pdf_link = f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes}"
 
     return rows, pdf_link
+
 
 @callback(
     Output('modal-add', 'is_open'),
@@ -228,6 +244,7 @@ def toggle_modal(n_add, n_cancel, n_confirm, is_open):
     if trigger in ['btn_add', 'btn-cancel', 'btn-add-confirm']:
         return not is_open
     return is_open
+
 
 @callback(
     Output('fig_serv', 'figure'),
