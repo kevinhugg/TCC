@@ -65,35 +65,112 @@
 }
 
 .modal-close-button {
-    padding: 2rem 2rem;
+    padding: 1rem 1rem;
     margin: -1rem -1rem -1rem auto;
     background-color: transparent;
     border: 0;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1;
     color: #000;
     text-shadow: 0 1px 0 #fff;
     opacity: .5;
+    cursor: pointer;
 }
 
 .modal-close-button:hover {
     opacity: .75;
 }
 
-.modal input {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 1.5rem;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color);
-    color: var(--primary-text-color);
-    border-radius: 8px;
-    transition: border-color 0.3s ease;
+.modal .form-group {
+    margin-bottom: 1rem;
 }
 
-.modal input:focus{
-    border-color: var(--accent-color);
+.modal .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+/* Estilos para o Dropdown do Dash */
+.modal .Select-control {
+    background-color: white !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+}
+
+.modal .Select-control:hover {
+    border-color: #80bdff !important;
+}
+
+.modal .is-focused:not(.is-open) > .Select-control {
+    border-color: #80bdff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
+
+
+.modal .Select-value-label, .modal .Select-placeholder {
+    color: #495057 !important;
+}
+
+.modal .Select-menu-outer {
+    background-color: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    border-radius: 0.25rem !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.modal .Select-option {
+    padding: 0.75rem 1.25rem;
+    background-color: white !important;
+    color: #212529 !important;
+}
+
+.modal .Select-option.is-focused {
+    background-color: #f8f9fa !important;
+    color: #16181b !important;
+}
+
+.modal .Select-option.is-selected {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.modal-footer .btn {
+    margin-left: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.modal-footer .btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.modal-footer .btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
 }

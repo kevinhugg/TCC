@@ -106,45 +106,54 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H2('Adicionar Agente'),
-                            html.Span(id='modal-close-button', className='modal-close-button', children='×'),
+                            html.H5('Adicionar Agente'),
+                            html.Button('×', id='modal-close-button', className='modal-close-button'),
                         ]),
                         html.Div(className='modal-body', children=[
-                            dcc.Dropdown(
-                                id='agent-filter-dropdown',
-                                options=[
-                                    {'label': 'Todos os Agentes', 'value': 'all'},
-                                    {'label': 'Agentes Sem Função', 'value': 'unassigned'},
-                                ],
-                                value='all',
-                                clearable=False
-                            ),
-                            dcc.Dropdown(id='agent-list', placeholder="Selecione um agente...", style={'display': 'flex', 'flex-direction': 'column'}),
+                            html.Div(className='form-group', children=[
+                                html.Label('Filtar Agentes por:'),
+                                dcc.Dropdown(
+                                    id='agent-filter-dropdown',
+                                    options=[
+                                        {'label': 'Todos os Agentes', 'value': 'all'},
+                                        {'label': 'Agentes Sem Função', 'value': 'unassigned'},
+                                    ],
+                                    value='all',
+                                    clearable=False
+                                ),
+                            ]),
+                            html.Div(className='form-group', children=[
+                                html.Label('Agente:'),
+                                dcc.Dropdown(id='agent-list', placeholder="Selecione um agente...", multi=False),
+                            ]),
                             html.Hr(),
-                            html.P('Selecione o Turno:', style={'marginTop': '1rem'}),
-                            dcc.Dropdown(
-                                id='assign-shift-dropdown',
-                                options=[
-                                    {'label': 'Manhã', 'value': 'manha'},
-                                    {'label': 'Tarde', 'value': 'tarde'},
-                                    {'label': 'Noite', 'value': 'noite'},
-                                ],
-                                placeholder="Selecione um turno...",
-                                style={'marginBottom': '1rem'}
-                            ),
-                            html.P('Selecione a Função:'),
-                            dcc.Dropdown(
-                                id='assign-role-dropdown',
-                                options=[
-                                    {'label': 'Motorista', 'value': 'Motorista'},
-                                    {'label': 'Encarregado', 'value': 'Encarregado'},
-                                    {'label': 'Auxiliar', 'value': 'Auxiliar'},
-                                ],
-                                placeholder="Selecione uma função...",
-                            ),
+                            html.Div(className='form-group', children=[
+                                html.Label('Turno:'),
+                                dcc.Dropdown(
+                                    id='assign-shift-dropdown',
+                                    options=[
+                                        {'label': 'Manhã', 'value': 'manha'},
+                                        {'label': 'Tarde', 'value': 'tarde'},
+                                        {'label': 'Noite', 'value': 'noite'},
+                                    ],
+                                    placeholder="Selecione um turno...",
+                                ),
+                            ]),
+                            html.Div(className='form-group', children=[
+                                html.Label('Função:'),
+                                dcc.Dropdown(
+                                    id='assign-role-dropdown',
+                                    options=[
+                                        {'label': 'Motorista', 'value': 'Motorista'},
+                                        {'label': 'Encarregado', 'value': 'Encarregado'},
+                                        {'label': 'Auxiliar', 'value': 'Auxiliar'},
+                                    ],
+                                    placeholder="Selecione uma função...",
+                                ),
+                            ]),
                         ]),
                         html.Div(className='modal-footer', children=[
-                            html.Button('Atribuir Agente', id='assign-agent-button', className='btn')
+                            html.Button('Atribuir Agente', id='assign-agent-button', className='btn btn-primary')
                         ]),
                     ]
                 )
@@ -225,29 +234,31 @@ def toggle_modal(add_driver_clicks, add_agent_clicks, close_clicks):
 
 
 @callback(
-    Output('agent-list', 'options'),
-    Input('agent-filter-dropdown', 'value')
+    [Output('agent-list', 'options'),
+     Output('agent-list', 'value')],
+    [Input('agent-filter-dropdown', 'value'),
+     Input('modal-assign-agent', 'is_open')],
+    State('agent_list', 'value')
 )
-def update_agent_list(filter_value):
+def update_agent_list(filter_value, modal_open, current_value):
+    if not modal_open:
+        raise dash.exceptions.PreventUpdate
+
     if filter_value == 'unassigned':
         filtered_agents = fb.get_unassigned_agents()
     else:
         filtered_agents = fb.get_all_agents()
 
-    return [
+    options = [
         {'label': f"{a.get('nome')} ({a.get('funcao')})", 'value': a.get('id')}
         for a in filtered_agents
     ]
 
-@callback(
-    Output('agent-list', 'value'),
-    Input('agent-list', 'value'),
-    prevent_initial_call=True
-)
-def enforce_single_selection(selected_values):
-    if len(selected_values) > 1:
-        return [selected_values[-1]]
-    return selected_values
+    values_in_options = [opt['value'] for opt in options]
+    if current_value in values_in_options:
+        return options, current_value
+    else:
+        return options, None
 
 @callback(
     [Output('agent-modal', 'style', allow_duplicate=True),
@@ -260,9 +271,8 @@ def enforce_single_selection(selected_values):
      State('agent-assignment-trigger', 'data')],
     prevent_initial_call=True
 )
-def assign_agent(n_clicks, agent_ids, vehicle_numero, shift, role, trigger):
-    if n_clicks and agent_ids and vehicle_numero and shift and role:
-        agent_id = agent_ids[0]  # Extract the single ID from the list
+def assign_agent(n_clicks, agent_id, vehicle_numero, shift, role, trigger):
+    if n_clicks and agent_id and vehicle_numero and shift and role:
         fb.update_agent(agent_id, {
             'viatura ': vehicle_numero,
             'turno': shift,
