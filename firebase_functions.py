@@ -50,12 +50,12 @@ def get_agent_by_id(matricula):
 #buscar ocorrências por viatura
 def get_all_agents():
     docs = db.collection('agentes').stream()
-    return [doc.to_dict() for doc in docs]
+    return [doc.to_dict() | {'id': doc.id} for doc in docs]
 
 #agentes sem função
 def get_unassigned_agents():
     docs = db.collection('agentes').where('funcao', '==', "").stream()
-    return [doc.to_dict() for doc in docs]
+    return [doc.to_dict() | {'id': doc.id} for doc in docs]
 
 #busca ocorrencias por agente pela subcoleção
 def get_ocurrences_by_agent(agent_mat):

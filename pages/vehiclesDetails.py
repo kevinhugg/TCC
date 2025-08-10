@@ -237,11 +237,11 @@ def toggle_modal(add_driver_clicks, add_agent_clicks, close_clicks):
     [Output('agent-list', 'options'),
      Output('agent-list', 'value')],
     [Input('agent-filter-dropdown', 'value'),
-     Input('modal-assign-agent', 'is_open')],
-    State('agent_list', 'value')
+     Input('agent-modal', 'style')],
+    State('agent-list', 'value')
 )
-def update_agent_list(filter_value, modal_open, current_value):
-    if not modal_open:
+def update_agent_list(filter_value, modal_style, current_value):
+    if not modal_style or modal_style.get('display') != 'block':
         raise dash.exceptions.PreventUpdate
 
     if filter_value == 'unassigned':
