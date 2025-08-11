@@ -89,7 +89,7 @@ def get_ocurrences_by_vehicles(veiculo_numero):
 
 #pega agentes com o veiculo
 def get_agents_by_vehicle(viatura_numero):
-    docs = db.collection('agentes').where('veiculo', '==', viatura_numero).stream()
+    docs = db.collection('agentes').where('viatura', '==', viatura_numero).stream()
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
 
 
@@ -103,6 +103,6 @@ def update_agent(agent_mat, updates: dict):
 def clear_agent_assignment(agent_mat):
     update_agent(agent_mat, {
         'funcao': '',
-        'veiculo': '',
+        'viatura': '',
         'turno': '',
     })

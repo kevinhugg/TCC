@@ -194,6 +194,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1rem;
@@ -216,7 +217,8 @@
     height: 100px;
     object-fit: cover;
     border-radius: 50%;
-    margin-bottom: 1rem;
+    margin: 0 auto 3rem auto;
+    display: block;
 }
 
 .img_agent {
@@ -233,7 +235,7 @@
     color: var(--primary-text-color);
 }
 
-.agent-role, .agent-cargo {
+.agent-role, .agent-cargo, .turno-status {
     font-size: 0.9rem;
     text-align: center;
     color: var(--secondary-text-color);
@@ -261,6 +263,29 @@
 
 .link-ag-vt:hover {
     text-decoration: underline;
+    color: var(--table-row-hover-text-color);
+}
+
+.add-agent-box {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-color);
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    border: 2px dashed var(--accent-color);
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: 3rem;
+    border-radius: 12px;
+    height: 200px;
+    width: 200px;
+    transition: background-color 0.2s ease;
+}
+
+.add-agent-box:hover {
+    background-color: var(--accent-color-hover);
+    color: white;
 }
 
 /* Responsive adjustments */

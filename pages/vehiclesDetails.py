@@ -209,30 +209,6 @@ def att_tabela_oco(mes, numero):
 def atualizar_link_pdf(filtro_status, numero):
     return f"/pdf_detalhes_viatura_{numero}?status={filtro_status}"
 
-
-@callback(
-    Output('agent-modal', 'style'),
-    Input('add-driver-button', 'n_clicks'),
-    Input('add-agent-button', 'n_clicks'),
-    Input('modal-close-button', 'n_clicks'),
-    prevent_initial_call=True
-)
-def toggle_modal(add_driver_clicks, add_agent_clicks, close_clicks):
-    ctx = dash.callback_context
-    if not ctx.triggered:
-        return {'display': 'none'}
-
-    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-
-    if trigger_id in ['add-driver-button', 'add-agent-button']:
-        return {'display': 'block'}
-
-    if trigger_id == 'modal-close-button':
-        return {'display': 'none'}
-
-    return {'display': 'none'}
-
-
 @callback(
     [Output('agent-list', 'options'),
      Output('agent-list', 'value')],
@@ -312,9 +288,15 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
     if motorista:
         children.append(
             html.Div([
-                html.Img(src=motorista.get('foto_agnt'), className='img_agent'),
-                html.P(f"{motorista.get('nome')}", className='agent-name'),
-                html.P(f"Função: {motorista.get('funcao', '').capitalize()}", className='agent-role'),
+                dcc.Link(
+                    html.Div([
+                        html.Img(src=motorista.get('foto_agnt'), className='img_agent'),
+                        html.P(f"{motorista.get('nome')}", className='agent-name'),
+                        html.P(f"Função: {motorista.get('funcao', '').capitalize()}", className='agent-role'),
+                        html.P(f"Turno: {motorista.get('turno', 'N/A').capitalize()}", className='turno-status'),
+                    ], className='agent-box-link'),
+                    href=f"/dashboard/agent/{motorista.get('id')}", className='link-ag-vt'
+                ),
                 html.Button('Remover', id={'type': 'remove-agent-button', 'agent_id': motorista.get('id')},
                             className='btn-remover')
             ], className='agent-box motorista')
@@ -325,7 +307,8 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
                 html.Div([
                     html.P("Sem motorista para este turno", className='agent-name'),
                 ], className='add-driver-box-content'),
-                id='add-driver-button', className='agent-box add-driver-box', title='Adicionar motorista'
+                id='add-driver-button', className='agent-box add-driver-box', title='Adicionar motorista',
+                style={'display': 'none' if motorista else 'block'}
             )
         )
 
@@ -349,15 +332,39 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
 
     # Box para adicionar agente
     children.append(
-        html.Div(
-            html.Div(
-                html.H1("+", className='add-agent-icon'),
-                id='add-agent-button', className='agent-box add-agent-box', title='Adicionar agente'
-            )
+        html.Button(
+            "+",
+            id='add-agent-button',
+            className='agent-box add-agent-box',
+            title='Adicionar agente',
+            style={'font-size': '3rem', 'border': 'none', 'cursor': 'pointer'}
         )
     )
 
     return children
+
+@callback(
+    Output('agent-modal', 'style'),
+    Input('add-agent-button', 'n_clicks'),
+    Input('modal-close-button', 'n_clicks'),
+    prevent_initial_call=True
+)
+def toggle_modal(add_agent_clicks, close_clicks):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return {'display': 'none'}
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id == 'add-agent-button':
+        print("Abrindo modal")
+        return {'display': 'block'}
+
+    if trigger_id == 'modal-close-button':
+        return {'display': 'none'}
+
+    return {'display': 'none'}
+
 
 @callback(
     Output('agent-assignment-trigger', 'data', allow_duplicate=True),
@@ -378,7 +385,7 @@ def remove_agent(n_clicks, trigger):
 
     if agent_to_remove:
         fb.update_agent(agent_id_to_remove, {
-            'veiculo': '',
+            'viatura': '',
             'funcao': '',
             'turno': ''
         })
