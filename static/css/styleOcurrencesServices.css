@@ -21,7 +21,6 @@
 
 .searchbar {
     display: flex;
-    align-items: center;
     justify-content: center;
     width: 100%;
     gap: 2rem;
@@ -55,7 +54,9 @@
     overflow: scroll;
 }
 
-
+.title{
+    color: #295678;
+}
 
 .oco-table th, .oco-table td,
 .serv-table th, .serv-table td {
@@ -138,6 +139,7 @@
         width: 100%;
     }
 }
+
 
 .serv-bar-chart {
     background-color: white;
@@ -227,7 +229,8 @@
     background-color: var(--button-hover-bg-color);
 }
 
-.modal .modal-body {
+
+.modal .modal-content {
     background-color: var(--card-bg-color) !important;
     color: var(--primary-text-color) !important;
 }
@@ -274,6 +277,7 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
+
 
 .rem_serv {
     background-color: var(--remove-btn-bg);
@@ -460,6 +464,10 @@ a, .dash-link {
     font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
+
+
+
+
 .data-table,
 .agents-table {
     width: 100%;
@@ -505,8 +513,4 @@ a, .dash-link {
     --table-row-odd-bg-color: #1a202c;
     --table-row-hover-bg-color: #4a5568;
     --table-row-hover-text-color: #ffffff;
-}
-
-.filter-month {
-    width: 12rem;
 }

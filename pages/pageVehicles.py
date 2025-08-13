@@ -3,9 +3,13 @@ from dash import html, dcc, Input, Output, callback
 from collections import Counter
 import plotly.express as px
 
-from data.dados import viaturas, damVehicles, data_damVeh
+import firebase_functions as fb
 
 dash.register_page(__name__, path='/pageVehicles', name='Veículos')
+
+dados = fb.get_vehicle_by_number
+ocorrencias = fb.get_ocurrences_by_vehicles
+partes_avariadas = fb.get_partes_avariadas
 
 viaturas_sorted = sorted(viaturas, key=lambda x: not x['avariada'])
 
