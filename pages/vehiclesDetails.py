@@ -10,7 +10,7 @@ dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
 def layout(numero=None):
     dados = fb.get_vehicle_by_number(numero)
     ocorrencias = fb.get_ocurrences_by_vehicles(numero)
-    partes_avariadas = fb.get_partes_avariadas(numero)
+    partes_avariadas = fb.get_all_damage_reports()
 
     if not (dados):
         return html.H3("Veículo não encontrado")

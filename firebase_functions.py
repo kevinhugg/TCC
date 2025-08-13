@@ -10,34 +10,83 @@ db = firestore.client()
 
 #BUSCAS
 
+#Busca todos as viaturas
+def get_all_vehicles():
+    docs = db.collection('veiculos').stream()
+    vehicles = [doc.to_dict() for doc in docs]
+    return vehicles
+
 #busca viatura por numero
 def get_vehicle_by_number(numero):
     docs = db.collection('veiculos').where('numero', '==', numero).stream()
     return next((doc.to_dict() for doc in docs), None)
 
 #busca as partes que estao avariadas
-def get_partes_avariadas(veiculo_id):
-    try:
-        inspecoes_ref = db.collection('veiculos').document(veiculo_id).collection('inspecoes')
-        docs = inspecoes_ref.order_by('__name__', direction=firestore.Query.DESCENDING).limit(1).stream()
+def get_all_damage_reports():
+    reports = []
+    veiculos_ref = db.collection('veiculos').stream()
 
-        avarias = []
+    for veiculo in veiculos_ref:
+        veiculo_data = veiculo.to_dict()
+        veiculo_id = veiculo.id
 
-        for doc in docs:
-            dados = doc.to_dict()
-            for parte, info in dados.items():
-                if isinstance(info, dict) and (info.get("0") == 1 or info.get("descricao") or info.get("uriFoto")):
-                    avarias.append({
-                        "parte": parte.capitalize(),
-                        "descricao": info.get("descricao", "Sem descrição"),
-                        "imagem": info.get("uriFoto", "")
-                    })
+        inspecoes_ref = (
+            db.collection('veiculos')
+            .document(veiculo_id)
+            .collection('inspecoes')
+            .stream()
+        )
 
-        return avarias
+        for inspecao in inspecoes_ref:
+            inspecao_data = inspecao.to_dict()
+            data_inspecao = inspecao.id
 
-    except Exception as e:
-        print(f"Erro ao buscar avarias detalhadas: {e}")
-        return []
+            for parte, info in inspecao_data.items():
+                if isinstance(info.get("0"), dict):
+                    parte_info = info.get("0")
+                    descricao = parte_info.get("descricao", "").strip()
+                    uri_foto = parte_info.get("uriFoto", "").strip()
+
+                    if descricao or uri_foto:
+                        reports.append({
+                            "viatura": veiculo_data.get('numero', 'Sem número'),
+                            "parte": parte,
+                            "descricao": descricao if descricao else "Sem descrição",
+                            "status": "Aberta",
+                            "data": data_inspecao
+                        })
+
+    return reports
+
+
+def get_damages_dates():
+    dates = []
+    veiculos_ref = db.collection('veiculos').stream()
+
+    for veiculo in veiculos_ref:
+        veiculo_id = veiculo.id
+
+        inspecoes_ref = (
+            db.collection('veiculos')
+            .document(veiculo_id)
+            .collection('inspecoes')
+            .stream()
+        )
+
+        for inspecao in inspecoes_ref:
+            inspecao_data = inspecao.to_dict()
+            data_inspecao = inspecao.id
+
+            for parte, info in inspecao_data.items():
+                if isinstance(info, dict):
+                    valor_0 = str(info.get("0")).strip() if info.get("0") is not None else ""
+                    descricao = info.get("descricao", "").strip()
+                    uri_foto = info.get("uriFoto", "").strip()
+
+                    if valor_0 == "1" or descricao or uri_foto:
+                        dates.append(data_inspecao)
+
+    return dates
 
 #busca agentes pela matricula
 def get_agent_by_id(matricula):
