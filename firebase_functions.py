@@ -163,28 +163,30 @@ def get_ocurrences_by_agent(agent_mat):
 
 
 # busca ocorrencias de todos os agentes na viatura informada
-def get_ocurrences_by_vehicles(veiculo_numero):
-    ocorrencias = []
-
-    # Itera sobre todos os dias com ocorrências
+def get_occurrences_and_services_by_vehicle(veiculo_numero):
+    history = []
     dias_docs = db.collection('ocorrencias').list_documents()
 
     for dia_doc in dias_docs:
-        data_str = dia_doc.id  # Nome do doc = data (ex: "2025-08-06")
-
+        data_str = dia_doc.id
         lista_ref = dia_doc.collection('lista').stream()
 
         for doc in lista_ref:
             data = doc.to_dict()
             if data.get('viatura') == veiculo_numero:
-                ocorrencias.append({
+                item_class = data.get('class', 'ocorrencia')
+                item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+
+                history.append({
                     'id': doc.id,
                     'data': data_str,
-                    'nome': data.get('nome'),
-                    'agente': data.get('agente')
+                    'nomenclatura': data.get('nomenclatura', 'N/A'),
+                    'tipo': item_type,
+                    'class': item_class,
+                    'path': 'services' if item_class == 'serviço' else 'ocurrences'
                 })
 
-    return ocorrencias
+    return history
 
 
 # pega agentes com o veiculo

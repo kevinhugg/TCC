@@ -9,23 +9,10 @@ dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
 
 def layout(numero=None):
     dados = fb.get_vehicle_by_number(numero)
-    ocorrencias = fb.get_ocurrences_by_vehicles(numero)
     partes_avariadas = fb.get_damage_reports_by_vehicle(numero)
 
     if not (dados):
         return html.H3("Veículo não encontrado")
-
-    meses_unicos = sorted(set(
-        datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
-        for o in ocorrencias
-    ))
-
-    dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
-        {
-            'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(),
-            'value': m
-        } for m in meses_unicos
-    ]
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/detailsVehicles.css'),
@@ -46,7 +33,7 @@ def layout(numero=None):
                         f"Situação: {'Avariada' if dados.get('avariada') else 'Operante'}",
                         className='det avariada' if dados.get('avariada') else 'det operante'
                     ),
-                    html.P(f"Partes Avariadas: {', '.join(sorted(list(set(p['parte'] for p in partes_avariadas))))}" if partes_avariadas else "Partes Avariadas: Sem avarias",
+                    html.P(f"Partes Avariadas: {', '.join([p['parte'] for p in partes_avariadas])}" if partes_avariadas else "Partes Avariadas: Sem avarias",
                            className='det loc_av'),
                 ], className='texts-det'),
             ], className='details-items'),
@@ -60,19 +47,19 @@ def layout(numero=None):
         ], className='details-container card'),
 
         html.Div([
-            html.H4("Histórico de ocorrências da Viatura"),
-            # colocar um icone para filtrar aqui por local da avaria, ocorrencia ou serviço
-            dcc.Dropdown(
-                id='filter-month',
-                options=dropdown_options,
+            html.H4("Histórico da Viatura"),
+            dcc.RadioItems(
+                id='history-filter',
+                options=[
+                    {'label': 'Todos', 'value': 'todos'},
+                    {'label': 'Ocorrências', 'value': 'ocorrencia'},
+                    {'label': 'Serviços', 'value': 'serviço'},
+                    {'label': 'Danos', 'value': 'dano'},
+                ],
                 value='todos',
-                placeholder="Filtrar por mês...",
-                className='filter-month'
+                labelStyle={'display': 'inline-block', 'margin-right': '20px'}
             ),
-            html.Div(id='table-ocurrences-vehicles'),
-            html.Div([
-                html.A(id='detalhes-pdf', children='Gerar PDF', target="_blank", className='btn-pdf')
-            ], style={'margin-top': '2rem'}),
+            html.Div(id='history-table-div'),
         ], className='ocurrences card'),
 
         html.Div([
@@ -163,51 +150,65 @@ def layout(numero=None):
     ], className='page-content'),
 
 @callback(
-    Output('table-ocurrences-vehicles', 'children'),
-    Input('filter-month', 'value'),
-    Input('vehicle-store', 'data')
+    Output('history-table-div', 'children'),
+    [Input('history-filter', 'value'),
+     Input('vehicle-store', 'data')]
 )
-def att_tabela_oco(mes, numero):
-    ocorrencias = fb.get_ocurrences_by_vehicles(numero)
+def update_history_table(filter_value, numero):
+    # 1. Fetch all data
+    occurrences_and_services = fb.get_occurrences_and_services_by_vehicle(numero)
+    damages = fb.get_damage_reports_by_vehicle(numero)
 
-    if mes != 'todos':
-        ocorrencias = [
-            o for o in ocorrencias
-            if datetime.strptime(o['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
-        ]
+    # 2. Combine and standardize data
+    combined_history = []
+    for item in occurrences_and_services:
+        combined_history.append({
+            'data': item.get('data'),
+            'tipo': item.get('tipo'),
+            'descricao': item.get('nomenclatura'),
+            'class': item.get('class'),
+            'id': item.get('id'),
+            'path': item.get('path')
+        })
 
-    if not ocorrencias:
-        return html.P("Nenhuma ocorrência registrada para este período.")
+    for item in damages:
+        combined_history.append({
+            'data': item.get('data'),
+            'tipo': 'Dano',
+            'descricao': f"{item.get('parte')}: {item.get('descricao')}",
+            'class': 'dano',
+            'id': None,  # No details page for damages yet
+            'path': None
+        })
 
-    return html.Table([
-        html.Thead(
-            html.Tr([
-                html.Th("Data"),
-                html.Th("Tipo"),
-            ])
-        ),
-        html.Tbody([
-            html.Tr([
-                html.Td(o['data']),
-                html.Td(o['nomenclatura']),
-                dcc.Link(
-                    html.Td('Ver Mais', className='bt'),
-                    href=f"/dashboard/ocurrences/{o['id']}",
-                    className="btn_view"
-                )
-            ])
-            for o in ocorrencias
-        ])
-    ], className='table-ocurrences')
+    # 3. Sort by date (newest first)
+    combined_history.sort(key=lambda x: x['data'], reverse=True)
 
+    # 4. Filter data
+    if filter_value != 'todos':
+        filtered_history = [item for item in combined_history if item['class'] == filter_value]
+    else:
+        filtered_history = combined_history
 
-@callback(
-    Output('detalhes-pdf', 'href'),
-    Input('filter-month', 'value'),
-    Input('vehicle-store', 'data')
-)
-def atualizar_link_pdf(filtro_status, numero):
-    return f"/pdf_detalhes_viatura_{numero}?status={filtro_status}"
+    if not filtered_history:
+        return html.P("Nenhum registro encontrado para este filtro.")
+
+    # 5. Create table
+    table_header = [
+        html.Thead(html.Tr([html.Th("Data"), html.Th("Tipo"), html.Th("Descrição")]))
+    ]
+    table_body = [html.Tbody([
+        html.Tr([
+            html.Td(item['data']),
+            html.Td(item['tipo']),
+            html.Td(item['descricao']),
+            html.Td(
+                dcc.Link('Ver Mais', href=f"/dashboard/{item['path']}/{item['id']}", className="btn_view")
+            ) if item.get('id') else None
+        ]) for item in filtered_history
+    ])]
+
+    return html.Table(table_header + table_body, className='table-ocurrences')
 
 @callback(
     [Output('agent-list', 'options'),
