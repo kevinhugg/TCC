@@ -3,13 +3,9 @@ from dash import html, dcc, Input, Output, callback
 from collections import Counter
 import plotly.express as px
 
-import firebase_functions as fb
+from data.dados import viaturas, damVehicles, data_damVeh
 
 dash.register_page(__name__, path='/pageVehicles', name='Veículos')
-
-dados = fb.get_vehicle_by_number
-ocorrencias = fb.get_ocurrences_by_vehicles
-partes_avariadas = fb.get_partes_avariadas
 
 viaturas_sorted = sorted(viaturas, key=lambda x: not x['avariada'])
 
@@ -23,34 +19,58 @@ fig = px.bar(
     title='Danos por Data'
 )
 
+
 fig.update_traces(
-    marker=dict(
-        color='#f5d100',
-        line=dict(color='black', width=2)
+    marker_color='#4682B4',
+    textposition='outside',
+    textfont=dict(color='black'),
+    hovertemplate=(
+        '<b>Data:</b> %{y}<br>'
+        '<b>Danos:</b> %{x}<extra></extra>'
     )
 )
 
+
 fig.update_layout(
     height=600,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    xaxis=dict(
-        gridcolor='#d7d7d7',
-        zerolinecolor='black'
+    title_font_size=26,
+    title_font_color='#295678',
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
+    font=dict(
+        family="Segoe UI, Arial, sans-serif",
+        size=14,
+        color='white'
     ),
+    xaxis=dict(
+        title_text='Quantidade de Danos',
+        gridcolor="#DADADA",
+        zerolinecolor="#DADADA",
+        linecolor="#DADADA",
+        tickfont=dict(size=12)
+    ),
+    yaxis=dict(
+        title_text='Data',
+        linecolor="#DADADA",
+        tickfont=dict(size=12),
+        autorange="reversed"
+    ),
+    hoverlabel=dict(
+        bgcolor="white",
+        font_size=12,
+        bordercolor="#DADADA"
+    )
 )
 
 graph_bar_horizontal = dcc.Graph(
+    id='damage-graph',
     figure=fig,
     config={
-        'modeBarButtonsToRemove': [
-            'zoom2d', 'pan2d', 'select2d', 'lasso2d',
-            'autoScale2d', 'resetScale2d',
-            'zoomIn', 'zoomOut'
-        ],
+        'displayModeBar': True,
+        'modeBarButtonsToRemove': ['autoScale2d', 'resetScale2d'],
         'displaylogo': False
     },
-    style={'height': '600px'},
+    style={'height': '600px', 'width': '100%'},
     className='bar-damVeh'
 )
 
@@ -77,7 +97,7 @@ layout = html.Div([
                 html.Div([
                     dcc.Link(
                         html.Img(src=v['imagem'], className='img-vehicle'),
-                        href=f"/dashboard/veiculo/{v['numero']}"
+                        href=f"/dashboard/veiculo/{v['numero'].upper()}"
                     ),
                     html.P(f"{v['placa']}", className='infoVehicle'),
                     html.P(f"{v['numero']}", className='infoVehicle'),

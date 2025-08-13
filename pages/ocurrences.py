@@ -1,229 +1,199 @@
 import dash
 from dash import html, dcc, Input, Output, callback
+import unicodedata
 from collections import Counter
 import plotly.express as px
+from datetime import datetime
+import pandas as pd
 
-from data.dados import viaturas, damVehicles, data_damVeh
+from data.dados import agents, Ocur_Vehicles
 
-dash.register_page(__name__, path='/pageVehicles', name='Veículos')
+dash.register_page(__name__, path='/ocurrences', name='Ocorrências', className='pg-at')
 
-viaturas_sorted = sorted(viaturas, key=lambda x: not x['avariada'])
+item = next((v for v in Ocur_Vehicles))
+responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
+respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
+viat_func = next((a['viatura_mes'] for a in agents))
+meses_unicos = sorted(set(
+    datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
+    for o in Ocur_Vehicles if o['viatura'] == viat_func
+))
 
-count_data = Counter(data_damVeh)
+ocorrencias = [o for o in Ocur_Vehicles if o.get('class') == 'ocorrencia']
 
-fig = px.bar(
-    x=list(count_data.values()),
-    y=list(count_data.keys()),
-    orientation='h',
-    labels={'x': 'Quantidade de Danos', 'y': 'Data'},
-    title='Danos por Data'
+dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
+    {
+        'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(),
+        'value': m
+    } for m in meses_unicos
+]
+
+#grafico ocorrencias registradas e seus dados
+tipos = [item['nomenclatura'].strip() for item in ocorrencias]
+contagem_tipos = Counter(tipos)
+
+tipos_labels = list(contagem_tipos.keys())
+tipos_values = list(contagem_tipos.values())
+
+df_ocorrencias = pd.DataFrame({
+    'Tipo': tipos_labels,
+    'Quantidade': tipos_values
+})
+
+fig_tipos = px.bar(
+    df_ocorrencias,
+    x='Tipo',
+    y='Quantidade',
+    text='Quantidade',
+    labels={'Tipo': '', 'Quantidade': ''},
+    title='Ocorrências Cadastradas'
 )
 
-
-fig.update_traces(
-    marker_color='#4682B4',
-    textposition='outside',
-    textfont=dict(color='black'),
-    hovertemplate=(
-        '<b>Data:</b> %{y}<br>'
-        '<b>Danos:</b> %{x}<extra></extra>'
-    )
-)
-
-
-fig.update_layout(
-    height=600,
+fig_tipos.update_traces(marker_color='#4682B4', textposition='outside')
+fig_tipos.update_layout(
+    title={
+        'text': 'Ocorrências Cadastradas',
+    },
     title_font_size=26,
     title_font_color='#295678',
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
-    font=dict(
-        family="Segoe UI, Arial, sans-serif",
-        size=14,
-        color='white'
-    ),
-    xaxis=dict(
-        title_text='Quantidade de Danos',
-        gridcolor="#DADADA",
-        zerolinecolor="#DADADA",
-        linecolor="#DADADA",
-        tickfont=dict(size=12)
-    ),
-    yaxis=dict(
-        title_text='Data',
-        linecolor="#DADADA",
-        tickfont=dict(size=12),
-        autorange="reversed"
-    ),
-    hoverlabel=dict(
-        bgcolor="white",
-        font_size=12,
-        bordercolor="#DADADA"
-    )
-)
-
-graph_bar_horizontal = dcc.Graph(
-    id='damage-graph',
-    figure=fig,
-    config={
-        'displayModeBar': True,
-        'modeBarButtonsToRemove': ['autoScale2d', 'resetScale2d'],
-        'displaylogo': False
-    },
-    style={'height': '600px', 'width': '100%'},
-    className='bar-damVeh'
 )
 
 layout = html.Div([
 
-    html.Link(rel='stylesheet', href='/static/css/styleVehicles.css'),
+    html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
+
+    dcc.Store(id='filtro-search'),
 
     html.Div([
 
         html.Div([
-            dcc.Input(id='input-search', type='text', placeholder='Buscar por placa ou número...', className='input-search'),
-        ], className='searchbar'),
-
-        html.Div([
-            html.Div('Imagem', className='header-item'),
-            html.Div('Placa', className='header-item'),
-            html.Div('Número', className='header-item'),
-            html.Div('Veículo', className='header-item'),
-            html.Div('Situação', className='header-item'),
-        ], className='list-header'),
-
-        html.Div([
-            *[
-                html.Div([
-                    dcc.Link(
-                        html.Img(src=v['imagem'], className='img-vehicle'),
-                        href=f"/dashboard/veiculo/{v['numero'].upper()}"
-                    ),
-                    html.P(f"{v['placa']}", className='infoVehicle'),
-                    html.P(f"{v['numero']}", className='infoVehicle'),
-                    html.P(f"{v['veiculo']}", className='infoVehicle'),
-                    html.P(
-                        f"{'Avariada' if v['avariada'] else 'Operante'}",
-                        className='situation-ava' if v['avariada'] else 'situation-op'
-                    ),
-                ], className='card-vehicles')
-                for v in viaturas_sorted
-            ],
-        ],id='list-vehicles', className='list-vehicles'),
-
-        html.Div([
-            html.Div([
-                html.A(id='rem_vehicle', children='Remover Veículos', className='btn rem_vehicle')
-            ], className='btn_rem'),
 
             html.Div([
-                html.A(id='add_vehicle', children='Adicionar Veículo', className='btn add_vehicle')
-            ], className='btn_add'),
-        ], className='btn_rem_add'),
-
-    ], className='vehicles card'),
-
-    html.Div([
-        html.H4('Viaturas danificadas'),
-
-        html.Div([
-            dcc.Dropdown(
-                id='status-filter',
-                options=[
-                    {'label': 'Todas', 'value': 'all'},
-                    {'label': 'Aberta', 'value': 'Aberta'},
-                    {'label': 'Fechada', 'value': 'Fechada'},
-                ],
-                value='all',
-                style={'width': '200px'}
-            ),
-        ], className='drop-date'),
+                html.H3('Ocorrências Gerais', className='title'),
+                dcc.Dropdown(
+                    id='filter-month',
+                    options=dropdown_options,
+                    value='todos',
+                    placeholder="Filtrar por mês...",
+                    className='filter-month'
+                ),
+                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...', className='input-search'),
+            ], className='searchbar'),
 
             html.Table([
-                html.Tbody([
+                html.Thead([
                     html.Tr([
-                        html.Td(item['viatura']),
-                        html.Td(item['descricao']),
-                        html.Td(item['status']),
+                        html.Th('Data'),
+                        html.Th('Responsável'),
+                        html.Th('Tipo'),
+                        html.Th('Veículo'),
+                    ])
+                ]),
+                html.Tbody(id='oco-table', children=[
+                    html.Tr([
                         html.Td(item['data']),
-                    ]) for item in damVehicles
-            ], id='table_dam', className='table_ocu'),
-            ]),
-            html.Div([
-                html.A(id='link-pdf', children='Gerar PDF', target="_blank", className='btn-pdf')
-            ], style={'margin': '1rem 10rem'})
-    ], className="Ranking_Ocu card"),
-
-    html.Div([
-        html.H4('Danos por Data'),
-        graph_bar_horizontal
-    ], className='graph-line card'),
-
-], className='page-content'),
-
-@callback(
-    Output('list-vehicles', 'children'),
-    Input('input-search', 'value')
-)
-def update_list(search_value):
-    if not search_value:
-        filtered = viaturas
-    else:
-        search_value = search_value.lower()
-        filtered = [v for v in viaturas if search_value in v['placa'].lower() or search_value in v['numero'].lower()]
-
-    return [
-        html.Div([
-            dcc.Link(
-                html.Img(src=v['imagem'], className='img-vehicle'),
-                href=f"/dashboard/veiculo/{v['numero']}"
-            ),
-            html.P(v['placa'], className='infoVehicle'),
-            html.P(v['numero'], className='infoVehicle'),
-            html.P(v['veiculo'], className='infoVehicle'),
-            html.P(
-                'Avariada' if v['avariada'] else 'Operante',
-                className='situation-ava' if v['avariada'] else 'situation-op'
-            )
-        ], className='card-vehicles')
-        for v in filtered
-    ]
-
-@callback(
-    Output('table_dam', 'children'),
-    Input('status-filter', 'value')
-)
-def filtrar_ocorrencias(status):
-    if status == 'all':
-        filtradas = damVehicles
-    else:
-        filtradas = [o for o in damVehicles if o['status'] == status]
-
-    return html.Div([
-        html.Table([
-            html.Thead([
-                html.Tr([
-                    html.Th('N°'),
-                    html.Th('Desc'),
-                    html.Th('Status'),
-                    html.Th('Data'),
+                        html.Td(
+                            dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
+                        ),
+                        html.Td(item['nomenclatura']),
+                        html.Td(
+                            dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
+                        ),
+                        html.Td(
+                            dcc.Link('Ver Mais', href=f"/dashboard/ocurrences/{item['id']}"), className='btn_view'
+                        ),
+                    ])
+                    for item in Ocur_Vehicles
                 ])
-            ]),
-            html.Tbody([
-                html.Tr([
-                    html.Td(item['viatura']),
-                    html.Td(item['descricao']),
-                    html.Td(item['status']),
-                    html.Td(item['data']),
-                ]) for item in filtradas
-            ])
-        ], className='table_ocu'),
+            ], className='oco-table'),
+
+
+
+            html.Div([
+                html.Div([
+                    html.A(id='rem_oco', children='Apagar Serviços', className='rem_serv btn-danger')
+                ], className='btn'),
+
+                html.Div([
+                   html.A(id='pdf_oco_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
+                ], className='btn-pdf-oco'),
+            ], className='btn_rem_add_pdf'),
+
+        ], className='oco_serv_container'),
     ]),
 
-#callback pdf
+    html.Div([
+        dcc.Graph(figure=fig_tipos, className='fig_oco'),
+
+        html.Div([
+            html.Div([
+                html.A(id='rem_vehicle', children='Apagar Serviços', className='rem_serv btn-danger')
+            ], className='btn'),
+
+            html.Div([
+                html.A(id='add_vehicle', children='Adicionar Ocorrência', className='btn_add')
+            ], className='btn'),
+        ], className='btn_rem_add_pdf'),
+
+    ], className='graph_tipes'),
+
+], className='page-content')
+
+def remover_acentos(txt):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', txt)
+        if unicodedata.category(c) != 'Mn'
+    ).lower()
+
 @callback(
-    Output('link-pdf', 'href'),
-    Input('status-filter', 'value')
+    Output('oco-table', 'children'),
+    Output('pdf_oco_gerar', 'href'),
+    Input('input-search', 'value'),
+    Input('filter-month', 'value'),
 )
-def atualizar_link_pdf(filtro_status):
-    return f"/pdf_viaturas_Danificadas?status={filtro_status}"
+def update_list(search_value, mes):
+    if not search_value:
+        filtered = ocorrencias
+    else:
+        search_value = remover_acentos(search_value.lower())
+        filtered = [
+            item for item in ocorrencias
+            if search_value in remover_acentos(item['viatura'].lower()) or
+               any(search_value in remover_acentos(a['nome'].lower()) for a in agents if a['viatura_mes'] == item['viatura'])
+        ]
+
+    if mes != 'todos':
+        filtered = [
+            item for item in filtered
+            if datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
+        ]
+
+    if not filtered:
+        return html.Tr([
+            html.Td("Ocorrência não encontrada!", colSpan=5, className='not-found'),
+        ]), f"/gerar_pdf_ocorrencias?filtro={search_value}&mes={mes}"
+
+    rows = []
+    for item in filtered:
+        responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
+        respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
+        row = html.Tr([
+                html.Td(item['data']),
+                html.Td(
+                    dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
+                ),
+                html.Td(item['nomenclatura']),
+                html.Td(
+                    dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
+                ),
+                html.Td(
+                    dcc.Link('Ver Mais', href=f"/dashboard/ocurrences/{item['id']}"), className='btn_view'
+                ),
+        ])
+        rows.append(row)
+
+    pdf_link = f"/gerar_pdf_ocorrencias?filtro={search_value}&mes={mes}"
+
+    return rows, pdf_link
