@@ -46,7 +46,7 @@ def layout(numero=None):
                         f"Situação: {'Avariada' if dados.get('avariada') else 'Operante'}",
                         className='det avariada' if dados.get('avariada') else 'det operante'
                     ),
-                    html.P(f"Partes Avariadas: {', '.join([p['parte'] for p in partes_avariadas])}" if partes_avariadas else "Partes Avariadas: Sem avarias",
+                    html.P(f"Partes Avariadas: {', '.join(sorted(list(set(p['parte'] for p in partes_avariadas))))}" if partes_avariadas else "Partes Avariadas: Sem avarias",
                            className='det loc_av'),
                 ], className='texts-det'),
             ], className='details-items'),

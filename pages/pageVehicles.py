@@ -4,6 +4,7 @@ from collections import Counter
 import plotly.express as px
 import pandas as pd
 import firebase_functions as fb
+from datetime import datetime
 
 dash.register_page(__name__, path='/pageVehicles', name='Veículos')
 
@@ -25,7 +26,8 @@ def create_damage_graph():
         )
         return fig
 
-    count_data = Counter(data_damVeh_filtered)
+    formatted_dates = [datetime.strptime(date, "%Y-%m-%d").strftime("%d/%m/%Y") for date in data_damVeh_filtered]
+    count_data = Counter(formatted_dates)
     df = pd.DataFrame({'Data': list(count_data.keys()), 'Quantidade de Danos': list(count_data.values())})
     df = df.sort_values(by='Data', ascending=True)
     fig = px.bar(df, x='Quantidade de Danos', y='Data', orientation='h', title='Danos por Data',
@@ -138,6 +140,19 @@ def layout():
                     value='all',
                     style={'width': '200px'}
                 ),
+                dcc.Dropdown(
+                    id='damage-part-filter',
+                    options=[
+                        {'label': 'Todas as partes', 'value': 'all'},
+                        {'label': 'Frente', 'value': 'frente'},
+                        {'label': 'Atrás', 'value': 'atras'},
+                        {'label': 'Lado Esquerdo', 'value': 'lado esquerdo'},
+                        {'label': 'Lado Direito', 'value': 'lado direito'},
+                    ],
+                    value='all',
+                    clearable=False,
+                    style={'width': '200px', 'marginLeft': '10px'}
+                ),
             ], className='drop-date'),
 
             html.Table([
@@ -173,11 +188,16 @@ def layout():
 
 @callback(
     Output('list-vehicles', 'children'),
-    Input('input-search', 'value')
+    [Input('input-search', 'value'),
+     Input('damage-part-filter', 'value')]
 )
-def update_list(search_value):
+def update_list(search_value, selected_part):
     viaturas = fb.get_all_vehicles()
     damVehicles = fb.get_all_damage_reports()
+
+    if selected_part != 'all':
+        vehicles_with_part = {d['viatura'] for d in damVehicles if d.get('parte') == selected_part}
+        viaturas = [v for v in viaturas if v.get('numero') in vehicles_with_part]
 
     damage_counts = {}
     for damage in damVehicles:
@@ -223,14 +243,17 @@ def update_list(search_value):
 
 @callback(
     Output('table_dam_body', 'children'),
-    Input('status-filter', 'value')
+    [Input('status-filter', 'value'),
+     Input('damage-part-filter', 'value')]
 )
-def filtrar_ocorrencias(status):
+def filter_damage_reports(status, selected_part):
     damVehicles = fb.get_all_damage_reports()
-    if status == 'all':
-        filtradas = damVehicles
-    else:
-        filtradas = [o for o in damVehicles if o.get('status') == status]
+
+    if status != 'all':
+        damVehicles = [o for o in damVehicles if o.get('status') == status]
+
+    if selected_part != 'all':
+        damVehicles = [o for o in damVehicles if o.get('parte') == selected_part]
 
     return [
         html.Tr([
@@ -238,7 +261,7 @@ def filtrar_ocorrencias(status):
             html.Td(item.get('descricao')),
             html.Td(item.get('status')),
             html.Td(item.get('data')),
-        ]) for item in filtradas
+        ]) for item in damVehicles
     ]
 
 
