@@ -46,9 +46,21 @@ def create_damage_graph():
 
 def layout():
     viaturas = fb.get_all_vehicles()
-    viaturas_sorted = sorted(viaturas, key=lambda x: not x.get('avariada', False))
-
     damVehicles = fb.get_all_damage_reports()
+
+    # Contar avarias por viatura
+    damage_counts = {}
+    for damage in damVehicles:
+        num_viatura = damage.get('viatura')
+        if num_viatura:
+            damage_counts[num_viatura] = damage_counts.get(num_viatura, 0) + 1
+
+    # Adicionar contagem de avarias aos dados da viatura
+    for v in viaturas:
+        v['damage_count'] = damage_counts.get(v.get('numero'), 0)
+
+    # Ordenar viaturas: primeiro as com mais avarias
+    viaturas_sorted = sorted(viaturas, key=lambda x: x.get('damage_count', 0), reverse=True)
 
     fig = create_damage_graph()
 
@@ -80,7 +92,7 @@ def layout():
                 html.Div('Placa', className='header-item'),
                 html.Div('Número', className='header-item'),
                 html.Div('Veículo', className='header-item'),
-                html.Div('Situação', className='header-item'),
+                html.Div('Avarias', className='header-item'),
             ], className='list-header'),
 
             html.Div(id='list-vehicles', className='list-vehicles', children=[
@@ -93,8 +105,8 @@ def layout():
                     html.P(f"{v.get('numero')}", className='infoVehicle'),
                     html.P(f"{v.get('veiculo')}", className='infoVehicle'),
                     html.P(
-                        f"{'Avariada' if v.get('avariada') else 'Operante'}",
-                        className='situation-ava' if v.get('avariada') else 'situation-op'
+                        f"{v.get('damage_count', 0)}",
+                        className='situation-ava' if v.get('damage_count', 0) > 0 else 'situation-op'
                     ),
                 ], className='card-vehicles')
                 for v in viaturas_sorted
@@ -165,17 +177,31 @@ def layout():
 )
 def update_list(search_value):
     viaturas = fb.get_all_vehicles()
-    viaturas_sorted = sorted(viaturas, key=lambda x: not x.get('avariada', False))
+    damVehicles = fb.get_all_damage_reports()
+
+    damage_counts = {}
+    for damage in damVehicles:
+        num_viatura = damage.get('viatura')
+        if num_viatura:
+            damage_counts[num_viatura] = damage_counts.get(num_viatura, 0) + 1
+
+    for v in viaturas:
+        v['damage_count'] = damage_counts.get(v.get('numero'), 0)
+
+    viaturas_sorted = sorted(viaturas, key=lambda x: x.get('damage_count', 0), reverse=True)
 
     if not search_value:
-        filtered = viaturas_sorted
+        filtered_vehicles = viaturas_sorted
     else:
         search_value = search_value.lower()
-        filtered = [
+        filtered_vehicles = [
             v for v in viaturas_sorted if
             search_value in v.get('placa', '').lower() or
             search_value in v.get('numero', '').lower()
         ]
+
+    if not filtered_vehicles:
+        return html.P("Nenhum veículo encontrado.", style={'text-align': 'center', 'padding': '20px'})
 
     return [
         html.Div([
@@ -187,11 +213,11 @@ def update_list(search_value):
             html.P(v.get('numero'), className='infoVehicle'),
             html.P(v.get('veiculo'), className='infoVehicle'),
             html.P(
-                'Avariada' if v.get('avariada') else 'Operante',
-                className='situation-ava' if v.get('avariada') else 'situation-op'
+                f"{v.get('damage_count', 0)}",
+                className='situation-ava' if v.get('damage_count', 0) > 0 else 'situation-op'
             )
         ], className='card-vehicles')
-        for v in filtered
+        for v in filtered_vehicles
     ]
 
 

@@ -10,7 +10,7 @@ dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
 def layout(numero=None):
     dados = fb.get_vehicle_by_number(numero)
     ocorrencias = fb.get_ocurrences_by_vehicles(numero)
-    partes_avariadas = fb.get_all_damage_reports()
+    partes_avariadas = fb.get_damage_reports_by_vehicle(numero)
 
     if not (dados):
         return html.H3("Veículo não encontrado")
@@ -46,7 +46,7 @@ def layout(numero=None):
                         f"Situação: {'Avariada' if dados.get('avariada') else 'Operante'}",
                         className='det avariada' if dados.get('avariada') else 'det operante'
                     ),
-                    html.P(f"Local: {', '.join(partes_avariadas)}" if partes_avariadas else "Local: Sem avarias",
+                    html.P(f"Partes Avariadas: {', '.join([p['parte'] for p in partes_avariadas])}" if partes_avariadas else "Partes Avariadas: Sem avarias",
                            className='det loc_av'),
                 ], className='texts-det'),
             ], className='details-items'),

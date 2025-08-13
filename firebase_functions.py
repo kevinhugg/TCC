@@ -42,7 +42,7 @@ def get_all_damage_reports():
             data_inspecao = inspecao.id
 
             for parte, info in inspecao_data.items():
-                if isinstance(info.get("0"), dict):
+                if isinstance(info, dict) and isinstance(info.get("0"), dict):
                     parte_info = info.get("0")
                     descricao = parte_info.get("descricao", "").strip()
                     uri_foto = parte_info.get("uriFoto", "").strip()
@@ -56,6 +56,45 @@ def get_all_damage_reports():
                             "data": data_inspecao
                         })
 
+    return reports
+
+
+def get_damage_reports_by_vehicle(numero):
+    reports = []
+    # Primeiro, encontre o ID do documento do veículo com base no número
+    veiculos_ref = db.collection('veiculos').where('numero', '==', numero).limit(1).stream()
+    veiculo_doc = next(veiculos_ref, None)
+
+    if veiculo_doc:
+        veiculo_id = veiculo_doc.id
+        veiculo_data = veiculo_doc.to_dict()
+
+        inspecoes_ref = (
+            db.collection('veiculos')
+            .document(veiculo_id)
+            .collection('inspecoes')
+            .stream()
+        )
+
+        for inspecao in inspecoes_ref:
+            inspecao_data = inspecao.to_dict()
+            data_inspecao = inspecao.id
+
+            for parte, info in inspecao_data.items():
+                # A estrutura pode variar, então verificamos se '0' existe e é um dicionário
+                if isinstance(info, dict) and isinstance(info.get("0"), dict):
+                    parte_info = info.get("0")
+                    descricao = parte_info.get("descricao", "").strip()
+                    uri_foto = parte_info.get("uriFoto", "").strip()
+
+                    if descricao or uri_foto:
+                        reports.append({
+                            "viatura": veiculo_data.get('numero', 'Sem número'),
+                            "parte": parte,
+                            "descricao": descricao if descricao else "Sem descrição",
+                            "status": "Aberta",  # O status pode precisar de lógica adicional se variar
+                            "data": data_inspecao
+                        })
     return reports
 
 
