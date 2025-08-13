@@ -21,7 +21,6 @@ fig = px.bar(
 
 
 fig.update_traces(
-    marker_color='#4682B4',
     textposition='outside',
     textfont=dict(color='black'),
     hovertemplate=(
@@ -30,35 +29,26 @@ fig.update_traces(
     )
 )
 
-
 fig.update_layout(
     height=600,
     title_font_size=26,
-    title_font_color='#295678',
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
     font=dict(
         family="Segoe UI, Arial, sans-serif",
-        size=14,
-        color='white'
+        size=14
     ),
     xaxis=dict(
         title_text='Quantidade de Danos',
-        gridcolor="#DADADA",
-        zerolinecolor="#DADADA",
-        linecolor="#DADADA",
         tickfont=dict(size=12)
     ),
     yaxis=dict(
         title_text='Data',
-        linecolor="#DADADA",
         tickfont=dict(size=12),
         autorange="reversed"
     ),
     hoverlabel=dict(
-        bgcolor="white",
-        font_size=12,
-        bordercolor="#DADADA"
+        font_size=12
     )
 )
 
@@ -227,3 +217,41 @@ def filtrar_ocorrencias(status):
 )
 def atualizar_link_pdf(filtro_status):
     return f"/pdf_viaturas_Danificadas?status={filtro_status}"
+
+
+@callback(
+    Output('damage-graph', 'figure'),
+    Input('theme-store', 'data')
+)
+def update_graph_theme(theme):
+    fig_copy = fig.to_dict()
+
+    if theme == 'dark':
+        title_color = '#ffffff'
+        text_color = '#ffffff'
+        grid_color = '#444444'
+        bar_color = '#60a5fa'
+        hover_bg_color = '#1f293b'
+        hover_border_color = '#374151'
+    else:
+        title_color = '#295678'
+        text_color = '#000000'
+        grid_color = '#e5e7eb'
+        bar_color = '#4682B4'
+        hover_bg_color = 'white'
+        hover_border_color = '#e5e7eb'
+
+    fig_copy['layout']['title']['font']['color'] = title_color
+    fig_copy['layout']['font']['color'] = text_color
+    fig_copy['layout']['xaxis']['gridcolor'] = grid_color
+    fig_copy['layout']['yaxis']['gridcolor'] = grid_color
+    fig_copy['layout']['xaxis']['zerolinecolor'] = grid_color
+    fig_copy['layout']['xaxis']['linecolor'] = grid_color
+    fig_copy['layout']['yaxis']['linecolor'] = grid_color
+    fig_copy['layout']['hoverlabel']['bgcolor'] = hover_bg_color
+    fig_copy['layout']['hoverlabel']['bordercolor'] = hover_border_color
+
+    fig_copy['data'][0]['marker']['color'] = bar_color
+    fig_copy['data'][0]['textfont']['color'] = text_color
+
+    return fig_copy
