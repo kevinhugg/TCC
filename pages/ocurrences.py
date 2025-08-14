@@ -70,26 +70,53 @@ def layout():
         dcc.Location(id='url-occurrences', refresh=True),
 
         # Modal for adding a new occurrence
-        dbc.Modal([
-            dbc.ModalHeader("Adicionar Nova Ocorrência"),
-            dbc.ModalBody([
-                dbc.Label("Data da Ocorrência:"),
-                dcc.DatePickerSingle(
-                    id='occurrence-date-picker',
-                    display_format='DD/MM/YYYY',
-                    className='date-picker'
-                ),
-                dbc.Label("Tipo de Ocorrência:", className="mt-3"),
-                dbc.Input(id='occurrence-type-input', placeholder="Ex: Atendimento ao Cidadão"),
-                dbc.Label("Viatura Responsável:", className="mt-3"),
-                dcc.Dropdown(id='occurrence-vehicle-dropdown', options=vehicle_options,
-                             placeholder="Selecione a viatura"),
-            ]),
-            dbc.ModalFooter([
-                dbc.Button("Cancelar", id="cancel-add-occurrence", color="secondary"),
-                dbc.Button("Salvar", id="save-new-occurrence", color="primary"),
-            ]),
-        ], id='modal-add-occurrence', is_open=False),
+        html.Div(
+            id='modal-add-occurrence',
+            className='modal',
+            style={'display': 'none'},
+            children=[
+                html.Div(
+                    className='modal-content',
+                    children=[
+                        html.Div(
+                            className='modal-header',
+                            children=[
+                                html.H5('Adicionar Nova Ocorrência', className='modal-title'),
+                                html.Button('×', id='cancel-add-occurrence-x', className='modal-close-button')
+                            ]
+                        ),
+                        html.Div(
+                            className='modal-body',
+                            children=[
+                                html.Div(className='form-group', children=[
+                                    html.Label("Data da Ocorrência:"),
+                                    dcc.DatePickerSingle(
+                                        id='occurrence-date-picker',
+                                        display_format='DD/MM/YYYY',
+                                        className='date-picker'
+                                    ),
+                                ]),
+                                html.Div(className='form-group', children=[
+                                    html.Label("Tipo de Ocorrência:"),
+                                    dcc.Input(id='occurrence-type-input', placeholder="Ex: Atendimento ao Cidadão", className='modal-input'),
+                                ]),
+                                html.Div(className='form-group', children=[
+                                    html.Label("Viatura Responsável:"),
+                                    dcc.Dropdown(id='occurrence-vehicle-dropdown', options=vehicle_options, placeholder="Selecione a viatura"),
+                                ]),
+                            ]
+                        ),
+                        html.Div(
+                            className='modal-footer',
+                            children=[
+                                html.Button("Cancelar", id="cancel-add-occurrence", className='modal-button cancel'),
+                                html.Button("Salvar", id="save-new-occurrence", className='modal-button submit'),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
 
         html.Div([
             html.Div([
@@ -268,21 +295,25 @@ def update_graph(mes, theme):
 
 
 @callback(
-    Output('modal-add-occurrence', 'is_open'),
+    Output('modal-add-occurrence', 'style'),
     Input('add_oco', 'n_clicks'),
     Input('cancel-add-occurrence', 'n_clicks'),
-    State('modal-add-occurrence', 'is_open'),
+    Input('cancel-add-occurrence-x', 'n_clicks'),
+    State('modal-add-occurrence', 'style'),
     prevent_initial_call=True,
 )
-def toggle_modal_occurrence(n_add, n_cancel, is_open):
-    if ctx.triggered_id in ['add_oco', 'cancel-add-occurrence']:
-        return not is_open
-    return is_open
+def toggle_modal_occurrence(n_add, n_cancel, n_cancel_x, style):
+    if ctx.triggered_id in ['add_oco', 'cancel-add-occurrence', 'cancel-add-occurrence-x']:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
 
 
 @callback(
     Output('url-occurrences', 'pathname', allow_duplicate=True),
-    Output('modal-add-occurrence', 'is_open', allow_duplicate=True),
+    Output('modal-add-occurrence', 'style', allow_duplicate=True),
     Input('save-new-occurrence', 'n_clicks'),
     State('occurrence-date-picker', 'date'),
     State('occurrence-type-input', 'value'),
@@ -292,17 +323,17 @@ def toggle_modal_occurrence(n_add, n_cancel, is_open):
 def save_new_occurrence(n_clicks, date, occ_type, vehicle):
     if n_clicks:
         if not all([date, occ_type, vehicle]):
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
 
         agents = fb.get_agents_by_vehicle(vehicle)
         if not agents:
             print(f"No agent found for vehicle {vehicle}")
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
 
         agent_id = agents[0].get('id')
         if not agent_id:
             print("Agent found but has no ID")
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
 
         occ_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
         occ_data = {
@@ -313,6 +344,6 @@ def save_new_occurrence(n_clicks, date, occ_type, vehicle):
 
         fb.add_occurrence(agent_id, occ_date, occ_data)
 
-        return '/ocurrences', False
+        return '/ocurrences', {'display': 'none'}
 
-    return dash.no_update, True
+    return dash.no_update, dash.no_update

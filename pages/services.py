@@ -69,25 +69,53 @@ def layout():
         dcc.Location(id='url-services', refresh=True),
 
         # Modal for adding a new service
-        dbc.Modal([
-            dbc.ModalHeader("Adicionar Novo Serviço"),
-            dbc.ModalBody([
-                dbc.Label("Data do Serviço:"),
-                dcc.DatePickerSingle(
-                    id='service-date-picker',
-                    display_format='DD/MM/YYYY',
-                    className='date-picker'
-                ),
-                dbc.Label("Tipo de Serviço:", className="mt-3"),
-                dbc.Input(id='service-type-input', placeholder="Ex: Atendimento ao cliente"),
-                dbc.Label("Viatura Responsável:", className="mt-3"),
-                dcc.Dropdown(id='service-vehicle-dropdown', options=vehicle_options, placeholder="Selecione a viatura"),
-            ]),
-            dbc.ModalFooter([
-                dbc.Button("Cancelar", id="cancel-add-service", color="secondary"),
-                dbc.Button("Salvar", id="save-new-service", color="primary"),
-            ]),
-        ], id='modal-add-service', is_open=False),
+        html.Div(
+            id='modal-add-service',
+            className='modal',
+            style={'display': 'none'},
+            children=[
+                html.Div(
+                    className='modal-content',
+                    children=[
+                        html.Div(
+                            className='modal-header',
+                            children=[
+                                html.H5('Adicionar Novo Serviço', className='modal-title'),
+                                html.Button('×', id='cancel-add-service-x', className='modal-close-button')
+                            ]
+                        ),
+                        html.Div(
+                            className='modal-body',
+                            children=[
+                                html.Div(className='form-group', children=[
+                                    html.Label("Data do Serviço:"),
+                                    dcc.DatePickerSingle(
+                                        id='service-date-picker',
+                                        display_format='DD/MM/YYYY',
+                                        className='date-picker'
+                                    ),
+                                ]),
+                                html.Div(className='form-group', children=[
+                                    html.Label("Tipo de Serviço:"),
+                                    dcc.Input(id='service-type-input', placeholder="Ex: Atendimento ao cliente", className='modal-input'),
+                                ]),
+                                html.Div(className='form-group', children=[
+                                    html.Label("Viatura Responsável:"),
+                                    dcc.Dropdown(id='service-vehicle-dropdown', options=vehicle_options, placeholder="Selecione a viatura"),
+                                ]),
+                            ]
+                        ),
+                        html.Div(
+                            className='modal-footer',
+                            children=[
+                                html.Button("Cancelar", id="cancel-add-service", className='modal-button cancel'),
+                                html.Button("Salvar", id="save-new-service", className='modal-button submit'),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
 
         html.Div([
             html.Div([
@@ -262,21 +290,25 @@ def update_graph(mes, theme):
 
 
 @callback(
-    Output('modal-add-service', 'is_open'),
+    Output('modal-add-service', 'style'),
     Input('add_serv', 'n_clicks'),
     Input('cancel-add-service', 'n_clicks'),
-    State('modal-add-service', 'is_open'),
+    Input('cancel-add-service-x', 'n_clicks'),
+    State('modal-add-service', 'style'),
     prevent_initial_call=True,
 )
-def toggle_modal_service(n_add, n_cancel, is_open):
-    if ctx.triggered_id in ['add_serv', 'cancel-add-service']:
-        return not is_open
-    return is_open
+def toggle_modal_service(n_add, n_cancel, n_cancel_x, style):
+    if ctx.triggered_id in ['add_serv', 'cancel-add-service', 'cancel-add-service-x']:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
 
 
 @callback(
     Output('url-services', 'pathname', allow_duplicate=True),
-    Output('modal-add-service', 'is_open', allow_duplicate=True),
+    Output('modal-add-service', 'style', allow_duplicate=True),
     Input('save-new-service', 'n_clicks'),
     State('service-date-picker', 'date'),
     State('service-type-input', 'value'),
@@ -286,7 +318,7 @@ def toggle_modal_service(n_add, n_cancel, is_open):
 def save_new_service(n_clicks, date, service_type, vehicle):
     if n_clicks:
         if not all([date, service_type, vehicle]):
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
 
         # Find the agent responsible for the vehicle
         agents = fb.get_agents_by_vehicle(vehicle)
@@ -294,12 +326,12 @@ def save_new_service(n_clicks, date, service_type, vehicle):
             # Handle case where no agent is found for the vehicle
             print(f"No agent found for vehicle {vehicle}")
             # Optionally, show an alert to the user
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
 
         agent_id = agents[0].get('id')
         if not agent_id:
             print("Agent found but has no ID")
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
 
         service_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
         service_data = {
@@ -310,6 +342,6 @@ def save_new_service(n_clicks, date, service_type, vehicle):
 
         fb.add_service(agent_id, service_date, service_data)
 
-        return '/services', False
+        return '/services', {'display': 'none'}
 
-    return dash.no_update, True
+    return dash.no_update, dash.no_update

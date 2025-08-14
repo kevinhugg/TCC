@@ -1,10 +1,14 @@
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
+import base64
+import uuid
 
 # inicializa o app uma vez só
 if not firebase_admin._apps:
     cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred)
+    firebase_admin.initialize_app(cred, {
+        'storageBucket': 'tcc-semurb-2ea61.appspot.com'
+    })
 
 db = firestore.client()
 
@@ -238,6 +242,26 @@ def get_all_occurrences_and_services():
 def get_agents_by_vehicle(viatura_numero):
     docs = db.collection('agentes').where('viatura', '==', viatura_numero).stream()
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
+
+
+def upload_image_to_storage(contents, filename):
+    """Uploads an image to Firebase Storage and returns its public URL."""
+    try:
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+
+        bucket = storage.bucket()
+        # Generate a unique filename
+        unique_filename = f"viaturas/{uuid.uuid4()}-{filename}"
+        blob = bucket.blob(unique_filename)
+
+        blob.upload_from_string(decoded, content_type=content_type)
+        blob.make_public()
+
+        return blob.public_url
+    except Exception as e:
+        print(f"An error occurred while uploading image: {e}")
+        return None
 
 
 # ADD / DELETE

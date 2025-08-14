@@ -59,23 +59,70 @@ def layout():
     all_parts = sorted(list(set(d['parte'] for d in damVehicles if d.get('parte'))))
     damage_part_options = [{'label': 'Partes', 'value': 'all'}] + [{'label': part.capitalize(), 'value': part} for part in all_parts]
 
-    add_vehicle_modal = dbc.Modal([
-        dbc.ModalHeader("Adicionar Novo Veículo"),
-        dbc.ModalBody([
-            dbc.Label("Placa:"),
-            dbc.Input(id='add-vehicle-placa', placeholder="ABC-1234"),
-            dbc.Label("Número:", className="mt-3"),
-            dbc.Input(id='add-vehicle-numero', placeholder="Número de identificação"),
-            dbc.Label("Tipo de Veículo:", className="mt-3"),
-            dbc.Input(id='add-vehicle-tipo', placeholder="Ex: Carro, Moto"),
-            dbc.Label("URL da Imagem:", className="mt-3"),
-            dbc.Input(id='add-vehicle-imagem', placeholder="https://..."),
-        ]),
-        dbc.ModalFooter([
-            dbc.Button("Cancelar", id="cancel-add-vehicle", color="secondary"),
-            dbc.Button("Salvar", id="submit-add-vehicle", color="primary"),
-        ]),
-    ], id='modal-add-vehicle', is_open=False)
+    add_vehicle_modal = html.Div(
+        id='modal-add-vehicle',
+        className='modal',
+        style={'display': 'none'},
+        children=[
+            html.Div(
+                className='modal-content',
+                children=[
+                    html.Div(
+                        className='modal-header',
+                        children=[
+                            html.H5('Adicionar Novo Veículo', className='modal-title'),
+                            html.Button('×', id='cancel-add-vehicle-x', className='modal-close-button')
+                        ]
+                    ),
+                    html.Div(
+                        className='modal-body',
+                        children=[
+                            html.Div(className='form-group', children=[
+                                html.Label("Placa:"),
+                                dcc.Input(id='add-vehicle-placa', placeholder="ABC-1234", className='modal-input'),
+                            ]),
+                            html.Div(className='form-group', children=[
+                                html.Label("Número:"),
+                                dcc.Input(id='add-vehicle-numero', placeholder="Número de identificação", className='modal-input'),
+                            ]),
+                            html.Div(className='form-group', children=[
+                                html.Label("Tipo de Veículo:"),
+                                dcc.Input(id='add-vehicle-tipo', placeholder="Ex: Carro, Moto", className='modal-input'),
+                            ]),
+                            html.Div(className='form-group', children=[
+                                html.Label("Imagem da Viatura:"),
+                                dcc.Upload(
+                                    id='upload-vehicle-image',
+                                    children=html.Div([
+                                        'Arraste e solte ou ',
+                                        html.A('Selecione uma imagem')
+                                    ]),
+                                    style={
+                                        'width': '100%',
+                                        'height': '60px',
+                                        'lineHeight': '60px',
+                                        'borderWidth': '1px',
+                                        'borderStyle': 'dashed',
+                                        'borderRadius': '5px',
+                                        'textAlign': 'center',
+                                        'margin': '10px 0'
+                                    },
+                                    accept='image/*'
+                                ),
+                            ]),
+                        ]
+                    ),
+                    html.Div(
+                        className='modal-footer',
+                        children=[
+                            html.Button("Cancelar", id="cancel-add-vehicle", className='modal-button cancel'),
+                            html.Button("Salvar", id="submit-add-vehicle", className='modal-button submit'),
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleVehicles.css'),
@@ -198,39 +245,50 @@ def update_graph_theme(theme):
 
 
 @callback(
-    Output('modal-add-vehicle', 'is_open'),
+    Output('modal-add-vehicle', 'style'),
     Input('add_vehicle', 'n_clicks'),
     Input('cancel-add-vehicle', 'n_clicks'),
-    State('modal-add-vehicle', 'is_open'),
+    Input('cancel-add-vehicle-x', 'n_clicks'),
+    State('modal-add-vehicle', 'style'),
     prevent_initial_call=True
 )
-def toggle_vehicle_modal(add_clicks, cancel_clicks, is_open):
-    if ctx.triggered_id in ['add_vehicle', 'cancel-add-vehicle']:
-        return not is_open
-    return is_open
+def toggle_vehicle_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
+    if ctx.triggered_id in ['add_vehicle', 'cancel-add-vehicle', 'cancel-add-vehicle-x']:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
 
 
 @callback(
     Output('url-vehicles', 'pathname'),
-    Output('modal-add-vehicle', 'is_open', allow_duplicate=True),
+    Output('modal-add-vehicle', 'style', allow_duplicate=True),
     Input('submit-add-vehicle', 'n_clicks'),
     State('add-vehicle-placa', 'value'),
     State('add-vehicle-numero', 'value'),
     State('add-vehicle-tipo', 'value'),
-    State('add-vehicle-imagem', 'value'),
+    State('upload-vehicle-image', 'contents'),
+    State('upload-vehicle-image', 'filename'),
     prevent_initial_call=True
 )
-def handle_add_vehicle(n_clicks, placa, numero, tipo, imagem):
+def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
     if n_clicks:
         if not all([placa, numero, tipo]):
-            return dash.no_update, True
+            return dash.no_update, {'display': 'flex'}
+
+        image_url = '/static/assets/img/viatura1.png'  # Default image
+        if contents:
+            uploaded_url = fb.upload_image_to_storage(contents, filename)
+            if uploaded_url:
+                image_url = uploaded_url
 
         vehicle_data = {
             'placa': placa,
             'numero': numero,
             'veiculo': tipo,
-            'imagem': imagem or '/static/assets/img/viatura1.png'
+            'imagem': image_url
         }
         fb.add_vehicle(vehicle_data)
-        return '/pageVehicles', False
-    return dash.no_update, True
+        return '/pageVehicles', {'display': 'none'}
+    return dash.no_update, dash.no_update

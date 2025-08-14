@@ -29,29 +29,65 @@ def layout():
         {'label': 'Noite', 'value': 'noite'},
     ]
 
-    add_agent_modal = dbc.Modal([
-        dbc.ModalHeader("Adicionar Novo Agente"),
-        dbc.ModalBody([
-            dbc.Label("Nome:"),
-            dbc.Input(id='add-agent-name', placeholder="Nome completo do agente"),
-            dbc.Label("Matrícula:", className="mt-3"),
-            dbc.Input(id='add-agent-matricula', placeholder="Matrícula do agente"),
-            dbc.Label("Idade:", className="mt-3"),
-            dbc.Input(id='add-agent-idade', type='number', placeholder="Idade"),
-            dbc.Label("Cargo:", className="mt-3"),
-            dbc.Input(id='add-agent-cargo', placeholder="Cargo do agente"),
-            dbc.Label("Função:", className="mt-3"),
-            dcc.Dropdown(id='add-agent-funcao', options=funcao_options, placeholder="Selecione a função"),
-            dbc.Label("Turno:", className="mt-3"),
-            dcc.Dropdown(id='add-agent-turno', options=turno_options, placeholder="Selecione o turno"),
-            dbc.Label("Viatura:", className="mt-3"),
-            dcc.Dropdown(id='add-agent-veiculo', options=viaturas_options, placeholder="Selecione o veículo"),
-        ]),
-        dbc.ModalFooter([
-            dbc.Button("Cancelar", id="cancel-add-agent", color="secondary"),
-            dbc.Button("Salvar", id="submit-add-agent", color="primary"),
-        ]),
-    ], id='modal-add-agent', is_open=False)
+    add_agent_modal = html.Div(
+    id='modal-add-agent',
+    className='modal',
+    style={'display': 'none'},
+    children=[
+        html.Div(
+            className='modal-content',
+            children=[
+                html.Div(
+                    className='modal-header',
+                    children=[
+                        html.H5('Adicionar Novo Agente', className='modal-title'),
+                        html.Button('×', id='cancel-add-agent-x', className='modal-close-button')
+                    ]
+                ),
+                html.Div(
+                    className='modal-body',
+                    children=[
+                        html.Div(className='form-group', children=[
+                            html.Label("Nome:"),
+                            dcc.Input(id='add-agent-name', placeholder="Nome completo do agente", className='modal-input'),
+                        ]),
+                        html.Div(className='form-group', children=[
+                            html.Label("Matrícula:"),
+                            dcc.Input(id='add-agent-matricula', placeholder="Matrícula do agente", className='modal-input'),
+                        ]),
+                        html.Div(className='form-group', children=[
+                            html.Label("Idade:"),
+                            dcc.Input(id='add-agent-idade', type='number', placeholder="Idade", className='modal-input'),
+                        ]),
+                        html.Div(className='form-group', children=[
+                            html.Label("Cargo:"),
+                            dcc.Input(id='add-agent-cargo', placeholder="Cargo do agente", className='modal-input'),
+                        ]),
+                        html.Div(className='form-group', children=[
+                            html.Label("Função:"),
+                            dcc.Dropdown(id='add-agent-funcao', options=funcao_options, placeholder="Selecione a função"),
+                        ]),
+                        html.Div(className='form-group', children=[
+                            html.Label("Turno:"),
+                            dcc.Dropdown(id='add-agent-turno', options=turno_options, placeholder="Selecione o turno"),
+                        ]),
+                        html.Div(className='form-group', children=[
+                            html.Label("Viatura:"),
+                            dcc.Dropdown(id='add-agent-veiculo', options=viaturas_options, placeholder="Selecione o veículo"),
+                        ]),
+                    ]
+                ),
+                html.Div(
+                    className='modal-footer',
+                    children=[
+                        html.Button("Cancelar", id="cancel-add-agent", className='modal-button cancel'),
+                        html.Button("Salvar", id="submit-add-agent", className='modal-button submit'),
+                    ]
+                )
+            ]
+        )
+    ]
+)
 
     confirm_remove = dcc.ConfirmDialog(
         id='confirm-remove-agent',
@@ -106,21 +142,26 @@ def layout():
 
 
 @callback(
-    Output('modal-add-agent', 'is_open'),
+    Output('modal-add-agent', 'style'),
     Input('add_agents', 'n_clicks'),
     Input('cancel-add-agent', 'n_clicks'),
-    State('modal-add-agent', 'is_open'),
+    Input('cancel-add-agent-x', 'n_clicks'),
+    State('modal-add-agent', 'style'),
     prevent_initial_call=True
 )
-def toggle_agent_modal(add_clicks, cancel_clicks, is_open):
-    if ctx.triggered_id in ['add_agents', 'cancel-add-agent']:
-        return not is_open
-    return is_open
+def toggle_agent_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
+    triggered_id = ctx.triggered_id
+    if triggered_id in ['add_agents', 'cancel-add-agent', 'cancel-add-agent-x']:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
 
 
 @callback(
     Output('url-agents', 'pathname'),
-    Output('modal-add-agent', 'is_open', allow_duplicate=True),
+    Output('modal-add-agent', 'style', allow_duplicate=True),
     Input('submit-add-agent', 'n_clicks'),
     State('add-agent-name', 'value'),
     State('add-agent-matricula', 'value'),
@@ -135,7 +176,7 @@ def handle_add_agent(n_clicks, name, matricula, idade, cargo, funcao, turno, vei
     if n_clicks:
         if not all([name, matricula, idade, cargo, funcao, turno]):
             print("Agent not added, missing fields")
-            return no_update, True
+            return no_update, {'display': 'flex'}
 
         new_agent = {
             'nome': name,
@@ -149,8 +190,8 @@ def handle_add_agent(n_clicks, name, matricula, idade, cargo, funcao, turno, vei
             'foto_agnt': 'https://firebasestorage.googleapis.com/v0/b/tcc-semurb-2ea61.appspot.com/o/agentes%2Fpersona.png?alt=media&token=c23068da-25a5-45elyn-846c-d2a637886358'
         }
         fb.add_agent(new_agent)
-        return '/pageAgents', False
-    return no_update, True
+        return '/pageAgents', {'display': 'none'}
+    return no_update, no_update
 
 
 @callback(
