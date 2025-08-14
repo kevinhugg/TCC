@@ -3,155 +3,169 @@ from dash import html, dcc, Input, Output, callback, State
 import plotly.graph_objects as go
 import plotly.express as px
 import random
+import firebase_functions as fb
 
-from data.dados import Ocur_Neighborhoods, time_response, Most_common_Ocu
-
-dash.register_page(__name__, path='/', name='Home')
-
-# VEÍCULOS
-vehiclesTot = 521
-damagedVehic = 152
-perfectVehic = vehiclesTot - damagedVehic
-
-# SERVIÇOS
+# JULES: This data is kept temporarily. It should be fetched from Firebase
+# once the necessary functions are implemented in firebase_functions.py.
+time_response = {
+    '2023': [30, 28, 40, 23, 50, 69, 20, 40, 64, 34, 23],
+    '2024': [36, 56, 45, 23, 23, 32, 21, 31, 64, 34, 12],
+    '2025': [43, 45, 67, 78, 23, 34, 53, 63, 37, 23, 23]
+}
+Most_common_Ocu = [
+    {'tipo': 'Sinístro de Trânsito', 'quantidade': 120, 'viatura': 'V001', 'data': '2025-07-25', 'id': 'a1'},
+    {'tipo': 'Semáforo Apagado', 'quantidade': 85, 'viatura': 'V001', 'data': '2025-05-25', 'id': 'a2'},
+    {'tipo': 'Veículo Danificado na Via', 'quantidade': 60, 'viatura': 'V001', 'data': '2025-02-01', 'id': 'a3'},
+]
+Ocur_Neighborhoods = [
+    {'bairro': 'Centro', 'latitude': -23.5505, 'longitude': -46.6333, 'quantidade': 120},
+    {'bairro': 'Jardins', 'latitude': -23.5614, 'longitude': -46.6550, 'quantidade': 95},
+]
 services = 20000
 servDones = 15000
 
-# agentes
-Agents_loged = 2930
 
-layout = html.Div([
+dash.register_page(__name__, path='/', name='Home')
 
-    html.Link(rel='stylesheet', href='/static/css/home.css'),
+def layout():
+    try:
+        all_vehicles = fb.get_all_vehicles()
+        damage_reports = fb.get_all_damage_reports()
+        vehiclesTot = len(all_vehicles)
+        damaged_vehicle_numbers = {report['viatura'] for report in damage_reports}
+        damagedVehic = len(damaged_vehicle_numbers)
+        perfectVehic = vehiclesTot - damagedVehic
+    except Exception as e:
+        print(f"Error fetching vehicle data from Firebase: {e}")
+        damagedVehic, perfectVehic = 0, 0
+        # You could return an error message component here instead
+        # return html.Div("Error loading data")
 
-    html.Div([
-
+    return html.Div([
+        html.Link(rel='stylesheet', href='/static/css/home.css'),
         html.Div([
-            html.H4('Viaturas'),
             html.Div([
+                html.H4('Viaturas'),
                 html.Div([
-                    html.H5('Com avarias:'),
-                    html.P(damagedVehic, className='NumsVehicles'),
-                ], className='info-vehic'),
+                    html.Div([
+                        html.H5('Com avarias:'),
+                        html.P(damagedVehic, className='NumsVehicles'),
+                    ], className='info-vehic'),
+                    html.Div([
+                        html.H5('Sem avarias:'),
+                        html.P(perfectVehic, className='NumsVehicles'),
+                    ], className='info-vehic')
+                ], className='category'),
+            ], className="vehicles card"),
+
+            html.Div([
+                html.H4('Agentes Logados'),
                 html.Div([
-                    html.H5('Sem avarias:'),
-                    html.P(perfectVehic, className='NumsVehicles'),
-                ], className='info-vehic')
-            ], className='category'),
-        ], className="vehicles card"),
+                    html.Div(id='value-agents'),
+                    html.Div(id='flux'),
+                ], className='agents-info'),
+                dcc.Interval(id='interval', interval=3000, n_intervals=0)
+            ], className="agents card"),
 
-        html.Div([
-            html.H4('Agentes Logados'),
             html.Div([
-                html.Div(id='value-agents'),
-                html.Div(id='flux'),
-            ], className='agents-info'),
-            dcc.Interval(id='interval', interval=3000, n_intervals=0)
-        ], className="agents card"),
+                html.H4('Serviços Feitos'),
+                html.Div([
+                    dcc.Graph(
+                        id='graph-pie',
+                        config={'displayModeBar': False},
+                    ),
+                ], className='category-graphs'),
+            ], className="pizza card"),
 
-        html.Div([
-            html.H4('Serviços Feitos'),
             html.Div([
-                dcc.Graph(
-                    id='graph-pie',
-                    config={'displayModeBar': False},
-                ),
-            ], className='category-graphs'),
-        ], className="pizza card"),
-
-        html.Div([
-            html.H4('Ocorrências no Mês'),
-            html.Div([
-                html.P('1950', className='NumOcuMonth'),
-            ], className='category'),
-        ], className="ocuMonthly card"),
-
-        html.Div([
-            dcc.Graph(
-                id='bar-chart',
-                config={
-                    'modeBarButtonsToRemove': [
-                        'zoom2d', 'pan2d', 'select2d', 'lasso2d',
-                        'autoScale2d', 'resetScale2d',
-                        'zoomIn', 'zoomOut'
-                    ],
-                    'displaylogo': False
-                }
-            )
-        ], className="GraphIndOcu card"),
-
-        html.Div([
-            dcc.Dropdown(
-                id='dropdown-year',
-                options=[{'label': ano, 'value': ano} for ano in time_response.keys()],
-                value='2025',
-                clearable=False,
-                style={'width': '70px'}
-            ),
-            dcc.Graph(
-                id='Graph_Time_Line',
-                config={
-                    'modeBarButtonsToRemove': [
-                        'zoom2d', 'pan2d', 'select2d', 'lasso2d',
-                        'autoScale2d', 'resetScale2d',
-                        'zoomIn', 'zoomOut'
-                    ],
-                    'displaylogo': False
-                }
-            ),
-        ], className="GraphTimeRes card"),
-
-        html.Div([
-            html.H4('Ocorrências Mais Comuns'),
-
-            html.Table([
-                html.Thead([
-                    html.Tr([
-                        html.Th('Tipo de Ocorrência'),
-                        html.Th('Quantidade')
-                    ])
-                ]),
-                html.Tbody([
-                    html.Tr([
-                        html.Td(item['tipo']),
-                        html.Td(item['quantidade'])
-                    ]) for item in Most_common_Ocu
-                ])
-            ], className='table_ocu')
-
-        ], className="Ranking_Ocu card"),
-
-        html.Div([
-            html.H4('Distrubuição Geográfica das Ocorrências'),
+                html.H4('Ocorrências no Mês'),
+                html.Div([
+                    html.P('1950', className='NumOcuMonth'), # JULES: Still static
+                ], className='category'),
+            ], className="ocuMonthly card"),
 
             html.Div([
                 dcc.Graph(
-                    id='map-chart',
-                    config={'displayModeBar': False},
+                    id='bar-chart',
+                    config={
+                        'modeBarButtonsToRemove': [
+                            'zoom2d', 'pan2d', 'select2d', 'lasso2d',
+                            'autoScale2d', 'resetScale2d',
+                            'zoomIn', 'zoomOut'
+                        ],
+                        'displaylogo': False
+                    }
                 )
-            ]),
-        ], className='GraphMap card'),
+            ], className="GraphIndOcu card"),
 
-        html.Div([
-            html.H4('Bairros com mais ocorrências'),
-            html.Table([
-                html.Thead([
-                    html.Tr([
-                        html.Th('Bairro'),
-                        html.Th('Quantidade de Ocorrências')
+            html.Div([
+                dcc.Dropdown(
+                    id='dropdown-year',
+                    options=[{'label': ano, 'value': ano} for ano in time_response.keys()],
+                    value='2025',
+                    clearable=False,
+                    style={'width': '70px'}
+                ),
+                dcc.Graph(
+                    id='Graph_Time_Line',
+                    config={
+                        'modeBarButtonsToRemove': [
+                            'zoom2d', 'pan2d', 'select2d', 'lasso2d',
+                            'autoScale2d', 'resetScale2d',
+                            'zoomIn', 'zoomOut'
+                        ],
+                        'displaylogo': False
+                    }
+                ),
+            ], className="GraphTimeRes card"),
+
+            html.Div([
+                html.H4('Ocorrências Mais Comuns'),
+                html.Table([
+                    html.Thead([
+                        html.Tr([
+                            html.Th('Tipo de Ocorrência'),
+                            html.Th('Quantidade')
+                        ])
+                    ]),
+                    html.Tbody([
+                        html.Tr([
+                            html.Td(item['tipo']),
+                            html.Td(item['quantidade'])
+                        ]) for item in Most_common_Ocu
                     ])
-                ]),
-                html.Tbody([
-                    html.Tr([
-                        html.Td(bairro['bairro']),
-                        html.Td(bairro['quantidade'])
-                    ]) for bairro in Ocur_Neighborhoods
-                ])
-            ], className='table_neighborhoods'),
-        ], className='NgbhInfos card'),
+                ], className='table_ocu')
+            ], className="Ranking_Ocu card"),
 
-    ], className='page-content home-grid'),
-])
+            html.Div([
+                html.H4('Distrubuição Geográfica das Ocorrências'),
+                html.Div([
+                    dcc.Graph(
+                        id='map-chart',
+                        config={'displayModeBar': False},
+                    )
+                ]),
+            ], className='GraphMap card'),
+
+            html.Div([
+                html.H4('Bairros com mais ocorrências'),
+                html.Table([
+                    html.Thead([
+                        html.Tr([
+                            html.Th('Bairro'),
+                            html.Th('Quantidade de Ocorrências')
+                        ])
+                    ]),
+                    html.Tbody([
+                        html.Tr([
+                            html.Td(bairro['bairro']),
+                            html.Td(bairro['quantidade'])
+                        ]) for bairro in Ocur_Neighborhoods
+                    ])
+                ], className='table_neighborhoods'),
+            ], className='NgbhInfos card'),
+        ], className='page-content home-grid'),
+    ])
 
 
 @callback(
@@ -282,11 +296,17 @@ def att_graph(year_selected, theme):
     State('theme-mode', 'data')
 )
 def att_flux(n, theme):
-    # Simulate agent flux without using global variables for incrementing
+    try:
+        agents = fb.get_all_agents()
+        agents_total = len(agents)
+    except Exception as e:
+        print(f"Error fetching agents from Firebase: {e}")
+        agents_total = 0
+
+    # Simulate agent flux
     entered = random.randint(10, 50)
     logouted = random.randint(10, 50)
-
-    current_agents = Agents_loged + (entered - logouted)
+    current_agents = agents_total + (entered - logouted)
 
     is_dark = theme == 'dark'
 

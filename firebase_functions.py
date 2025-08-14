@@ -189,10 +189,59 @@ def get_occurrences_and_services_by_vehicle(veiculo_numero):
     return history
 
 
+def get_all_occurrences_and_services():
+    """Gets all occurrences and services from all vehicles."""
+    history = []
+    dias_docs = db.collection('ocorrencias').list_documents()
+
+    for dia_doc in dias_docs:
+        data_str = dia_doc.id
+        lista_ref = dia_doc.collection('lista').stream()
+
+        for doc in lista_ref:
+            data = doc.to_dict()
+            item_class = data.get('class', 'ocorrencia')
+            item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+
+            history.append({
+                'id': doc.id,
+                'data': data_str,
+                'nomenclatura': data.get('nomenclatura', 'N/A'),
+                'tipo': item_type,
+                'class': item_class,
+                'path': 'services' if item_class == 'serviço' else 'ocurrences',
+                'viatura': data.get('viatura', 'N/A') # Also get the vehicle number
+            })
+
+    return history
+
+
 # pega agentes com o veiculo
 def get_agents_by_vehicle(viatura_numero):
     docs = db.collection('agentes').where('viatura', '==', viatura_numero).stream()
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
+
+
+# ADD / DELETE
+
+def add_agent(agent_data):
+    """Adds a new agent to the 'agentes' collection. Firestore will generate the ID."""
+    try:
+        doc_ref = db.collection('agentes').document()
+        doc_ref.set(agent_data)
+        return doc_ref.id
+    except Exception as e:
+        print(f"An error occurred while adding agent: {e}")
+        return None
+
+def delete_agent(agent_id):
+    """Deletes an agent from the 'agentes' collection by their ID."""
+    try:
+        db.collection('agentes').document(agent_id).delete()
+        return True
+    except Exception as e:
+        print(f"An error occurred while deleting agent {agent_id}: {e}")
+        return False
 
 
 # UPDATES

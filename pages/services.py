@@ -1,264 +1,236 @@
 import dash
-from dash import html, dcc, Input, Output, callback, ctx, State
+from dash import html, dcc, Input, Output, callback, State, ctx
 import unicodedata
 from collections import Counter
 import plotly.express as px
 from datetime import datetime
 import pandas as pd
 import dash_bootstrap_components as dbc
-
-from data.dados import agents, Ocur_Vehicles
+import firebase_functions as fb
 
 dash.register_page(__name__, path='/services', name='Serviços', className='pg-at')
 
-item = next((v for v in Ocur_Vehicles))
-servicos = [o for o in Ocur_Vehicles if o.get('class') == 'serviço']
-
-responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-viat_func = next((a['viatura_mes'] for a in agents))
-
-meses_unicos = sorted(set(
-    datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
-    for o in Ocur_Vehicles if o['viatura'] == viat_func
-))
-
-dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
-    {
-        'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(),
-        'value': m
-    } for m in meses_unicos
-]
-
-# grafico ocorrencias registradas e seus dados
-tipos = [item['nomenclatura'].strip() for item in servicos]
-contagem_tipos = Counter(tipos)
-
-tipos_labels = list(contagem_tipos.keys())
-tipos_values = list(contagem_tipos.values())
-
-df_tipos = pd.DataFrame({
-    'Tipo': tipos_labels,
-    'Quantidade': tipos_values
-})
-
-fig_tipos = px.bar(
-    df_tipos,
-    x='Tipo',
-    y='Quantidade',
-    text='Quantidade',
-    labels={'Tipo': '', 'Quantidade': ''},
-    title='Serviços Cadastrados'
-)
-
-fig_tipos.update_traces(
-    marker_color='#4682B4',
-    textposition='outside',
-    textfont=dict(color='black'),
-    hovertemplate='<b>Tipo</b>: %{x}<br><b>Quantidade</b>: %{y}<extra></extra>'  # Mantém o tooltip original
-)
-fig_tipos.update_layout(
-    title={
-        'text': 'Serviços Cadastrados',
-    },
-    title_font_size=26,
-    title_font_color='#295678',
-    plot_bgcolor='rgba(0,0,0,0)',
-    paper_bgcolor='rgba(0,0,0,0)',
-)
-
-layout = html.Div([
-
-    html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
-    html.Link(rel='stylesheet', href='/static/css/modal.css'),
-
-    dcc.Store(id='filtro-search'),
-
-    html.Div([
-
-        html.Div([
-
-            html.Div([
-                html.H3('Serviços Gerais', className='title'),
-                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...',
-                          className='input-search'),
-                dcc.Dropdown(
-                    id='filter-month',
-                    options=dropdown_options,
-                    value='todos',
-                    placeholder="Filtrar por mês...",
-                    className='filter-month'
-                ),
-            ], className='searchbar'),
-
-            html.Table([
-                html.Thead([
-                    html.Tr([
-                        html.Th('Data'),
-                        html.Th('Responsável'),
-                        html.Th('Tipo'),
-                        html.Th('Veículo'),
-                    ])
-                ]),
-                html.Tbody(id='serv-table', children=[
-                    html.Tr([
-                        html.Td(item['data']),
-                        html.Td(
-                            dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
-                        ),
-                        html.Td(item['nomenclatura']),
-                        html.Td(
-                            dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
-                        ),
-                        html.Td(
-                            dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}"), className='btn_view'
-                        ),
-                    ])
-                    for item in servicos
-                ], className='sla')
-            ], className='serv-table'),
-
-            html.Div([
-                html.Div([
-                    html.A(id='rem_serv', children='Apagar Serviços', className='rem_serv')
-                ], className='btn'),
-
-                html.Div([
-                    html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
-                ], className='btn-pdf-serv'),
-            ], className='btn_rem_add_pdf'),
-
-        ], className='oco_serv_container card'),
-    ]),
-
-    html.Div([
-        dcc.Graph(figure=fig_tipos, className='fig_serv'),
-
-        html.Div([
-            html.Div([
-                html.A(id='rem_vehicle_serv', children='Remover Serviço', className='rem_serv')
-            ], className='btn'),
-
-            html.Div([
-                html.A(id='btn_add', children='Adicionar Serviço', className='btn_add')
-            ], className='btn'),
-        ], className='btn_rem_add_pdf'),
-
-    ], className='graph_tipes card'),
-
-    dbc.Modal(
-        [
-            dbc.ModalHeader(dbc.ModalTitle('Novo Serviço'), close_button=False),
-            dbc.ModalBody([
-                dbc.Input(id='input-tipo', placeholder='Digite o novo tipo...', type='text'),
-            ]),
-            dbc.ModalFooter([
-                dbc.Button('Adicionar', id='btn-add-confirm', className='btn-confirm', n_clicks=0),
-                dbc.Button('Cancelar', id='btn-cancel', className='btn-cancel', n_clicks=0),
-            ]),
-        ],
-        id='modal-add',
-        is_open=False,
-        className='modal',
-    )
-
-], className='page-content')
-
 
 def remover_acentos(txt):
+    if not txt:
+        return ""
     return ''.join(
         c for c in unicodedata.normalize('NFD', txt)
         if unicodedata.category(c) != 'Mn'
     ).lower()
 
 
-callback(
+def get_page_data():
+    """Fetches and prepares all data needed for the services page."""
+    try:
+        all_items = fb.get_all_occurrences_and_services()
+        all_agents = fb.get_all_agents()
+
+        # Filter for services only
+        servicos = [s for s in all_items if s.get('class') == 'serviço']
+
+        # Create a mapping from vehicle number to responsible agent for efficient lookup
+        agent_map = {}
+        for agent in all_agents:
+            vehicle = agent.get('viatura')
+            if vehicle and agent.get('funcao') in ['Encarregado', 'Motorista']:
+                if vehicle not in agent_map:
+                    agent_map[vehicle] = {'nome': agent.get('nome'), 'id': agent.get('id')}
+
+        return servicos, agent_map
+    except Exception as e:
+        print(f"Error fetching data for services page: {e}")
+        return [], {}
+
+
+def layout():
+    servicos, _ = get_page_data()
+
+    if servicos:
+        meses_unicos = sorted(list(set(
+            datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
+            for o in servicos
+        )))
+        dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
+            {
+                'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(),
+                'value': m
+            } for m in meses_unicos
+        ]
+    else:
+        dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}]
+
+    return html.Div([
+        html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
+        dcc.Store(id='filtro-search-serv'),
+
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H3('Serviços Gerais', className='title'),
+                    dcc.Dropdown(
+                        id='filter-month-serv',
+                        options=dropdown_options,
+                        value='todos',
+                        placeholder="Filtrar por mês...",
+                        className='filter-month'
+                    ),
+                    dcc.Input(id='input-search-serv', type='text', placeholder='Buscar por tipo ou viatura...',
+                              className='input-search'),
+                ], className='searchbar'),
+
+                html.Table([
+                    html.Thead([
+                        html.Tr([
+                            html.Th('Data'),
+                            html.Th('Responsável'),
+                            html.Th('Tipo'),
+                            html.Th('Veículo'),
+                            html.Th('Ações'),
+                        ])
+                    ]),
+                    html.Tbody(id='serv-table')
+                ], className='serv-table'),
+
+                html.Div([
+                    html.Div([
+                        html.A(id='rem_serv', children='Apagar Serviços', className='rem_serv btn-danger')
+                    ], className='btn'),
+                    html.Div([
+                        html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
+                    ], className='btn-pdf-serv'),
+                ], className='btn_rem_add_pdf'),
+
+            ], className='oco_serv_container card'),
+        ]),
+
+        html.Div([
+            dcc.Graph(id='fig_serv_tipos', className='fig_serv'),
+            html.Div([
+                html.Div([
+                    html.A(id='add_serv', children='Adicionar Serviço', className='btn_add')
+                ], className='btn'),
+            ], className='btn_rem_add_pdf'),
+        ], className='graph_tipes card'),
+    ], className='page-content')
+
+
+@callback(
     Output('serv-table', 'children'),
     Output('pdf_serv_gerar', 'href'),
-    Input('input-search', 'value'),
-    Input('filter-month', 'value')
+    Input('input-search-serv', 'value'),
+    Input('filter-month-serv', 'value'),
 )
-
-
 def update_list(search_value, mes):
-    if not search_value:
-        filtered = servicos
-    else:
-        search_value = remover_acentos(search_value.lower())
-        filtered = [
-            item for item in servicos
-            if search_value in remover_acentos(item['viatura'].lower()) or
-               any(search_value in remover_acentos(a['nome'].lower()) for a in agents if
-                   a['viatura_mes'] == item['viatura'])
-        ]
+    servicos, agent_map = get_page_data()
+
+    if not servicos:
+        return html.Tr([
+            html.Td("Nenhum serviço encontrado.", colSpan=5, className='not-found'),
+        ]), "/gerar_pdf_servicos_gerais"
 
     if mes != 'todos':
         filtered = [
-            item for item in filtered
+            item for item in servicos
             if datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
         ]
+    else:
+        filtered = servicos
+
+    if search_value:
+        search_term = remover_acentos(search_value)
+        filtered_by_search = []
+        for item in filtered:
+            responsavel = agent_map.get(item.get('viatura'), {})
+            responsavel_nome = remover_acentos(responsavel.get('nome', ''))
+
+            if search_term in remover_acentos(item.get('viatura', '')) or \
+                    search_term in remover_acentos(item.get('nomenclatura', '')) or \
+                    search_term in responsavel_nome:
+                filtered_by_search.append(item)
+        filtered = filtered_by_search
 
     if not filtered:
         return html.Tr([
             html.Td("Serviço não encontrado!", colSpan=5, className='not-found'),
-        ]), f"/gerar_pdf_servicos_gerais?filtro={search_value}"
+        ]), f"/gerar_pdf_servicos_gerais?filtro={search_value}&mes={mes}"
 
     rows = []
-    for index, item in enumerate(filtered):
-        responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-        respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-
-        # Adicione uma classe baseada no índice (par ou ímpar)
-        row_class = 'even-row' if index % 2 == 0 else 'odd-row'
-
+    for item in filtered:
+        responsavel = agent_map.get(item.get('viatura'), {'nome': 'N/A', 'id': ''})
         row = html.Tr([
-            html.Td(item['data']),
+            html.Td(item.get('data', 'N/A')),
             html.Td(
-                dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
+                dcc.Link(responsavel['nome'], href=f"/dashboard/agent/{responsavel['id']}") if responsavel['id'] else
+                responsavel['nome'],
+                className='btn_ag'
             ),
-            html.Td(item['nomenclatura']),
+            html.Td(item.get('nomenclatura', 'N/A')),
             html.Td(
-                dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
+                dcc.Link(item.get('viatura', 'N/A'), href=f"/dashboard/veiculo/{item.get('viatura', '')}"),
+                className='btn_veh'
             ),
             html.Td(
-                dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}"), className='btn_view'
+                dcc.Link('Ver Mais', href=f"/dashboard/services/{item.get('id', '')}"), className='btn_view'
             ),
-        ], className=f'sla {row_class}')
+        ])
         rows.append(row)
 
     pdf_link = f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes}"
-
     return rows, pdf_link
 
 
 @callback(
-    Output('modal-add', 'is_open'),
-    Input('btn_add', 'n_clicks'),
-    Input('btn-cancel', 'n_clicks'),
-    Input('btn-add-confirm', 'n_clicks'),
-    State('modal-add', 'is_open'),
-    prevent_initial_call=True
+    Output('fig_serv_tipos', 'figure'),
+    Input('filter-month-serv', 'value'),
+    Input('theme-mode', 'data')
 )
-def toggle_modal(n_add, n_cancel, n_confirm, is_open):
-    trigger = ctx.triggered_id
-    if trigger in ['btn_add', 'btn-cancel', 'btn-add-confirm']:
-        return not is_open
-    return is_open
+def update_graph(mes, theme):
+    servicos, _ = get_page_data()
 
+    if not servicos:
+        return px.bar(title='Nenhum Serviço Cadastrado')
 
-@callback(
-    Output('fig_serv', 'figure'),
-    Output('input-tipo', 'value'),
-    Input('btn-add-confirm', 'n_clicks'),
-    State('input-tipo', 'value'),
-    prevent_initial_call='initial_duplicate'
-)
-def adicionar_tipo(n_clicks, novo_tipo):
-    if not novo_tipo:
-        raise dash.exceptions.PreventUpdate
+    if mes != 'todos':
+        filtered = [
+            item for item in servicos
+            if datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
+        ]
+    else:
+        filtered = servicos
 
-    novo_tipo = novo_tipo.strip().capitalize()
-    if novo_tipo and novo_tipo not in tipos:
-        tipos.append(novo_tipo)
-        tipos.sort()
-    return [{'label': t, 'value': t} for t in tipos], ""
+    tipos = [item['nomenclatura'].strip() for item in filtered]
+    contagem_tipos = Counter(tipos)
+
+    if not contagem_tipos:
+        return px.bar(title=f'Nenhum serviço em {mes}')
+
+    df_servicos = pd.DataFrame({
+        'Tipo': list(contagem_tipos.keys()),
+        'Quantidade': list(contagem_tipos.values())
+    })
+
+    is_dark = theme == 'dark'
+    bar_color = '#60a5fa' if is_dark else '#4682B4'
+    title_color = '#f9fafb' if is_dark else '#295678'
+    bg_color = 'rgba(0,0,0,0)'
+
+    fig_tipos = px.bar(
+        df_servicos,
+        x='Tipo',
+        y='Quantidade',
+        text='Quantidade',
+        labels={'Tipo': '', 'Quantidade': ''},
+        title='Serviços Cadastrados'
+    )
+
+    fig_tipos.update_traces(marker_color=bar_color, textposition='outside')
+    fig_tipos.update_layout(
+        title={'text': 'Serviços Cadastrados'},
+        title_font_size=26,
+        title_font_color=title_color,
+        plot_bgcolor=bg_color,
+        paper_bgcolor=bg_color,
+        font_color=title_color
+    )
+    return fig_tipos
