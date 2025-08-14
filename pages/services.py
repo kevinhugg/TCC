@@ -45,6 +45,8 @@ def get_page_data():
 
 def layout():
     servicos, _ = get_page_data()
+    vehicles = fb.get_all_vehicles()
+    vehicle_options = [{'label': v['numero'], 'value': v['numero']} for v in vehicles] if vehicles else []
 
     if servicos:
         meses_unicos = sorted(list(set(
@@ -62,7 +64,30 @@ def layout():
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
+        html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Store(id='filtro-search-serv'),
+        dcc.Location(id='url-services', refresh=True),
+
+        # Modal for adding a new service
+        dbc.Modal([
+            dbc.ModalHeader("Adicionar Novo Serviço"),
+            dbc.ModalBody([
+                dbc.Label("Data do Serviço:"),
+                dcc.DatePickerSingle(
+                    id='service-date-picker',
+                    display_format='DD/MM/YYYY',
+                    className='date-picker'
+                ),
+                dbc.Label("Tipo de Serviço:", className="mt-3"),
+                dbc.Input(id='service-type-input', placeholder="Ex: Atendimento ao cliente"),
+                dbc.Label("Viatura Responsável:", className="mt-3"),
+                dcc.Dropdown(id='service-vehicle-dropdown', options=vehicle_options, placeholder="Selecione a viatura"),
+            ]),
+            dbc.ModalFooter([
+                dbc.Button("Cancelar", id="cancel-add-service", color="secondary"),
+                dbc.Button("Salvar", id="save-new-service", color="primary"),
+            ]),
+        ], id='modal-add-service', is_open=False),
 
         html.Div([
             html.Div([
@@ -234,3 +259,57 @@ def update_graph(mes, theme):
         font_color=title_color
     )
     return fig_tipos
+
+
+@callback(
+    Output('modal-add-service', 'is_open'),
+    Input('add_serv', 'n_clicks'),
+    Input('cancel-add-service', 'n_clicks'),
+    State('modal-add-service', 'is_open'),
+    prevent_initial_call=True,
+)
+def toggle_modal_service(n_add, n_cancel, is_open):
+    if ctx.triggered_id in ['add_serv', 'cancel-add-service']:
+        return not is_open
+    return is_open
+
+
+@callback(
+    Output('url-services', 'pathname', allow_duplicate=True),
+    Output('modal-add-service', 'is_open', allow_duplicate=True),
+    Input('save-new-service', 'n_clicks'),
+    State('service-date-picker', 'date'),
+    State('service-type-input', 'value'),
+    State('service-vehicle-dropdown', 'value'),
+    prevent_initial_call=True,
+)
+def save_new_service(n_clicks, date, service_type, vehicle):
+    if n_clicks:
+        if not all([date, service_type, vehicle]):
+            return dash.no_update, True
+
+        # Find the agent responsible for the vehicle
+        agents = fb.get_agents_by_vehicle(vehicle)
+        if not agents:
+            # Handle case where no agent is found for the vehicle
+            print(f"No agent found for vehicle {vehicle}")
+            # Optionally, show an alert to the user
+            return dash.no_update, True
+
+        agent_id = agents[0].get('id')
+        if not agent_id:
+            print("Agent found but has no ID")
+            return dash.no_update, True
+
+        service_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
+        service_data = {
+            'nomenclatura': service_type,
+            'viatura': vehicle,
+            'class': 'serviço'
+        }
+
+        fb.add_service(agent_id, service_date, service_data)
+
+        return '/services', False
+
+    return dash.no_update, True

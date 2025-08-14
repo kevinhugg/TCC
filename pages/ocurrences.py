@@ -1,10 +1,11 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback, State, ctx
 import unicodedata
 from collections import Counter
 import plotly.express as px
 from datetime import datetime
 import pandas as pd
+import dash_bootstrap_components as dbc
 import firebase_functions as fb
 
 dash.register_page(__name__, path='/ocurrences', name='Ocorrências', className='pg-at')
@@ -45,6 +46,8 @@ def get_page_data():
 
 def layout():
     ocorrencias, _ = get_page_data()
+    vehicles = fb.get_all_vehicles()
+    vehicle_options = [{'label': v['numero'], 'value': v['numero']} for v in vehicles] if vehicles else []
 
     # Generate month dropdown options from the fetched data
     if ocorrencias:
@@ -63,14 +66,37 @@ def layout():
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
-        dcc.Store(id='filtro-search-oco'),  # Renamed store to be specific
+        html.Link(rel='stylesheet', href='/static/css/modal.css'),
+        dcc.Location(id='url-occurrences', refresh=True),
+
+        # Modal for adding a new occurrence
+        dbc.Modal([
+            dbc.ModalHeader("Adicionar Nova Ocorrência"),
+            dbc.ModalBody([
+                dbc.Label("Data da Ocorrência:"),
+                dcc.DatePickerSingle(
+                    id='occurrence-date-picker',
+                    display_format='DD/MM/YYYY',
+                    className='date-picker'
+                ),
+                dbc.Label("Tipo de Ocorrência:", className="mt-3"),
+                dbc.Input(id='occurrence-type-input', placeholder="Ex: Atendimento ao Cidadão"),
+                dbc.Label("Viatura Responsável:", className="mt-3"),
+                dcc.Dropdown(id='occurrence-vehicle-dropdown', options=vehicle_options,
+                             placeholder="Selecione a viatura"),
+            ]),
+            dbc.ModalFooter([
+                dbc.Button("Cancelar", id="cancel-add-occurrence", color="secondary"),
+                dbc.Button("Salvar", id="save-new-occurrence", color="primary"),
+            ]),
+        ], id='modal-add-occurrence', is_open=False),
 
         html.Div([
             html.Div([
                 html.Div([
                     html.H3('Ocorrências Gerais', className='title'),
                     dcc.Dropdown(
-                        id='filter-month-oco',  # Renamed to be specific
+                        id='filter-month-oco',
                         options=dropdown_options,
                         value='todos',
                         placeholder="Filtrar por mês...",
@@ -95,8 +121,6 @@ def layout():
 
                 html.Div([
                     html.Div([
-                        # This button seems to be for deleting services, which is out of place here.
-                        # I'll keep it but comment that it might be wrong.
                         html.A(id='rem_oco', children='Apagar Ocorrências', className='rem_serv btn-danger')
                     ], className='btn'),
 
@@ -134,7 +158,6 @@ def update_list(search_value, mes):
             html.Td("Nenhuma ocorrência encontrada.", colSpan=5, className='not-found'),
         ]), "/gerar_pdf_ocorrencias"
 
-    # Filter by month
     if mes != 'todos':
         filtered = [
             item for item in ocorrencias
@@ -143,7 +166,6 @@ def update_list(search_value, mes):
     else:
         filtered = ocorrencias
 
-    # Filter by search value
     if search_value:
         search_term = remover_acentos(search_value)
         filtered_by_search = []
@@ -190,8 +212,8 @@ def update_list(search_value, mes):
 
 @callback(
     Output('fig_oco_tipos', 'figure'),
-    Input('filter-month-oco', 'value'),  # Update graph when month changes
-    Input('theme-mode', 'data')  # Update graph when theme changes
+    Input('filter-month-oco', 'value'),
+    Input('theme-mode', 'data')
 )
 def update_graph(mes, theme):
     ocorrencias, _ = get_page_data()
@@ -199,7 +221,6 @@ def update_graph(mes, theme):
     if not ocorrencias:
         return px.bar(title='Nenhuma Ocorrência Cadastrada')
 
-    # Filter by month
     if mes != 'todos':
         filtered = [
             item for item in ocorrencias
@@ -244,3 +265,54 @@ def update_graph(mes, theme):
     )
 
     return fig_tipos
+
+
+@callback(
+    Output('modal-add-occurrence', 'is_open'),
+    Input('add_oco', 'n_clicks'),
+    Input('cancel-add-occurrence', 'n_clicks'),
+    State('modal-add-occurrence', 'is_open'),
+    prevent_initial_call=True,
+)
+def toggle_modal_occurrence(n_add, n_cancel, is_open):
+    if ctx.triggered_id in ['add_oco', 'cancel-add-occurrence']:
+        return not is_open
+    return is_open
+
+
+@callback(
+    Output('url-occurrences', 'pathname', allow_duplicate=True),
+    Output('modal-add-occurrence', 'is_open', allow_duplicate=True),
+    Input('save-new-occurrence', 'n_clicks'),
+    State('occurrence-date-picker', 'date'),
+    State('occurrence-type-input', 'value'),
+    State('occurrence-vehicle-dropdown', 'value'),
+    prevent_initial_call=True,
+)
+def save_new_occurrence(n_clicks, date, occ_type, vehicle):
+    if n_clicks:
+        if not all([date, occ_type, vehicle]):
+            return dash.no_update, True
+
+        agents = fb.get_agents_by_vehicle(vehicle)
+        if not agents:
+            print(f"No agent found for vehicle {vehicle}")
+            return dash.no_update, True
+
+        agent_id = agents[0].get('id')
+        if not agent_id:
+            print("Agent found but has no ID")
+            return dash.no_update, True
+
+        occ_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
+        occ_data = {
+            'nomenclatura': occ_type,
+            'viatura': vehicle,
+            'class': 'ocorrencia'
+        }
+
+        fb.add_occurrence(agent_id, occ_date, occ_data)
+
+        return '/ocurrences', False
+
+    return dash.no_update, True

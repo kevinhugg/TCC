@@ -162,56 +162,74 @@ def get_ocurrences_by_agent(agent_mat):
     return next((doc.to_dict() | {'matricula': doc.id} for doc in docs))
 
 
-# busca ocorrencias de todos os agentes na viatura informada
 def get_occurrences_and_services_by_vehicle(veiculo_numero):
+    """Gets all occurrences and services for a specific vehicle by iterating through agents."""
     history = []
-    dias_docs = db.collection('ocorrencias').list_documents()
+    agents = get_all_agents()  # Fetch all agents
 
-    for dia_doc in dias_docs:
-        data_str = dia_doc.id
-        lista_ref = dia_doc.collection('lista').stream()
+    for agent in agents:
+        agent_id = agent.get('id')
+        if not agent_id:
+            continue
 
-        for doc in lista_ref:
-            data = doc.to_dict()
-            if data.get('viatura') == veiculo_numero:
-                item_class = data.get('class', 'ocorrencia')
-                item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+        # Reference to the 'ocorrencias' subcollection for the agent
+        ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
+        date_docs = ocorrencias_ref.stream()
 
-                history.append({
-                    'id': doc.id,
-                    'data': data_str,
-                    'nomenclatura': data.get('nomenclatura', 'N/A'),
-                    'tipo': item_type,
-                    'class': item_class,
-                    'path': 'services' if item_class == 'serviço' else 'ocurrences'
-                })
+        for date_doc in date_docs:
+            data_str = date_doc.id
+            lista_ref = date_doc.reference.collection('lista').stream()
 
+            for item_doc in lista_ref:
+                data = item_doc.to_dict()
+                # Check if the item belongs to the requested vehicle
+                if data.get('viatura') == veiculo_numero:
+                    item_class = data.get('class', 'ocorrencia')
+                    item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+
+                    history.append({
+                        'id': item_doc.id,
+                        'data': data_str,
+                        'nomenclatura': data.get('nomenclatura', 'N/A'),
+                        'tipo': item_type,
+                        'class': item_class,
+                        'path': 'services' if item_class == 'serviço' else 'ocurrences',
+                        'viatura': data.get('viatura', 'N/A')
+                    })
     return history
 
 
 def get_all_occurrences_and_services():
-    """Gets all occurrences and services from all vehicles."""
+    """Gets all occurrences and services from all agents."""
     history = []
-    dias_docs = db.collection('ocorrencias').list_documents()
+    agents = get_all_agents()
 
-    for dia_doc in dias_docs:
-        data_str = dia_doc.id
-        lista_ref = dia_doc.collection('lista').stream()
+    for agent in agents:
+        agent_id = agent.get('id')
+        if not agent_id:
+            continue
 
-        for doc in lista_ref:
-            data = doc.to_dict()
-            item_class = data.get('class', 'ocorrencia')
-            item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+        ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
+        date_docs = ocorrencias_ref.stream()
 
-            history.append({
-                'id': doc.id,
-                'data': data_str,
-                'nomenclatura': data.get('nomenclatura', 'N/A'),
-                'tipo': item_type,
-                'class': item_class,
-                'path': 'services' if item_class == 'serviço' else 'ocurrences',
-                'viatura': data.get('viatura', 'N/A') # Also get the vehicle number
-            })
+        for date_doc in date_docs:
+            data_str = date_doc.id
+            lista_ref = date_doc.reference.collection('lista').stream()
+
+            for item_doc in lista_ref:
+                data = item_doc.to_dict()
+                item_class = data.get('class', 'ocorrencia')
+                item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+
+                history.append({
+                    'id': item_doc.id,
+                    'data': data_str,
+                    'nomenclatura': data.get('nomenclatura', 'N/A'),
+                    'tipo': item_type,
+                    'class': item_class,
+                    'path': 'services' if item_class == 'serviço' else 'ocurrences',
+                    'viatura': data.get('viatura', 'N/A')
+                })
 
     return history
 
@@ -233,6 +251,40 @@ def add_agent(agent_data):
     except Exception as e:
         print(f"An error occurred while adding agent: {e}")
         return None
+
+
+def add_occurrence_or_service(agent_id, date, data):
+    """Adds a new occurrence or service to a specific agent's subcollection."""
+    try:
+        agent_ref = db.collection('agentes').document(agent_id)
+        day_ref = agent_ref.collection('ocorrencias').document(date)
+        day_ref.collection('lista').add(data)
+        return True
+    except Exception as e:
+        print(f"An error occurred while adding occurrence/service for agent {agent_id}: {e}")
+        return False
+
+
+def add_service(agent_id, service_date, service_data):
+    """Adds a new service for a specific agent."""
+    return add_occurrence_or_service(agent_id, service_date, service_data)
+
+
+def add_occurrence(agent_id, occ_date, occ_data):
+    """Adds a new occurrence for a specific agent."""
+    return add_occurrence_or_service(agent_id, occ_date, occ_data)
+
+
+def add_vehicle(vehicle_data):
+    """Adds a new vehicle to the 'veiculos' collection."""
+    try:
+        doc_ref = db.collection('veiculos').document()
+        doc_ref.set(vehicle_data)
+        return doc_ref.id
+    except Exception as e:
+        print(f"An error occurred while adding vehicle: {e}")
+        return None
+
 
 def delete_agent(agent_id):
     """Deletes an agent from the 'agentes' collection by their ID."""
