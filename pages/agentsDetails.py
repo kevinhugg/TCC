@@ -34,7 +34,7 @@ def layout(id=None):
         ]),
 
         # The main content will be loaded here by a callback
-        html.Div(id='agent-details-content'),
+        html.Div(id='agent-details-content', className='agent-details-wrapper'),
 
     ], className='page-content')
 
@@ -156,18 +156,23 @@ def update_history_table(selected_month, store_data):
     [Input('rem_agent', 'n_clicks'),
      Input('close-modal-agent', 'n_clicks'),
      Input('cancel-remove-agent', 'n_clicks')],
+    [State('removal-modal-agent', 'style')],
     prevent_initial_call=True
 )
-def toggle_removal_modal(n_open, n_close, n_cancel):
+def toggle_removal_modal(n_open, n_close, n_cancel, current_style):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return {'display': 'none'}
+        return dash.no_update
 
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    if trigger_id == 'rem_agent':
+
+    if trigger_id == 'rem_agent' and n_open:
         return {'display': 'block'}
 
-    return {'display': 'none'}
+    if trigger_id in ['close-modal-agent', 'cancel-remove-agent']:
+        return {'display': 'none'}
+
+    return dash.no_update
 
 
 @callback(

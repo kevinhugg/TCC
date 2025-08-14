@@ -27,7 +27,7 @@ def get_page_data():
         all_agents = fb.get_all_agents()
 
         # Filter for services only
-        servicos = [s for s in all_items if s.get('class') == 'serviço']
+        servicos = [s for s in all_items if s.get('class') == 'viario']
 
         # Create a mapping from vehicle number to responsible agent for efficient lookup
         agent_map = {}

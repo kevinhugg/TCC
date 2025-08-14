@@ -1,5 +1,3 @@
-/* static/css/modal.css */
-
 .modal {
     display: flex; /* Always flex, use 'display: none' on the element style to hide/show */
     position: fixed;

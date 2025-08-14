@@ -315,7 +315,7 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
             'imagem': image_url
         }
         fb.add_vehicle(vehicle_data)
-        return '/pageVehicles', {'display': 'none'}, ""
+        return '/dashboard/pageVehicles', {'display': 'none'}, ""
     return dash.no_update, dash.no_update, ""
 
 
