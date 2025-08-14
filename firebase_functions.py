@@ -327,6 +327,38 @@ def delete_agent(agent_id):
         return False
 
 
+def delete_vehicle(numero):
+    """Deletes a vehicle from the 'veiculos' collection by its number."""
+    try:
+        # Find the document by its 'numero' field
+        docs = db.collection('veiculos').where('numero', '==', numero).limit(1).stream()
+        doc_to_delete = next(docs, None)
+
+        if doc_to_delete:
+            doc_to_delete.reference.delete()
+            print(f"Vehicle with numero {numero} deleted successfully.")
+            return True
+        else:
+            print(f"No vehicle found with numero {numero}.")
+            return False
+    except Exception as e:
+        print(f"An error occurred while deleting vehicle {numero}: {e}")
+        return False
+
+
+def delete_all_vehicles():
+    """Deletes all vehicles from the 'veiculos' collection."""
+    try:
+        docs = db.collection('veiculos').stream()
+        for doc in docs:
+            doc.reference.delete()
+        print("All vehicles have been deleted.")
+        return True
+    except Exception as e:
+        print(f"An error occurred while deleting all vehicles: {e}")
+        return False
+
+
 # UPDATES
 
 # att agente por id/matricula

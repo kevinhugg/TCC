@@ -130,7 +130,29 @@ def layout():
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Location(id='url-vehicles', refresh=True),
         add_vehicle_modal,
-
+        html.Div(
+            id='modal-delete-all-vehicles',
+            className='modal',
+            style={'display': 'none'},
+            children=[
+                html.Div(
+                    className='modal-content',
+                    children=[
+                        html.Div(className='modal-header', children=[
+                            html.H5('Confirmar Exclusão Total', className='modal-title'),
+                            html.Button('×', id='cancel-delete-all-vehicles-x', className='modal-close-button')
+                        ]),
+                        html.Div(className='modal-body', children=[
+                            html.P("Você tem certeza que quer remover TODAS as viaturas? Esta ação não pode ser desfeita.")
+                        ]),
+                        html.Div(className='modal-footer', children=[
+                            html.Button('Cancelar', id='cancel-delete-all-vehicles', className='modal-button cancel'),
+                            html.Button('Confirmar', id='confirm-delete-all-vehicles', className='modal-button submit')
+                        ])
+                    ]
+                )
+            ]
+        ),
         html.Div([
             html.Div([
                 dcc.Input(id='input-search', type='text', placeholder='Buscar por placa ou número...', className='input-search'),
@@ -153,7 +175,7 @@ def layout():
                 for v in viaturas_sorted
             ]),
             html.Div([
-                html.Div([html.A(id='rem_vehicle', children='Remover Veículos', className='btn rem_vehicle')], className='btn_rem'),
+                html.Div([html.A(id='rem_all_vehicles', children='Remover Veículos', className='btn rem_vehicle')], className='btn_rem'),
                 html.Div([html.A(id='add_vehicle', children='Adicionar Veículo', className='btn add_vehicle')], className='btn_add'),
             ], className='btn_rem_add'),
         ], className='vehicles card'),
@@ -295,3 +317,32 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
         fb.add_vehicle(vehicle_data)
         return '/pageVehicles', {'display': 'none'}, ""
     return dash.no_update, dash.no_update, ""
+
+
+@callback(
+    Output("modal-delete-all-vehicles", "style"),
+    [Input("rem_all_vehicles", "n_clicks"),
+     Input("cancel-delete-all-vehicles", "n_clicks"),
+     Input("cancel-delete-all-vehicles-x", "n_clicks")],
+    [State("modal-delete-all-vehicles", "style")],
+    prevent_initial_call=True,
+)
+def toggle_delete_all_modal(n_open, n_cancel, n_cancel_x, style):
+    if n_open or n_cancel or n_cancel_x:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
+
+
+@callback(
+    Output('url-vehicles', 'pathname', allow_duplicate=True),
+    Input('confirm-delete-all-vehicles', 'n_clicks'),
+    prevent_initial_call=True
+)
+def delete_all_vehicles(n_clicks):
+    if n_clicks:
+        if fb.delete_all_vehicles():
+            return '/dashboard/pageVehicles'
+    return dash.no_update

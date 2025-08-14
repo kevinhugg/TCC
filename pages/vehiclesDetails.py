@@ -1,7 +1,7 @@
 import dash
 from dash import html, dcc, Input, Output, callback, State
 from datetime import datetime
-
+import dash_bootstrap_components as dbc
 import firebase_functions as fb
 
 dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
@@ -17,7 +17,7 @@ def layout(numero=None):
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/detailsVehicles.css'),
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
-
+        dcc.Location(id='url-redirect', refresh=True),
         dcc.Store(id='vehicle-store', data=numero),
         dcc.Store(id='agent-assignment-trigger', data=0),
 
@@ -40,11 +40,35 @@ def layout(numero=None):
 
             html.Div([
                 html.Div([
-                    html.A(id='rem_vehicle', children='Remover Veículo', className='btn rem_vehicle')
+                    html.A(id='rem_vehicle_btn', children='Remover Veículo', className='btn rem_vehicle')
                 ], className='btn_rem'),
             ], className='btn_rem_add'),
 
         ], className='details-container card'),
+
+        html.Div(
+            id='modal-delete-vehicle',
+            className='modal',
+            style={'display': 'none'},
+            children=[
+                html.Div(
+                    className='modal-content',
+                    children=[
+                        html.Div(className='modal-header', children=[
+                            html.H5('Confirmar Exclusão', className='modal-title'),
+                            html.Button('×', id='cancel-delete-vehicle-x', className='modal-close-button')
+                        ]),
+                        html.Div(className='modal-body', children=[
+                            html.P("Você tem certeza que quer remover esta viatura?")
+                        ]),
+                        html.Div(className='modal-footer', children=[
+                            html.Button('Cancelar', id='cancel-delete-vehicle', className='modal-button cancel'),
+                            html.Button('Confirmar', id='confirm-delete-vehicle', className='modal-button submit')
+                        ])
+                    ]
+                )
+            ]
+        ),
 
         html.Div([
             html.H4("Histórico da Viatura"),
@@ -393,4 +417,34 @@ def remove_agent(n_clicks, trigger):
         print(f"Removed agent {agent_id_to_remove} from their vehicle.")
         return trigger + 1
 
+    return dash.no_update
+
+
+@callback(
+    Output("modal-delete-vehicle", "style"),
+    [Input("rem_vehicle_btn", "n_clicks"),
+     Input("cancel-delete-vehicle", "n_clicks"),
+     Input("cancel-delete-vehicle-x", "n_clicks")],
+    [State("modal-delete-vehicle", "style")],
+    prevent_initial_call=True,
+)
+def toggle_delete_modal(n_open, n_cancel, n_cancel_x, style):
+    if n_open or n_cancel or n_cancel_x:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
+
+
+@callback(
+    Output('url-redirect', 'pathname'),
+    Input('confirm-delete-vehicle', 'n_clicks'),
+    State('vehicle-store', 'data'),
+    prevent_initial_call=True
+)
+def delete_vehicle(n_clicks, numero):
+    if n_clicks:
+        if fb.delete_vehicle(numero):
+            return '/dashboard/pageVehicles'
     return dash.no_update
