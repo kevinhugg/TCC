@@ -59,22 +59,6 @@ def layout():
                             html.Label("Idade:"),
                             dcc.Input(id='add-agent-idade', type='number', placeholder="Idade", className='modal-input'),
                         ]),
-                        html.Div(className='form-group', children=[
-                            html.Label("Cargo:"),
-                            dcc.Input(id='add-agent-cargo', placeholder="Cargo do agente", className='modal-input'),
-                        ]),
-                        html.Div(className='form-group', children=[
-                            html.Label("Função:"),
-                            dcc.Dropdown(id='add-agent-funcao', options=funcao_options, placeholder="Selecione a função"),
-                        ]),
-                        html.Div(className='form-group', children=[
-                            html.Label("Turno:"),
-                            dcc.Dropdown(id='add-agent-turno', options=turno_options, placeholder="Selecione o turno"),
-                        ]),
-                        html.Div(className='form-group', children=[
-                            html.Label("Viatura:"),
-                            dcc.Dropdown(id='add-agent-veiculo', options=viaturas_options, placeholder="Selecione o veículo"),
-                        ]),
                     ]
                 ),
                 html.Div(
@@ -115,7 +99,6 @@ def layout():
                         html.Tr([
                             html.Th('Selecionar', id='select-header', style={'display': 'none'}),
                             html.Th('Nome'),
-                            html.Th('Cargo'),
                             html.Th('Função'),
                             html.Th('Veículo'),
                             html.Th('Ações')
@@ -125,17 +108,11 @@ def layout():
                 ], className='agents-table'),
 
                 html.Div([
-                    html.Div([
-                        html.Button(id='rem_agents', children='Remover Agentes', className='btn btn-danger')
-                    ], className='btn'),
-                    html.Div([
-                        html.A(id='pdf_agentes_gerar', children='Gerar PDF', target="_blank",
-                               className='btn btn-primary')
-                    ], className='btn-pdf-agent'),
-                    html.Div([
-                        html.Button(id='add_agents', children='Adicionar Agente', className='btn btn-success')
-                    ], className='btn'),
-                ], className='btn_rem_add_pdf'),
+                    html.Button(id='rem_agents', children='Remover Agentes', className='btn btn-danger'),
+                    html.A(id='pdf_agentes_gerar', children='Gerar PDF', target="_blank",
+                           className='btn btn-primary'),
+                    html.Button(id='add_agents', children='Adicionar Agente', className='btn btn-success'),
+                ], className='btn_rem_add'),
             ], className='agents_container'),
         ])
     ], className='page-content')
@@ -166,15 +143,11 @@ def toggle_agent_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
     State('add-agent-name', 'value'),
     State('add-agent-matricula', 'value'),
     State('add-agent-idade', 'value'),
-    State('add-agent-cargo', 'value'),
-    State('add-agent-funcao', 'value'),
-    State('add-agent-turno', 'value'),
-    State('add-agent-veiculo', 'value'),
     prevent_initial_call=True
 )
-def handle_add_agent(n_clicks, name, matricula, idade, cargo, funcao, turno, veiculo):
+def handle_add_agent(n_clicks, name, matricula, idade):
     if n_clicks:
-        if not all([name, matricula, idade, cargo, funcao, turno]):
+        if not all([name, matricula, idade]):
             print("Agent not added, missing fields")
             return no_update, {'display': 'flex'}
 
@@ -182,10 +155,10 @@ def handle_add_agent(n_clicks, name, matricula, idade, cargo, funcao, turno, vei
             'nome': name,
             'matricula': matricula,
             'idade': idade,
-            'cargo_at': cargo,
-            'funcao': funcao,
-            'turno': turno,
-            'viatura': veiculo or "",
+            'cargo_at': "",
+            'funcao': "",
+            'turno': "",
+            'viatura': "",
             'ocorrencias': "0",
             'foto_agnt': 'https://firebasestorage.googleapis.com/v0/b/tcc-semurb-2ea61.appspot.com/o/agentes%2Fpersona.png?alt=media&token=c23068da-25a5-45elyn-846c-d2a637886358'
         }
@@ -292,7 +265,6 @@ def update_list(search_value, edit_mode, pathname):
         rows.append(html.Tr([
             checkbox_cell,
             html.Td(item.get('nome', 'N/A')),
-            html.Td(item.get('cargo_at', 'N/A')),
             html.Td(item.get('funcao', 'N/A')),
             html.Td(dcc.Link(item.get('viatura', 'N/A'), href=f"/dashboard/veiculo/{item.get('viatura', '')}")),
             html.Td(dcc.Link('Ver Mais', href=f"/dashboard/agent/{agent_id}")),

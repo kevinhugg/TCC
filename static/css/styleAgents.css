@@ -3,6 +3,9 @@
     margin-left: 4em;
     margin-top: 30px;
     transition: margin-left 0.3s ease;
+    width: 97%;
+    min-height: 35rem;
+    box-sizing: border-box;
 }
 
 .agents_container {
@@ -61,6 +64,16 @@
 .agents-table tr:hover {
     background-color: var(--table-header-bg-color);
     color: var(--table-row-hover-text-color);
+}
+
+.agents-table a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.agents-table a:hover {
+    text-decoration: underline;
 }
 
 .agents-table tr {
@@ -124,19 +137,20 @@
 }
 
 .modal-input {
-    width: 100%;
+    width: 95%;
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-color);
-    color: rgba(0, 0, 0, 0.1);
+    color: var(--primary-text-color);
     font-size: 1rem;
     transition: border-color 0.3s ease;
 }
 
 .modal-input:focus {
     outline: none;
+    color: var(--primary-text-color);
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
@@ -367,33 +381,39 @@
     --add-btn-hover: #166534;
 }
 
-
-
-.btn_rem_add_pdf {
-    position: relative;
-    z-index: 0;
+.btn_rem_add {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    gap: 20px;
+    margin-top: 1rem;
 }
-
 
 .btn {
-    position: relative;
-    z-index: 1;
-    padding: 0.75rem 1.5rem;
+    color: var(--button-text-color);
+    background-color: var(--button-bg-color);
+    padding: 0.5rem 1rem;
     border-radius: 8px;
-    margin: 0;
-    border: none !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid transparent;
 }
 
-
-.btn::before, .btn::after {
-    content: none !important;
+.btn:hover {
+    background-color: var(--button-hover-bg-color);
 }
 
+.btn-danger:hover {
+    border-color: #ef4444;
+    background-color: transparent !important;
+    color: #ef4444 !important;
+}
+
+.btn-success:hover {
+    border-color: #22c55e;
+    background-color: transparent !important;
+    color: #22c55e !important;
+}
 
 .btn-danger {
     background-color: var(--remove-btn-bg) !important;
