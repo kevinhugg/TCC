@@ -89,6 +89,7 @@ def layout():
                                 html.Label("Tipo de Veículo:"),
                                 dcc.Input(id='add-vehicle-tipo', placeholder="Ex: Carro, Moto", className='modal-input'),
                             ]),
+                            html.Div(id='upload-error-message', style={'color': 'red'}),
                             html.Div(className='form-group', children=[
                                 html.Label("Imagem da Viatura:"),
                                 dcc.Upload(
@@ -264,6 +265,7 @@ def toggle_vehicle_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
 @callback(
     Output('url-vehicles', 'pathname'),
     Output('modal-add-vehicle', 'style', allow_duplicate=True),
+    Output('upload-error-message', 'children'),
     Input('submit-add-vehicle', 'n_clicks'),
     State('add-vehicle-placa', 'value'),
     State('add-vehicle-numero', 'value'),
@@ -275,13 +277,14 @@ def toggle_vehicle_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
 def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
     if n_clicks:
         if not all([placa, numero, tipo]):
-            return dash.no_update, {'display': 'flex'}
+            return dash.no_update, {'display': 'flex'}, "Por favor, preencha todos os campos."
 
         image_url = '/static/assets/img/viatura1.png'  # Default image
         if contents:
             uploaded_url = fb.upload_image_to_storage(contents, filename)
             if uploaded_url:
                 image_url = uploaded_url
+            # If upload fails, silently use the default image_url
 
         vehicle_data = {
             'placa': placa,
@@ -290,5 +293,5 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
             'imagem': image_url
         }
         fb.add_vehicle(vehicle_data)
-        return '/pageVehicles', {'display': 'none'}
-    return dash.no_update, dash.no_update
+        return '/pageVehicles', {'display': 'none'}, ""
+    return dash.no_update, dash.no_update, ""

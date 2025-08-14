@@ -2,13 +2,12 @@ import firebase_admin
 from firebase_admin import credentials, firestore, storage
 import base64
 import uuid
+from urllib.parse import quote
 
 # inicializa o app uma vez só
 if not firebase_admin._apps:
     cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred, {
-        'storageBucket': 'tcc-semurb-2ea61.appspot.com'
-    })
+    firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
@@ -245,20 +244,28 @@ def get_agents_by_vehicle(viatura_numero):
 
 
 def upload_image_to_storage(contents, filename):
-    """Uploads an image to Firebase Storage and returns its public URL."""
+    """Uploads an image to Firebase Storage and returns its download URL."""
     try:
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
 
         bucket = storage.bucket()
-        # Generate a unique filename
         unique_filename = f"viaturas/{uuid.uuid4()}-{filename}"
         blob = bucket.blob(unique_filename)
 
-        blob.upload_from_string(decoded, content_type=content_type)
-        blob.make_public()
+        # Create a new token and set it in the metadata
+        download_token = uuid.uuid4()
+        metadata = {"firebaseStorageDownloadTokens": str(download_token)}
+        blob.metadata = metadata
 
-        return blob.public_url
+        # Upload the file
+        blob.upload_from_string(decoded, content_type=content_type)
+
+        # Manually construct the download URL
+        encoded_path = quote(blob.name, safe='')
+        download_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{encoded_path}?alt=media&token={download_token}"
+
+        return download_url
     except Exception as e:
         print(f"An error occurred while uploading image: {e}")
         return None
