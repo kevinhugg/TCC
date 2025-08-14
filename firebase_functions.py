@@ -209,3 +209,26 @@ def clear_agent_assignment(agent_mat):
         'viatura': '',
         'turno': '',
     })
+
+
+def get_occurrence_or_service_by_id(doc_id):
+    dias_docs = db.collection('ocorrencias').list_documents()
+    for dia_doc in dias_docs:
+        doc_ref = dia_doc.collection('lista').document(doc_id)
+        doc = doc_ref.get()
+        if doc.exists:
+            return doc.to_dict() | {'id': doc.id, 'data': dia_doc.id}
+    return None
+
+
+def delete_occurrence_or_service(doc_id):
+    dias_docs = db.collection('ocorrencias').list_documents()
+    for dia_doc in dias_docs:
+        doc_ref = dia_doc.collection('lista').document(doc_id)
+        if doc_ref.get().exists:
+            doc_ref.delete()
+            # Se a subcoleção 'lista' ficar vazia, remove o documento do dia
+            if not dia_doc.collection('lista').limit(1).get():
+                dia_doc.delete()
+            return True
+    return False
