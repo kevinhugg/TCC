@@ -26,10 +26,19 @@ def create_damage_graph():
         )
         return fig
 
-    formatted_dates = [datetime.strptime(date, "%Y-%m-%d").strftime("%d/%m/%Y") for date in data_damVeh_filtered]
-    count_data = Counter(formatted_dates)
+    # Convert to datetime objects for correct counting and sorting
+    date_objects = [datetime.strptime(date, "%Y-%m-%d") for date in data_damVeh_filtered]
+    count_data = Counter(date_objects)
+
+    # Create DataFrame
     df = pd.DataFrame({'Data': list(count_data.keys()), 'Quantidade de Danos': list(count_data.values())})
+
+    # Sort by date
     df = df.sort_values(by='Data', ascending=True)
+
+    # Format date for display AFTER sorting
+    df['Data'] = df['Data'].dt.strftime("%d/%m/%Y")
+
     fig = px.bar(df, x='Quantidade de Danos', y='Data', orientation='h', title='Danos por Data',
                  text='Quantidade de Danos')
     fig.update_traces(
@@ -77,6 +86,11 @@ def layout():
         style={'height': '600px', 'width': '100%'},
         className='bar-damVeh'
     )
+
+    # Dynamic options for damage part filter
+    all_parts = sorted(list(set(d['parte'] for d in damVehicles if d.get('parte'))))
+    damage_part_options = [{'label': 'Partes', 'value': 'all'}] + \
+                          [{'label': part.capitalize(), 'value': part} for part in all_parts]
 
     return html.Div([
 
@@ -142,16 +156,10 @@ def layout():
                 ),
                 dcc.Dropdown(
                     id='damage-part-filter',
-                    options=[
-                        {'label': 'Todas as partes', 'value': 'all'},
-                        {'label': 'Frente', 'value': 'frente'},
-                        {'label': 'Atrás', 'value': 'atras'},
-                        {'label': 'Lado Esquerdo', 'value': 'lado esquerdo'},
-                        {'label': 'Lado Direito', 'value': 'lado direito'},
-                    ],
+                    options=damage_part_options,
                     value='all',
                     clearable=False,
-                    style={'width': '200px', 'marginLeft': '10px'}
+                    style={'width': '200px'}
                 ),
             ], className='drop-date'),
 
@@ -159,6 +167,7 @@ def layout():
                 html.Thead([
                     html.Tr([
                         html.Th('N°'),
+                        html.Th('Área Avariada'),
                         html.Th('Desc'),
                         html.Th('Status'),
                         html.Th('Data'),
@@ -167,6 +176,7 @@ def layout():
                 html.Tbody(id='table_dam_body', children=[
                     html.Tr([
                         html.Td(item.get('viatura')),
+                        html.Td(item.get('parte')),
                         html.Td(item.get('descricao')),
                         html.Td(item.get('status')),
                         html.Td(item.get('data')),
@@ -258,6 +268,7 @@ def filter_damage_reports(status, selected_part):
     return [
         html.Tr([
             html.Td(item.get('viatura')),
+            html.Td(item.get('parte')),
             html.Td(item.get('descricao')),
             html.Td(item.get('status')),
             html.Td(item.get('data')),
