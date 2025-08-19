@@ -46,7 +46,10 @@ def get_page_data():
 def layout():
     servicos, _ = get_page_data()
     vehicles = fb.get_all_vehicles()
+    service_types = fb.get_all_service_types()
+
     vehicle_options = [{'label': v['numero'], 'value': v['numero']} for v in vehicles] if vehicles else []
+    service_type_options = [{'label': s['nome'], 'value': s['nome']} for s in service_types]
 
     if servicos:
         meses_unicos = sorted(list(set(
@@ -54,10 +57,8 @@ def layout():
             for o in servicos
         )))
         dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
-            {
-                'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(),
-                'value': m
-            } for m in meses_unicos
+            {'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(), 'value': m}
+            for m in meses_unicos
         ]
     else:
         dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}]
@@ -67,7 +68,41 @@ def layout():
         dcc.Store(id='filtro-search-serv'),
         dcc.Location(id='url-services', refresh=True),
 
-        # Modal for adding a new service
+        # Modal for deleting a service type
+        html.Div(id='delete-service-type-modal', className='modal', style={'display': 'none'}, children=[
+            html.Div(className='modal-content', children=[
+                html.Div(className='modal-header', children=[
+                    html.H5("Confirmar Exclusão"),
+                    html.Button('×', id='cancel-delete-service-type-x', className='modal-close-button')
+                ]),
+                html.Div(id='delete-service-type-modal-body', className='modal-body'),
+                html.Div(className='modal-footer', children=[
+                    html.Button("Cancelar", id='cancel-delete-service-type', className='modal-button cancel'),
+                    html.Button("Apagar", id='confirm-delete-service-type', className='modal-button submit btn-danger')
+                ])
+            ])
+        ]),
+
+        # Modal for managing service types
+        html.Div(id='manage-service-types-modal', className='modal', style={'display': 'none'}, children=[
+            html.Div(className='modal-content', children=[
+                html.Div(className='modal-header', children=[
+                    html.H5("Gerenciar Tipos de Serviço"),
+                    html.Button('×', id='close-manage-service-types-modal', className='modal-close-button')
+                ]),
+                html.Div(className='modal-body', children=[
+                    html.Div(className='form-group', children=[
+                        html.Label("Adicionar Novo Tipo:"),
+                        dcc.Input(id='new-service-type-name', placeholder="Nome do novo tipo", className='modal-input'),
+                        html.Button("Adicionar", id='add-new-service-type', className='modal-button submit', style={'margin-left': '10px'}),
+                    ]),
+                    html.Hr(),
+                    html.Label("Tipos de Serviço Existentes:"),
+                    html.Div(id='service-types-list', className='service-types-list')
+                ]),
+            ])
+        ]),
+
         html.Div(
             id='modal-add-service',
             className='modal',
@@ -88,15 +123,14 @@ def layout():
                             children=[
                                 html.Div(className='form-group', children=[
                                     html.Label("Data do Serviço:"),
-                                    dcc.DatePickerSingle(
-                                        id='service-date-picker',
-                                        display_format='DD/MM/YYYY',
-                                        className='date-picker'
-                                    ),
+                                    dcc.DatePickerSingle(id='service-date-picker', display_format='DD/MM/YYYY', className='date-picker'),
                                 ]),
                                 html.Div(className='form-group', children=[
                                     html.Label("Tipo de Serviço:"),
-                                    dcc.Input(id='service-type-input', placeholder="Ex: Atendimento ao cliente", className='modal-input'),
+                                    html.Div(style={'display': 'flex', 'align-items': 'center'}, children=[
+                                        dcc.Dropdown(id='service-type-dropdown', options=service_type_options, placeholder="Selecione o tipo", style={'flex-grow': 1}),
+                                        html.Button("Adicionar/Gerenciar Tipos", id="manage-service-types", className='btn-link', style={'margin-left': '10px', 'cursor': 'pointer'})
+                                    ]),
                                 ]),
                                 html.Div(className='form-group', children=[
                                     html.Label("Viatura Responsável:"),
@@ -120,37 +154,35 @@ def layout():
             html.Div([
                 html.Div([
                     html.H3('Serviços Gerais', className='title'),
-                    dcc.Dropdown(
-                        id='filter-month-serv',
-                        options=dropdown_options,
-                        value='todos',
-                        placeholder="Filtrar por mês...",
-                        className='filter-month'
-                    ),
-                    dcc.Input(id='input-search-serv', type='text', placeholder='Buscar por tipo ou viatura...',
-                              className='input-search'),
+                    html.Div([
+                        dcc.Input(id='input-search-serv', type='text', placeholder='Buscar por tipo ou viatura...', className='input-search'),
+                        dcc.Dropdown(
+                            id='filter-month-serv',
+                            options=dropdown_options,
+                            value='todos',
+                            placeholder="Filtrar por mês...",
+                            className='filter-month'
+                        ),
+                    ], className='search-controls'),
                 ], className='searchbar'),
 
                 html.Table([
-                    html.Thead([
-                        html.Tr([
-                            html.Th('Data'),
-                            html.Th('Responsável'),
-                            html.Th('Tipo'),
-                            html.Th('Veículo'),
-                            html.Th('Ações'),
-                        ])
-                    ]),
+                    html.Thead(html.Tr([
+                        html.Th('Data'), html.Th('Responsável'), html.Th('Tipo'),
+                        html.Th('Veículo'), html.Th('Ações')
+                    ])),
                     html.Tbody(id='serv-table')
                 ], className='serv-table'),
 
                 html.Div([
-                    html.Div([
-                        html.A(id='rem_serv', children='Apagar Serviços', className='rem_serv btn-danger')
-                    ], className='btn'),
-                    html.Div([
-                        html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
-                    ], className='btn-pdf-serv'),
+                    html.Div(
+                        html.A(id='rem_serv', children='Apagar Serviços', className='rem_serv btn-danger'),
+                        className='btn'
+                    ),
+                    html.Div(
+                        html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf'),
+                        className='btn-pdf-serv'
+                    ),
                 ], className='btn_rem_add_pdf'),
 
             ], className='oco_serv_container card'),
@@ -159,9 +191,7 @@ def layout():
         html.Div([
             dcc.Graph(id='fig_serv_tipos', className='fig_serv'),
             html.Div([
-                html.Div([
-                    html.A(id='add_serv', children='Adicionar Serviço', className='btn_add')
-                ], className='btn'),
+                html.Button("Adicionar Serviço", id="add_serv", className='btn_add'),
             ], className='btn_rem_add_pdf'),
         ], className='graph_tipes card'),
     ], className='page-content')
@@ -305,26 +335,122 @@ def toggle_modal_service(n_add, n_cancel, n_cancel_x, style):
     return style
 
 
+def generate_service_types_list(service_types):
+    if not service_types:
+        return html.P("Nenhum tipo de serviço cadastrado.")
+
+    return html.Ul([
+        html.Li([
+            s['nome'],
+            html.Button(
+                "×",
+                id={'type': 'delete-service-type-btn', 'index': s['id']},
+                className='delete-button'
+            )
+        ], key=s['id'], className='service-type-item')
+        for s in service_types
+    ], className='list-unstyled')
+
+
+@callback(
+    Output('service-types-list', 'children'),
+    Input('manage-service-types-modal', 'style'), # Update when modal is shown
+)
+def update_service_types_list(style):
+    if style and style.get('display') == 'flex':
+        service_types = fb.get_all_service_types()
+        return generate_service_types_list(service_types)
+    return []
+
+
+@callback(
+    Output('manage-service-types-modal', 'style'),
+    Input('manage-service-types', 'n_clicks'),
+    Input('close-manage-service-types-modal', 'n_clicks'),
+    State('manage-service-types-modal', 'style'),
+    prevent_initial_call=True,
+)
+def toggle_manage_service_types_modal(n_clicks, close_clicks, style):
+    triggered_id = ctx.triggered_id
+    if triggered_id in ['manage-service-types', 'close-manage-service-types-modal']:
+        if style and style.get('display') == 'flex':
+            return {'display': 'none'}
+        else:
+            return {'display': 'flex'}
+    return style
+
+
+@callback(
+    Output('url-services', 'pathname', allow_duplicate=True),
+    Output('new-service-type-name', 'value'),
+    Input('add-new-service-type', 'n_clicks'),
+    State('new-service-type-name', 'value'),
+    prevent_initial_call=True,
+)
+def handle_add_service_type(n_clicks, new_type_name):
+    if n_clicks and new_type_name:
+        _, success = fb.add_service_type(new_type_name)
+        if success:
+            return '/services', '' # Reload page and clear input
+    return dash.no_update, dash.no_update
+
+
+@callback(
+    Output('delete-service-type-modal', 'style'),
+    Output('delete-service-type-modal-body', 'children'),
+    Output('confirm-delete-service-type', 'data'),
+    Input({'type': 'delete-service-type-btn', 'index': dash.ALL}, 'n_clicks'),
+    Input('cancel-delete-service-type', 'n_clicks'),
+    Input('cancel-delete-service-type-x', 'n_clicks'),
+    State('delete-service-type-modal', 'style'),
+    prevent_initial_call=True,
+)
+def handle_delete_service_type_modal(n_clicks, cancel_clicks, cancel_x_clicks, style):
+    triggered_id = ctx.triggered_id
+    if not any(n_clicks):
+        return {'display': 'none'}, dash.no_update, dash.no_update
+
+    if triggered_id and isinstance(triggered_id, dict):
+        service_type_id = triggered_id['index']
+        # Here you might want to fetch the name of the service type to display it
+        body_message = "Você tem certeza que deseja apagar este tipo de serviço?"
+        return {'display': 'flex'}, body_message, {'service_type_id': service_type_id}
+
+    return {'display': 'none'}, dash.no_update, dash.no_update
+
+
+@callback(
+    Output('url-services', 'pathname', allow_duplicate=True),
+    Input('confirm-delete-service-type', 'n_clicks'),
+    State('confirm-delete-service-type', 'data'),
+    prevent_initial_call=True
+)
+def execute_delete_service_type(n_clicks, data):
+    if n_clicks and data and 'service_type_id' in data:
+        service_type_id = data['service_type_id']
+        if fb.delete_service_type(service_type_id):
+            return '/services' # Reload the page
+    return dash.no_update
+
+
 @callback(
     Output('url-services', 'pathname', allow_duplicate=True),
     Output('modal-add-service', 'style', allow_duplicate=True),
     Input('save-new-service', 'n_clicks'),
     State('service-date-picker', 'date'),
-    State('service-type-input', 'value'),
+    State('service-type-dropdown', 'value'),
     State('service-vehicle-dropdown', 'value'),
     prevent_initial_call=True,
 )
 def save_new_service(n_clicks, date, service_type, vehicle):
     if n_clicks:
         if not all([date, service_type, vehicle]):
+            # Idealmente, mostre uma mensagem de erro para o usuário aqui
             return dash.no_update, {'display': 'flex'}
 
-        # Find the agent responsible for the vehicle
         agents = fb.get_agents_by_vehicle(vehicle)
         if not agents:
-            # Handle case where no agent is found for the vehicle
             print(f"No agent found for vehicle {vehicle}")
-            # Optionally, show an alert to the user
             return dash.no_update, {'display': 'flex'}
 
         agent_id = agents[0].get('id')

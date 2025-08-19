@@ -163,7 +163,7 @@ def handle_add_agent(n_clicks, name, matricula, idade):
             'foto_agnt': 'https://firebasestorage.googleapis.com/v0/b/tcc-semurb-2ea61.appspot.com/o/agentes%2Fpersona.png?alt=media&token=c23068da-25a5-45elyn-846c-d2a637886358'
         }
         fb.add_agent(new_agent)
-        return '/pageAgents', {'display': 'none'}
+        return '/dashboard/pageAgents', {'display': 'none'}
     return no_update, no_update
 
 

@@ -22,21 +22,55 @@
 .searchbar {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
-    gap: 2rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-controls {
+    display: flex;
+    justify-content: center; /* Centraliza os controles */
+    flex-grow: 1;
+    gap: 5rem;
 }
 
 .input-search {
-    width: 50%;
-    height: 2rem;
+    width: 50%; /* Largura da barra de pesquisa */
+    height: 1.5rem; /* Aumenta a altura */
     padding: 0.5rem 1rem;
-    font-size: 1.2rem;
+    font-size: 1rem;
     border: 1px solid var(--border-color);
     background-color: var(--bg-color);
     color: var(--primary-text-color);
     border-radius: 8px;
     outline: none;
     transition: border-color 0.3s ease;
+}
+
+.filter-month {
+    width: 10.5rem; /* Largura do dropdown */
+}
+
+.filter-month .Select-control {
+    height: 2.5rem;
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+}
+
+.filter-month .Select-value-label,
+.filter-month .Select-placeholder {
+    color: var(--primary-text-color) !important;
+}
+
+.filter-month .Select-menu-outer {
+    background-color: var(--card-bg-color);
+    border-color: var(--border-color);
+}
+
+.filter-month .Select-option.is-focused {
+    background-color: var(--accent-color-hover);
 }
 
 .input-search:focus {
@@ -229,29 +263,6 @@
     background-color: var(--button-hover-bg-color);
 }
 
-
-.modal .modal-content {
-    background-color: var(--card-bg-color) !important;
-    color: var(--primary-text-color) !important;
-    z-index: 1100;
-}
-
-.modal .modal-header, .modal .modal-footer {
-    border-color: var(--border-color) !important;
-}
-
-.modal .btn-confirm {
-    background-color: var(--add-btn-bg) !important;
-    color: white !important;
-}
-
-.modal .btn-cancel {
-    background-color: transparent !important;
-    color: var(--primary-text-color) !important;
-    border: 1px solid var(--border-color) !important;
-}
-
-
 .btn, .btn_add, .rem_serv, .btn-pdf {
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
@@ -332,20 +343,6 @@
     margin-top: 1.5rem;
     flex-wrap: wrap;
 }
-
-
-.modal .btn-confirm {
-    background-color: var(--add-btn-bg) !important;
-    color: white !important;
-    border: none !important;
-}
-
-.modal .btn-cancel {
-    background-color: transparent !important;
-    color: var(--primary-text-color) !important;
-    border: 1px solid var(--border-color) !important;
-}
-
 
 :root {
 
@@ -514,4 +511,30 @@ a, .dash-link {
     --table-row-odd-bg-color: #1a202c;
     --table-row-hover-bg-color: #4a5568;
     --table-row-hover-text-color: #ffffff;
+}
+
+.service-types-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+}
+
+.service-type-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.service-type-item:last-child {
+    border-bottom: none;
+}
+
+.service-type-item:hover {
+    background-color: var(--table-row-hover-bg-color);
 }

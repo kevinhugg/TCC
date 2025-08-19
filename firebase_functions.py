@@ -435,3 +435,39 @@ def delete_occurrence_or_service(doc_id):
                 dia_doc.delete()
             return True
     return False
+
+
+def get_all_service_types():
+    """Fetches all service types from the 'tipos_servico' collection."""
+    docs = db.collection('tipos_servico').stream()
+    return [{'id': doc.id, 'nome': doc.to_dict().get('nome')} for doc in docs]
+
+
+def add_service_type(service_type_name):
+    """Adds a new service type to the 'tipos_servico' collection."""
+    try:
+        # Verifica se já existe um tipo de serviço com o mesmo nome (case-insensitive)
+        existing_types = db.collection('tipos_servico').where('nome_lower', '==', service_type_name.lower()).limit(1).stream()
+        if next(existing_types, None):
+            print(f"Service type '{service_type_name}' already exists.")
+            return None, False  # Indica que o tipo já existe
+
+        doc_ref = db.collection('tipos_servico').document()
+        doc_ref.set({
+            'nome': service_type_name,
+            'nome_lower': service_type_name.lower()  # Campo para busca case-insensitive
+        })
+        return doc_ref.id, True
+    except Exception as e:
+        print(f"An error occurred while adding service type: {e}")
+        return None, False
+
+
+def delete_service_type(service_type_id):
+    """Deletes a service type by its ID."""
+    try:
+        db.collection('tipos_servico').document(service_type_id).delete()
+        return True
+    except Exception as e:
+        print(f"An error occurred while deleting service type {service_type_id}: {e}")
+        return False
