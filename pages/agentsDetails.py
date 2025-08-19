@@ -57,7 +57,7 @@ def update_agent_details(store_data):
     motorista = next((a for a in team_agents if a.get('funcao', '').lower() == 'motorista'), None)
     another_agents = [a for a in team_agents if a != motorista]
 
-    history = fb.get_occurrences_and_services_by_vehicle(vehicle_number) if vehicle_number else []
+    history = fb.get_history_by_agent(agent_id)
     meses_unicos = sorted(list(set(datetime.strptime(h['data'], "%Y-%m-%d").strftime("%Y/%m") for h in history)))
     dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
         {'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(), 'value': m} for m in meses_unicos
@@ -127,11 +127,10 @@ def update_agent_details(store_data):
 )
 def update_history_table(selected_month, store_data):
     agent_id = store_data.get('id')
-    agent_data = fb.get_agent_by_id(agent_id)
-    if not agent_data or not agent_data.get('viatura'):
-        return html.P("Agente não está em nenhuma viatura.")
+    if not agent_id:
+        return html.P("ID do agente não encontrado.")
 
-    history = fb.get_occurrences_and_services_by_vehicle(agent_data['viatura'])
+    history = fb.get_history_by_agent(agent_id)
 
     if selected_month != 'todos':
         history = [h for h in history if datetime.strptime(h['data'], '%Y-%m-%d').strftime('%Y/%m') == selected_month]
@@ -139,12 +138,18 @@ def update_history_table(selected_month, store_data):
     if not history:
         return html.P("Nenhum registro encontrado para este período.")
 
-    table_header = [html.Thead(html.Tr([html.Th("Data"), html.Th("Tipo"), html.Th("Descrição")]))]
+    table_header = [html.Thead(html.Tr([
+        html.Th("Data"),
+        html.Th("Tipo"),
+        html.Th("Descrição"),
+        html.Th("Viatura")
+    ]))]
     table_body = [html.Tbody([
         html.Tr([
             html.Td(item['data']),
             html.Td(item['tipo']),
-            html.Td(item['nomenclatura']),
+            html.Td(item['descricao']),
+            html.Td(item.get('viatura', 'N/A')),
             html.Td(dcc.Link('Ver Mais', href=f"/dashboard/{item['path']}/{item['id']}", className="btn_view"))
         ]) for item in history
     ])]

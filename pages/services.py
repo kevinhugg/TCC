@@ -64,7 +64,6 @@ def layout():
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
-        html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Store(id='filtro-search-serv'),
         dcc.Location(id='url-services', refresh=True),
 

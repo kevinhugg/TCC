@@ -233,6 +233,7 @@
 .modal .modal-content {
     background-color: var(--card-bg-color) !important;
     color: var(--primary-text-color) !important;
+    z-index: 1100;
 }
 
 .modal .modal-header, .modal .modal-footer {

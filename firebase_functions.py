@@ -375,13 +375,52 @@ def clear_agent_assignment(agent_mat):
     })
 
 
+def get_history_by_agent(agent_id):
+    """Gets all occurrences and services for a specific agent."""
+    history = []
+    if not agent_id:
+        return history
+
+    ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
+    date_docs = ocorrencias_ref.stream()
+
+    for date_doc in date_docs:
+        data_str = date_doc.id
+        lista_ref = date_doc.reference.collection('lista').stream()
+
+        for item_doc in lista_ref:
+            data = item_doc.to_dict()
+            item_class = data.get('class', 'ocorrencia')
+            item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+
+            history.append({
+                'id': item_doc.id,
+                'data': data_str,
+                'nomenclatura': data.get('nomenclatura', 'N/A'),
+                'descricao': data.get('descricao', 'N/A'),
+                'tipo': item_type,
+                'class': item_class,
+                'path': 'services' if item_class == 'serviço' else 'ocurrences',
+                'viatura': data.get('viatura', 'N/A')
+            })
+    return history
+
 def get_occurrence_or_service_by_id(doc_id):
-    dias_docs = db.collection('ocorrencias').list_documents()
-    for dia_doc in dias_docs:
-        doc_ref = dia_doc.collection('lista').document(doc_id)
-        doc = doc_ref.get()
-        if doc.exists:
-            return doc.to_dict() | {'id': doc.id, 'data': dia_doc.id}
+    """Gets a single occurrence or service by its unique ID, searching across all agents."""
+    agents = get_all_agents()
+    for agent in agents:
+        agent_id = agent.get('id')
+        if not agent_id:
+            continue
+
+        ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
+        date_docs = ocorrencias_ref.stream()
+
+        for date_doc in date_docs:
+            lista_ref = date_doc.reference.collection('lista')
+            doc = lista_ref.document(doc_id).get()
+            if doc.exists:
+                return doc.to_dict() | {'id': doc.id, 'data': date_doc.id}
     return None
 
 
