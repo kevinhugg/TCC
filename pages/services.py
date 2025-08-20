@@ -77,7 +77,7 @@ def layout():
                         html.Div(
                             className='modal-header',
                             children=[
-                                html.H5('Adicionar Novo Serviço', className='modal-title'),
+                                html.H5('Adicionar Novo Tipo de Serviço', className='modal-title'),
                                 html.Button('×', id='cancel-add-service-x', className='modal-close-button')
                             ]
                         ),
@@ -86,12 +86,8 @@ def layout():
                             children=[
                                 html.Div(className='form-group', children=[
                                     html.Label("Novo Tipo de Serviço"),
-                                    html.Div(style={'display': 'flex', 'align-items': 'center'}, children=[
-                                        dcc.Input(id='new-service-type-name-modal', placeholder="Digite um novo tipo",
-                                                  style={'flex-grow': 1}),
-                                        html.Button("Adicionar", id="add-new-service-type-modal",
-                                                    className='btn-primary', style={'margin-left': '10px'})
-                                    ]),
+                                    dcc.Input(id='new-service-type-name-modal', placeholder="Digite um novo tipo",
+                                              className='modal-input'),
                                 ]),
                             ]
                         ),
@@ -319,69 +315,24 @@ def toggle_modal_service(n_add, n_cancel, n_cancel_x, style):
 
 
 @callback(
-    Output('service-type-dropdown', 'options'),
-    Output('service-type-dropdown', 'value'),
-    Output('new-service-type-name-modal', 'value'),
-    Input('add-new-service-type-modal', 'n_clicks'),
-    State('new-service-type-name-modal', 'value'),
-    State('service-type-dropdown', 'options'),
-    prevent_initial_call=True,
-)
-def add_new_service_type_from_modal(n_clicks, new_type_name, existing_options):
-    if n_clicks and new_type_name:
-        # Simplistic: assumes success and avoids DB call for this example
-        new_option = {'label': new_type_name, 'value': new_type_name}
-
-        # Prevent adding duplicate service types
-        if new_option not in existing_options:
-            updated_options = existing_options + [new_option]
-
-            # Add to the database
-            fb.add_service_type(new_type_name)
-
-            return updated_options, new_type_name, ''
-
-        # If the service type already exists, just select it
-        return existing_options, new_type_name, ''
-
-    return dash.no_update, dash.no_update, dash.no_update
-
-
-@callback(
     Output('url-services', 'pathname', allow_duplicate=True),
     Output('modal-add-service', 'style', allow_duplicate=True),
+    Output('new-service-type-name-modal', 'value', allow_duplicate=True),
     Input('save-new-service', 'n_clicks'),
-    State('service-date-picker', 'date'),
-    State('service-type-dropdown', 'value'),
-    State('service-vehicle-dropdown', 'value'),
+    State('new-service-type-name-modal', 'value'),
     prevent_initial_call=True,
 )
-def save_new_service(n_clicks, date, service_type, vehicle):
-    if n_clicks:
-        if not all([date, service_type, vehicle]):
-            # Idealmente, mostre uma mensagem de erro para o usuário aqui
-            return dash.no_update, {'display': 'flex'}
+def save_new_service_type(n_clicks, new_type_name):
+    if n_clicks and new_type_name:
+        # Check if the service type already exists to avoid duplicates
+        existing_types = [s['nome'].lower() for s in fb.get_all_service_types()]
+        if new_type_name.lower() not in existing_types:
+            fb.add_service_type(new_type_name)
+            # Reload the page to show the new type in any dropdowns
+            return '/services', {'display': 'none'}, ''
+        else:
+            # Handle case where type already exists, maybe flash a message in a real app
+            # For now, just close the modal and clear the input
+            return dash.no_update, {'display': 'none'}, ''
 
-        # Find the responsible agent based on the vehicle
-        agents = fb.get_agents_by_vehicle(vehicle)
-        responsavel_nome = 'N/A'
-        responsavel_id = ''
-        if agents:
-            responsavel_nome = agents[0].get('nome', 'N/A')
-            responsavel_id = agents[0].get('id', '')
-
-        service_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
-        service_data = {
-            'data': service_date,
-            'nomenclatura': service_type,
-            'viatura': vehicle,
-            'responsavel': responsavel_nome,
-            'responsavel_id': responsavel_id,
-            'tipo': 'Serviço'  # Explicitly set the type
-        }
-
-        fb.add_viario_service(service_data)
-
-        return '/services', {'display': 'none'}
-
-    return dash.no_update, dash.no_update
+    return dash.no_update, dash.no_update, dash.no_update
