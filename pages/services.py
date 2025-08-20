@@ -23,11 +23,8 @@ def remover_acentos(txt):
 def get_page_data():
     """Fetches and prepares all data needed for the services page."""
     try:
-        all_items = fb.get_all_occurrences_and_services()
+        servicos = fb.get_viario_services()
         all_agents = fb.get_all_agents()
-
-        # Filter for services only
-        servicos = [s for s in all_items if s.get('class') == 'viario']
 
         # Create a mapping from vehicle number to responsible agent for efficient lookup
         agent_map = {}
@@ -65,6 +62,7 @@ def layout():
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
+        html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Store(id='filtro-search-serv'),
         dcc.Location(id='url-services', refresh=True),
 
@@ -87,28 +85,13 @@ def layout():
                             className='modal-body',
                             children=[
                                 html.Div(className='form-group', children=[
-                                    html.Label("Data do Serviço:"),
-                                    dcc.DatePickerSingle(id='service-date-picker', display_format='DD/MM/YYYY',
-                                                         className='date-picker'),
-                                ]),
-                                html.Div(className='form-group', children=[
-                                    html.Label("Tipo de Serviço:"),
-                                    dcc.Dropdown(id='service-type-dropdown', options=service_type_options,
-                                                 placeholder="Selecione o tipo"),
-                                ]),
-                                html.Div(className='form-group', children=[
-                                    html.Label("Novo Tipo de Serviço (Opcional):"),
+                                    html.Label("Novo Tipo de Serviço"),
                                     html.Div(style={'display': 'flex', 'align-items': 'center'}, children=[
                                         dcc.Input(id='new-service-type-name-modal', placeholder="Digite um novo tipo",
                                                   style={'flex-grow': 1}),
                                         html.Button("Adicionar", id="add-new-service-type-modal",
                                                     className='btn-primary', style={'margin-left': '10px'})
                                     ]),
-                                ]),
-                                html.Div(className='form-group', children=[
-                                    html.Label("Viatura Responsável:"),
-                                    dcc.Dropdown(id='service-vehicle-dropdown', options=vehicle_options,
-                                                 placeholder="Selecione a viatura"),
                                 ]),
                             ]
                         ),
@@ -214,12 +197,19 @@ def update_list(search_value, mes):
 
     rows = []
     for item in filtered:
-        responsavel = agent_map.get(item.get('viatura'), {'nome': 'N/A', 'id': ''})
+        agent_name = item.get('responsavel', 'N/A')
+        agent_id = item.get('responsavel_id', '')
+
+        # Fallback for older data that might rely on agent_map
+        if agent_name == 'N/A' and 'viatura' in item:
+            agent_info = agent_map.get(item.get('viatura'), {'nome': 'N/A', 'id': ''})
+            agent_name = agent_info['nome']
+            agent_id = agent_info['id']
+
         row = html.Tr([
             html.Td(item.get('data', 'N/A')),
             html.Td(
-                dcc.Link(responsavel['nome'], href=f"/dashboard/agent/{responsavel['id']}") if responsavel['id'] else
-                responsavel['nome'],
+                dcc.Link(agent_name, href=f"/dashboard/agent/{agent_id}") if agent_id else agent_name,
                 className='btn_ag'
             ),
             html.Td(item.get('nomenclatura', 'N/A')),
@@ -372,24 +362,25 @@ def save_new_service(n_clicks, date, service_type, vehicle):
             # Idealmente, mostre uma mensagem de erro para o usuário aqui
             return dash.no_update, {'display': 'flex'}
 
+        # Find the responsible agent based on the vehicle
         agents = fb.get_agents_by_vehicle(vehicle)
-        if not agents:
-            print(f"No agent found for vehicle {vehicle}")
-            return dash.no_update, {'display': 'flex'}
-
-        agent_id = agents[0].get('id')
-        if not agent_id:
-            print("Agent found but has no ID")
-            return dash.no_update, {'display': 'flex'}
+        responsavel_nome = 'N/A'
+        responsavel_id = ''
+        if agents:
+            responsavel_nome = agents[0].get('nome', 'N/A')
+            responsavel_id = agents[0].get('id', '')
 
         service_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
         service_data = {
+            'data': service_date,
             'nomenclatura': service_type,
             'viatura': vehicle,
-            'class': 'serviço'
+            'responsavel': responsavel_nome,
+            'responsavel_id': responsavel_id,
+            'tipo': 'Serviço'  # Explicitly set the type
         }
 
-        fb.add_service(agent_id, service_date, service_data)
+        fb.add_viario_service(service_data)
 
         return '/services', {'display': 'none'}
 
