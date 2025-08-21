@@ -75,9 +75,6 @@ def layout(id=None):
             ], className='details-items'),
             html.Div([
                 html.Div([
-                    html.A(id='del_oco', children='Remover Ocorrência', className='btn rem_vehicle')
-                ], className='btn_rem'),
-                html.Div([
                     html.A(id='pdf_oco_serv_det_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
                 ], className='btn-pdf'),
             ], className='btn_rem_pdf'),
@@ -88,12 +85,6 @@ def layout(id=None):
                 html.H3(f"Responsáveis do Mês", className='tittle'),
                 dcc.Dropdown(
                     id='dropdown-turnos-oco',
-                    options=[
-                        {'label': 'Todos os Turnos', 'value': 'todos'},
-                        {'label': 'Manhã', 'value': 'manha'},
-                        {'label': 'Tarde', 'value': 'tarde'},
-                        {'label': 'Noite', 'value': 'noite'},
-                    ],
                     value='todos',
                     clearable=False,
                     className='dropdown-turnos',
