@@ -60,74 +60,8 @@ def layout(id=None):
                 ], className='btn-pdf'),
             ], className='details-container card'),
 
-            html.Div([
-                html.H3(f"Equipe Responsável"),
-                html.Div([
-                    dcc.Link(
-                        html.Div([
-                            html.Img(src=motorista.get('foto_agnt', '/static/img/default-user.png'), className='img'),
-                            html.P(motorista.get('nome', 'N/A')),
-                            html.P(f"Função: {motorista.get('func_mes', 'N/A').capitalize()}"),
-                        ], className='agent-box motorista'),
-                        href=f"/dashboard/agent/{motorista.get('id')}"
-                    ) if motorista else html.Div("Sem motorista designado", className='agent-box'),
-
-                    *[dcc.Link(
-                        html.Div([
-                            html.Img(src=agente.get('foto_agnt', '/static/img/default-user.png'), className='img'),
-                            html.P(agente.get('nome', 'N/A')),
-                            html.P(f"Função: {agente.get('func_mes', 'N/A').capitalize()}"),
-                        ], className='agent-box'),
-                        href=f"/dashboard/agent/{agente.get('id')}"
-                    ) for agente in another_agents]
-                ], className='agents-grid'),
-            ], className='agents-container card'),
+            # The user requested to remove the other containers so the details can fill the screen.
         ], className='grid-details'),
-
-        html.Div([
-            html.H4(f"Histórico de Serviços do Veículo {dados.get('viatura', '')}"),
-            dcc.Dropdown(
-                id='filter-month-serv',
-                options=dropdown_options,
-                value='todos',
-                placeholder="Filtrar por mês...",
-                className='filter-month'
-            ),
-            html.Div(id='table-serv-viat'),
-        ], className='services card'),
-
     ], className='page-content details-page')
 
-@callback(
-    Output('table-serv-viat', 'children'),
-    [Input('filter-month-serv', 'value'),
-     Input('serv-store', 'data')]
-)
-def update_history_table_serv(selected_month, service_id):
-    service = next((item for item in Ocur_Vehicles if item.get('id') == service_id), None)
-    if not service:
-        return html.P("Serviço não encontrado.")
-
-    vehicle_number = service.get('viatura')
-    if not vehicle_number:
-        return html.P("Viatura não especificada.")
-
-    # Get history and filter for services only
-    history = [h for h in Ocur_Vehicles if h.get('viatura') == vehicle_number and h.get('class') == 'serviço']
-
-    if selected_month != 'todos':
-        history = [h for h in history if datetime.strptime(h['data'], '%Y-%m-%d').strftime('%Y/%m') == selected_month]
-
-    if not history:
-        return html.P("Nenhum registro encontrado para este período.")
-
-    table_header = [html.Thead(html.Tr([html.Th("Data"), html.Th("Tipo"), html.Th("Descrição")]))]
-    table_body = [html.Tbody([
-        html.Tr([
-            html.Td(item['data']),
-            html.Td(item.get('class', 'serviço').capitalize()),
-            html.Td(item['nomenclatura']),
-            html.Td(dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}", className="btn_view"))
-        ]) for item in history
-    ])]
-    return html.Table(table_header + table_body, className='table-ocurrences-serv')
+# The callback for the history table is no longer needed as the table has been removed.
