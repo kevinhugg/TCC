@@ -28,7 +28,7 @@
 
 .details-container {
     flex: 1 1 400px;
-    width: 65rem;
+    width: 60rem;
     margin: 0 auto;
 }
 
@@ -153,11 +153,23 @@
 
 
 /* Agents Section */
+.dropdown-title {
+    display: flex;
+    align-items: right;
+    justify-content: right;
+    gap: 40rem;
+}
+
+.dropdown-turnos {
+    margin-top: 1rem;
+}
+
 .agents-grid {
     display: flex;
     gap: 1.5rem;
+    width: 60rem;
     overflow-x: auto;
-    padding-bottom: 1rem;
+    padding-bottom: 2rem;
 }
 
 .agent-box {
@@ -166,6 +178,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1rem;
@@ -175,7 +188,7 @@
 }
 
 .agent-box:hover {
-    transform: translateY(-3px);
+    transform: translatex(4px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
@@ -183,11 +196,20 @@
     border-left: 4px solid var(--accent-color);
 }
 
-.agent-box .img {
-    width: 80px;
-    height: 80px;
+.agent-box .img_agent {
+    width: 100px;
+    height: 100px;
     object-fit: cover;
     border-radius: 50%;
+    margin: 0 auto 3rem auto;
+    display: block;
+}
+
+.img_agent {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 25%;
     margin-bottom: 1rem;
 }
 
@@ -197,10 +219,32 @@
     color: var(--primary-text-color);
 }
 
-.agent-role, .agent-cargo {
+.agent-role, .agent-cargo, .turno-status {
     font-size: 0.9rem;
     text-align: center;
     color: var(--secondary-text-color);
+}
+
+.add-agent-box {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-color);
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    border: 2px dashed var(--accent-color);
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: 3rem;
+    border-radius: 12px;
+    height: 200px;
+    width: 200px;
+    transition: background-color 0.2s ease;
+}
+
+.add-agent-box:hover {
+    background-color: var(--accent-color-hover);
+    color: white;
 }
 
 .link-ag-vt {

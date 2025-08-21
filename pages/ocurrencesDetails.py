@@ -83,39 +83,101 @@ def layout(id=None):
             ], className='btn_rem_pdf'),
         ], className='details-container'),
 
-        # The user requested to remove the other containers so the details can fill the screen.
-        # Removing agents-container and ocurrences (history) container.
+        html.Div([
+            html.Div([
+                html.H3(f"Responsáveis do Mês", className='tittle'),
+                dcc.Dropdown(
+                    id='dropdown-turnos-oco',
+                    options=[
+                        {'label': 'Todos os Turnos', 'value': 'todos'},
+                        {'label': 'Manhã', 'value': 'manha'},
+                        {'label': 'Tarde', 'value': 'tarde'},
+                        {'label': 'Noite', 'value': 'noite'},
+                    ],
+                    value='todos',
+                    clearable=False,
+                    className='dropdown-turnos',
+                    style={'height': '40px', 'width': '200px'}
+                ),
+            ], className='dropdown-title'),
+
+            html.Div(id='agents-grid-oco', className='agents-grid'),
+
+        ], className='agents-container card'),
+
     ], className='page-content details-page')
 
-# The callback for the history table is no longer needed as the table has been removed.
 
-# @callback(
-#     Output('delete-modal-oco', 'style'),
-#     [Input('del_oco', 'n_clicks'),
-#      Input('close-modal-oco', 'n_clicks'),
-#      Input('cancel-delete-oco', 'n_clicks')],
-#     prevent_initial_call=True
-# )
-# def toggle_delete_modal_oco(n_open, n_close, n_cancel):
-#     ctx = dash.callback_context
-#     if not ctx.triggered:
-#         return {'display': 'none'}
-#
-#     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-#     if trigger_id == 'del_oco':
-#         return {'display': 'block'}
-#
-#     return {'display': 'none'}
+@callback(
+    Output('agents-grid-oco', 'children'),
+    Input('dropdown-turnos-oco', 'value'),
+    State('oc-store', 'data')
+)
+def update_agents_by_shift_oco(selected_shift, occurrence_id):
+    if not occurrence_id:
+        return []
 
-# @callback(
-#     Output('redirect-oco', 'pathname'),
-#     Input('confirm-delete-oco', 'n_clicks'),
-#     State('oc-store', 'data'),
-#     prevent_initial_call=True
-# )
-# def handle_delete_oco(n_clicks, occurrence_id):
-#     if n_clicks and occurrence_id:
-#         # Logic to delete from data/dados.py would be needed here
-#         print(f"Deletion of {occurrence_id} is not implemented in this version.")
-#         return '/dashboard/ocurrences'
-#     return dash.no_update
+    # Find the occurrence by ID from the local data
+    occurrence_data = next((item for item in Ocur_Vehicles if item.get('id') == occurrence_id), None)
+    if not occurrence_data:
+        return []
+
+    vehicle_number = occurrence_data.get('viatura')
+    # Find team agents from local agents list
+    all_agents_for_vehicle = [a for a in agents if a.get('viatura_mes') == vehicle_number]
+
+    # 2. Filtra por turno
+    if selected_shift and selected_shift != 'todos':
+        agents_to_display = [a for a in all_agents_for_vehicle if a.get('turno') == selected_shift]
+    else:
+        agents_to_display = all_agents_for_vehicle
+
+    # 3. Separa motorista e outros agentes
+    motorista = next((a for a in agents_to_display if a.get('func_mes', '').lower() == 'motorista'), None)
+    another_agents = [a for a in agents_to_display if a != motorista]
+
+    # 4. Cria os componentes HTML
+    children = []
+
+    # Box do Motorista
+    if motorista:
+        children.append(
+            html.Div([
+                dcc.Link(
+                    html.Div([
+                        html.Img(src=motorista.get('foto_agnt'), className='img_agent'),
+                        html.P(f"{motorista.get('nome')}", className='agent-name'),
+                        html.P(f"Função: {motorista.get('func_mes', '').capitalize()}", className='agent-role'),
+                        html.P(f"Turno: {motorista.get('turno', 'N/A').capitalize()}", className='turno-status'),
+                    ], className='agent-box-link'),
+                    href=f"/dashboard/agent/{motorista.get('id')}", className='link-ag-vt'
+                )
+            ], className='agent-box motorista')
+        )
+    else:
+        children.append(
+            html.Div(
+                html.Div([
+                    html.P("Sem motorista para este turno", className='agent-name'),
+                ], className='add-driver-box-content'),
+                id='add-driver-button', className='agent-box add-driver-box', title='Adicionar motorista',
+                style={'display': 'none' if motorista else 'block'}
+            )
+        )
+
+    # Boxes dos outros agentes
+    for agente in another_agents:
+        children.append(
+            html.Div([
+                dcc.Link(
+                    html.Div([
+                        html.Img(src=agente.get('foto_agnt'), className='img_agent'),
+                        html.P(f"{agente.get('nome')}", className='agent-name'),
+                        html.P(f"Função: {agente.get('func_mes', '').capitalize()}", className='agent-role'),
+                        html.P(f"Turno: {agente.get('turno', 'N/A').capitalize()}", className='turno-status'),
+                    ], className='agent-box-link'),
+                    href=f"/dashboard/agent/{agente.get('id')}", className='link-ag-vt'
+                )
+            ], className='agent-box')
+        )
+    return children
