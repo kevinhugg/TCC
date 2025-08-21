@@ -1,12 +1,12 @@
 import dash
-from dash import html, dcc, Input, Output, callback, State, ctx
+from dash import html, dcc, Input, Output, callback
 import unicodedata
 from collections import Counter
 import plotly.express as px
 from datetime import datetime
 import pandas as pd
-import dash_bootstrap_components as dbc
-import firebase_functions as fb
+
+from data.dados import Ocur_Vehicles, agents
 
 dash.register_page(__name__, path='/services', name='Serviços', className='pg-at')
 
@@ -21,32 +21,17 @@ def remover_acentos(txt):
 
 
 def get_page_data():
-    """Fetches and prepares all data needed for the services page."""
+    """Fetches and prepares all data needed for the services page from data/dados.py."""
     try:
-        servicos = fb.get_viario_services()
-        all_agents = fb.get_all_agents()
-
-        # Create a mapping from vehicle number to responsible agent for efficient lookup
-        agent_map = {}
-        for agent in all_agents:
-            vehicle = agent.get('viatura')
-            if vehicle and agent.get('funcao') in ['Encarregado', 'Motorista']:
-                if vehicle not in agent_map:
-                    agent_map[vehicle] = {'nome': agent.get('nome'), 'id': agent.get('id')}
-
-        return servicos, agent_map
+        servicos = [o for o in Ocur_Vehicles if o.get('class') == 'serviço']
+        return servicos
     except Exception as e:
-        print(f"Error fetching data for services page: {e}")
-        return [], {}
+        print(f"Error fetching data for services page from dados.py: {e}")
+        return []
 
 
 def layout():
-    servicos, _ = get_page_data()
-    vehicles = fb.get_all_vehicles()
-    service_types = fb.get_all_service_types()
-
-    vehicle_options = [{'label': v['numero'], 'value': v['numero']} for v in vehicles] if vehicles else []
-    service_type_options = [{'label': s['nome'], 'value': s['nome']} for s in service_types]
+    servicos = get_page_data()
 
     if servicos:
         meses_unicos = sorted(list(set(
@@ -65,43 +50,6 @@ def layout():
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Store(id='filtro-search-serv'),
         dcc.Location(id='url-services', refresh=True),
-
-        html.Div(
-            id='modal-add-service',
-            className='modal',
-            style={'display': 'none'},
-            children=[
-                html.Div(
-                    className='modal-content',
-                    children=[
-                        html.Div(
-                            className='modal-header',
-                            children=[
-                                html.H5('Adicionar Novo Tipo de Serviço', className='modal-title'),
-                                html.Button('×', id='cancel-add-service-x', className='modal-close-button')
-                            ]
-                        ),
-                        html.Div(
-                            className='modal-body',
-                            children=[
-                                html.Div(className='form-group', children=[
-                                    html.Label("Novo Tipo de Serviço"),
-                                    dcc.Input(id='new-service-type-name-modal', placeholder="Digite um novo tipo",
-                                              className='modal-input'),
-                                ]),
-                            ]
-                        ),
-                        html.Div(
-                            className='modal-footer',
-                            children=[
-                                html.Button("Cancelar", id="cancel-add-service", className='modal-button cancel'),
-                                html.Button("Salvar", id="save-new-service", className='modal-button submit'),
-                            ]
-                        )
-                    ]
-                )
-            ]
-        ),
 
         html.Div([
             html.Div([
@@ -144,9 +92,6 @@ def layout():
 
         html.Div([
             dcc.Graph(id='fig_serv_tipos', className='fig_serv'),
-            html.Div([
-                html.Button("Adicionar Serviço", id="add_serv", className='btn_add'),
-            ], className='btn_rem_add_pdf'),
         ], className='graph_tipes card'),
     ], className='page-content')
 
@@ -158,7 +103,7 @@ def layout():
     Input('filter-month-serv', 'value'),
 )
 def update_list(search_value, mes):
-    servicos, agent_map = get_page_data()
+    servicos = get_page_data()
 
     if not servicos:
         return html.Tr([
@@ -177,11 +122,12 @@ def update_list(search_value, mes):
         search_term = remover_acentos(search_value)
         filtered_by_search = []
         for item in filtered:
-            responsavel_nome_item = remover_acentos(item.get('responsavel', ''))
+            responsavel_info = next((agent for agent in agents if agent.get('viatura_mes') == item.get('viatura')), None)
+            responsavel_nome_item = remover_acentos(responsavel_info['nome']) if responsavel_info else ''
 
             if search_term in remover_acentos(item.get('viatura', '')) or \
-                    search_term in remover_acentos(item.get('nomenclatura', '')) or \
-                    search_term in responsavel_nome_item:
+               search_term in remover_acentos(item.get('nomenclatura', '')) or \
+               search_term in responsavel_nome_item:
                 filtered_by_search.append(item)
         filtered = filtered_by_search
 
@@ -192,14 +138,9 @@ def update_list(search_value, mes):
 
     rows = []
     for item in filtered:
-        agent_name = item.get('responsavel', 'N/A')
-        agent_id = item.get('responsavel_id', '')
-
-        # Fallback for older data that might rely on agent_map
-        if agent_name == 'N/A' and 'viatura' in item:
-            agent_info = agent_map.get(item.get('viatura'), {'nome': 'N/A', 'id': ''})
-            agent_name = agent_info['nome']
-            agent_id = agent_info['id']
+        agent_info = next((a for a in agents if a.get('viatura_mes') == item.get('viatura')), None)
+        agent_name = agent_info['nome'] if agent_info else 'N/A'
+        agent_id = agent_info['id'] if agent_info else ''
 
         row = html.Tr([
             html.Td(item.get('data', 'N/A')),
@@ -225,15 +166,13 @@ def update_list(search_value, mes):
 @callback(
     Output('fig_serv_tipos', 'figure'),
     Input('filter-month-serv', 'value'),
-    Input('theme-mode', 'data')
 )
-def update_graph(mes, theme):
-    servicos, _ = get_page_data()
+def update_graph(mes):
+    servicos = get_page_data()
 
     if not servicos:
         return px.bar(title='Nenhum Serviço Cadastrado')
 
-    # Filtragem por mês
     if mes != 'todos':
         filtered = [
             item for item in servicos
@@ -253,19 +192,6 @@ def update_graph(mes, theme):
         'Quantidade': list(contagem_tipos.values())
     })
 
-    # Theming
-    is_dark = theme == 'dark'
-    if is_dark:
-        plot_bg_color = '#1f293b'
-        paper_bg_color = '#1f293b'
-        font_color = '#f9fafb'
-        bar_color = '#60a5fa'
-    else:
-        plot_bg_color = 'white'
-        paper_bg_color = 'white'
-        font_color = 'black'
-        bar_color = 'blue'
-
     fig_tipos = px.bar(
         df_servicos,
         x='Tipo',
@@ -275,63 +201,14 @@ def update_graph(mes, theme):
         title='Serviços Cadastrados'
     )
 
-    fig_tipos.update_traces(
-        marker_color=bar_color,
-        textposition='outside',
-        textfont_color=font_color
-    )
+    fig_tipos.update_traces(marker_color='#4682B4', textposition='outside')
     fig_tipos.update_layout(
         title={
             'text': 'Serviços Cadastrados',
             'x': 0.5,
-            'xanchor': 'center',
-            'font': {'color': font_color, 'size': 26}
+            'xanchor': 'center'
         },
-        plot_bgcolor=plot_bg_color,
-        paper_bgcolor=paper_bg_color,
-        font_color=font_color,
-        xaxis=dict(gridcolor='rgba(255, 255, 255, 0.1)' if is_dark else 'rgba(0, 0, 0, 0.1)'),
-        yaxis=dict(gridcolor='rgba(255, 255, 255, 0.1)' if is_dark else 'rgba(0, 0, 0, 0.1)')
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
     )
     return fig_tipos
-
-
-@callback(
-    Output('modal-add-service', 'style'),
-    Input('add_serv', 'n_clicks'),
-    Input('cancel-add-service', 'n_clicks'),
-    Input('cancel-add-service-x', 'n_clicks'),
-    State('modal-add-service', 'style'),
-    prevent_initial_call=True,
-)
-def toggle_modal_service(n_add, n_cancel, n_cancel_x, style):
-    if ctx.triggered_id in ['add_serv', 'cancel-add-service', 'cancel-add-service-x']:
-        if style and style.get('display') == 'flex':
-            return {'display': 'none'}
-        else:
-            return {'display': 'flex'}
-    return style
-
-
-@callback(
-    Output('url-services', 'pathname', allow_duplicate=True),
-    Output('modal-add-service', 'style', allow_duplicate=True),
-    Output('new-service-type-name-modal', 'value', allow_duplicate=True),
-    Input('save-new-service', 'n_clicks'),
-    State('new-service-type-name-modal', 'value'),
-    prevent_initial_call=True,
-)
-def save_new_service_type(n_clicks, new_type_name):
-    if n_clicks and new_type_name:
-        # Check if the service type already exists to avoid duplicates
-        existing_types = [s['nome'].lower() for s in fb.get_all_service_types()]
-        if new_type_name.lower() not in existing_types:
-            fb.add_service_type(new_type_name)
-            # Reload the page to show the new type in any dropdowns
-            return '/services', {'display': 'none'}, ''
-        else:
-            # Handle case where type already exists, maybe flash a message in a real app
-            # For now, just close the modal and clear the input
-            return dash.no_update, {'display': 'none'}, ''
-
-    return dash.no_update, dash.no_update, dash.no_update

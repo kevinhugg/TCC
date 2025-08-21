@@ -21,6 +21,17 @@ def get_all_vehicles():
     return vehicles
 
 
+def get_all_viario():
+    """Fetches all documents from the 'viario' collection."""
+    docs = db.collection('viario').stream()
+    viario_list = []
+    for doc in docs:
+        doc_data = doc.to_dict()
+        doc_data['id'] = doc.id
+        viario_list.append(doc_data)
+    return viario_list
+
+
 # busca viatura por numero
 def get_vehicle_by_number(numero):
     docs = db.collection('veiculos').where('numero', '==', numero).stream()
@@ -443,20 +454,13 @@ def delete_occurrence_or_service(doc_id):
 
 def get_all_service_types():
     """Fetches all service types from the 'tipos_servico' collection."""
-    docs = db.collection('services').stream()
+    docs = db.collection('tipos_servicos').stream()
     return [{'id': doc.id, 'nome': doc.to_dict().get('nome')} for doc in docs]
-
-
-def get_viario_services():
-    """Fetches all services from the 'ocorrencias' subcollection in 'agentes'."""
-    all_items = get_all_occurrences_and_services()
-    services = [item for item in all_items if item['class'] == 'viario']
-    return services
 
 def add_viario_service(service_data):
     """Adds a new service document to the 'viario' collection."""
     try:
-        doc_ref = db.collection('servico').document()
+        doc_ref = db.collection('tipos_servico').document()
         doc_ref.set(service_data)
         return doc_ref.id
     except Exception as e:
@@ -467,7 +471,7 @@ def add_viario_service(service_data):
 def delete_service_type(service_type_id):
     """Deletes a service type by its ID."""
     try:
-        db.collection('servico').document(service_type_id).delete()
+        db.collection('tipos_servico').document(service_type_id).delete()
         return True
     except Exception as e:
         print(f"An error occurred while deleting service type {service_type_id}: {e}")

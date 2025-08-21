@@ -1,12 +1,13 @@
 import dash
-from dash import html, dcc, Input, Output, callback, State
+from dash import html, dcc, Input, Output, callback
 from datetime import datetime
-import firebase_functions as fb
+from data.dados import Ocur_Vehicles, viaturas, agents
 
 dash.register_page(__name__, path_template='/services/<id>', name=None)
 
 def layout(id=None):
-    dados = fb.get_occurrence_or_service_by_id(id)
+    # Find the service by ID from the local data
+    dados = next((item for item in Ocur_Vehicles if item.get('id') == id), None)
 
     if not dados or dados.get('class') != 'serviço':
         return html.Div([
@@ -19,12 +20,16 @@ def layout(id=None):
         ])
 
     vehicle_number = dados.get('viatura')
-    vehicle_data = fb.get_vehicle_by_number(vehicle_number) if vehicle_number else None
-    team_agents = fb.get_agents_by_vehicle(vehicle_number) if vehicle_number else []
-    motorista = next((a for a in team_agents if a.get('funcao', '').lower() == 'motorista'), None)
+    # Find vehicle data from local viaturas list
+    vehicle_data = next((v for v in viaturas if v.get('numero') == vehicle_number), None)
+    # Find team agents from local agents list
+    team_agents = [a for a in agents if a.get('viatura_mes') == vehicle_number]
+    # Note: 'funcao' in dados.py is 'func_mes'
+    motorista = next((a for a in team_agents if a.get('func_mes', '').lower() == 'motorista'), None)
     another_agents = [a for a in team_agents if a != motorista]
 
-    history = fb.get_occurrences_and_services_by_vehicle(vehicle_number) if vehicle_number else []
+    # Get history for the vehicle from local data
+    history = [h for h in Ocur_Vehicles if h.get('viatura') == vehicle_number]
     meses_unicos = sorted(list(set(datetime.strptime(h['data'], "%Y-%m-%d").strftime("%Y/%m") for h in history if h.get('class') == 'serviço')))
     dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
         {'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(), 'value': m} for m in meses_unicos
@@ -36,22 +41,7 @@ def layout(id=None):
         dcc.Store(id='serv-store', data=id),
         dcc.Location(id='redirect-serv', refresh=True),
 
-        # Deletion Modal
-        html.Div(id='delete-modal-serv', className='modal', style={'display': 'none'}, children=[
-            html.Div(className='modal-content', children=[
-                html.Div(className='modal-header', children=[
-                    html.H5('Confirmar Exclusão'),
-                    html.Button('×', id='close-modal-serv', className='modal-close-button')
-                ]),
-                html.Div(className='modal-body', children=[
-                    html.P("Você tem certeza que deseja excluir este serviço?")
-                ]),
-                html.Div(className='modal-footer', children=[
-                    html.Button('Cancelar', id='cancel-delete-serv', className='btn btn-secondary'),
-                    html.Button('Excluir', id='confirm-delete-serv', className='btn btn-danger')
-                ])
-            ])
-        ]),
+        # Deletion Modal REMOVED
 
         html.Div([
             html.H3(f"{dados.get('nomenclatura', 'N/A')}", className='tittle'),
@@ -69,9 +59,7 @@ def layout(id=None):
                 ], className='texts-det'),
             ], className='details-items'),
             html.Div([
-                html.Div([
-                    html.A(id='del_serv', children='Remover Serviço', className='btn rem_vehicle')
-                ], className='btn_rem'),
+                # REMOVED Delete button
                 html.Div([
                     html.A(id='pdf_serv_det_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
                 ], className='btn-pdf'),
@@ -97,7 +85,7 @@ def layout(id=None):
                     html.Div([
                         html.Img(src=motorista.get('foto_agnt', '/static/img/default-user.png'), className='img'),
                         html.P(motorista.get('nome', 'N/A')),
-                        html.P(f"Função: {motorista.get('funcao', 'N/A').capitalize()}"),
+                        html.P(f"Função: {motorista.get('func_mes', 'N/A').capitalize()}"),
                     ], className='agent-box motorista'),
                     href=f"/dashboard/agent/{motorista.get('id')}"
                 ) if motorista else html.Div("Sem motorista designado", className='agent-box'),
@@ -106,7 +94,7 @@ def layout(id=None):
                     html.Div([
                         html.Img(src=agente.get('foto_agnt', '/static/img/default-user.png'), className='img'),
                         html.P(agente.get('nome', 'N/A')),
-                        html.P(f"Função: {agente.get('funcao', 'N/A').capitalize()}"),
+                        html.P(f"Função: {agente.get('func_mes', 'N/A').capitalize()}"),
                     ], className='agent-box'),
                     href=f"/dashboard/agent/{agente.get('id')}"
                 ) for agente in another_agents]
@@ -120,7 +108,7 @@ def layout(id=None):
      Input('serv-store', 'data')]
 )
 def update_history_table_serv(selected_month, service_id):
-    service = fb.get_occurrence_or_service_by_id(service_id)
+    service = next((item for item in Ocur_Vehicles if item.get('id') == service_id), None)
     if not service:
         return html.P("Serviço não encontrado.")
 
@@ -128,9 +116,8 @@ def update_history_table_serv(selected_month, service_id):
     if not vehicle_number:
         return html.P("Viatura não especificada.")
 
-    history = fb.get_occurrences_and_services_by_vehicle(vehicle_number)
-    # Filter for services only
-    history = [h for h in history if h.get('class') == 'serviço']
+    # Get history and filter for services only
+    history = [h for h in Ocur_Vehicles if h.get('viatura') == vehicle_number and h.get('class') == 'serviço']
 
     if selected_month != 'todos':
         history = [h for h in history if datetime.strptime(h['data'], '%Y-%m-%d').strftime('%Y/%m') == selected_month]
@@ -142,39 +129,9 @@ def update_history_table_serv(selected_month, service_id):
     table_body = [html.Tbody([
         html.Tr([
             html.Td(item['data']),
-            html.Td(item['tipo']),
+            html.Td(item.get('class', 'serviço').capitalize()),
             html.Td(item['nomenclatura']),
             html.Td(dcc.Link('Ver Mais', href=f"/dashboard/services/{item['id']}", className="btn_view"))
         ]) for item in history
     ])]
     return html.Table(table_header + table_body, className='table-ocurrences-serv')
-
-@callback(
-    Output('delete-modal-serv', 'style'),
-    [Input('del_serv', 'n_clicks'),
-     Input('close-modal-serv', 'n_clicks'),
-     Input('cancel-delete-serv', 'n_clicks')],
-    prevent_initial_call=True
-)
-def toggle_delete_modal_serv(n_open, n_close, n_cancel):
-    ctx = dash.callback_context
-    if not ctx.triggered:
-        return {'display': 'none'}
-
-    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    if trigger_id == 'del_serv':
-        return {'display': 'block'}
-
-    return {'display': 'none'}
-
-@callback(
-    Output('redirect-serv', 'pathname'),
-    Input('confirm-delete-serv', 'n_clicks'),
-    State('serv-store', 'data'),
-    prevent_initial_call=True
-)
-def handle_delete_serv(n_clicks, service_id):
-    if n_clicks and service_id:
-        fb.delete_occurrence_or_service(service_id)
-        return '/dashboard/services'
-    return dash.no_update
