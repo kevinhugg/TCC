@@ -52,7 +52,7 @@
 .details-items {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
     align-items: center;
     justify-content: center;
 }
@@ -63,7 +63,7 @@
     text-align: center;
     align-items: center;
     font-size: 1.2rem;
-    gap: 1rem;
+    gap: 0.5rem;
     color: var(--secondary-text-color);
     justify-content: center;
 }

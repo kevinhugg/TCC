@@ -126,3 +126,11 @@ occurrence_types = [
     {'id': 1, 'nome': 'Fiscalização ambiental'},
     {'id': 2, 'nome': 'Fiscalização de trânsito'},
 ]
+
+adm = {
+    'nome': 'Administrador',
+    'email': 'admin@example.com',
+    'idade': 30,
+    'cargo': 'Administrador de Sistemas',
+    'imagem': 'https://i.imgur.com/3pS27T4.png'
+}
