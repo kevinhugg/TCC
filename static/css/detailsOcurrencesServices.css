@@ -230,3 +230,28 @@
         flex-direction: column;
     }
 }
+
+.grid-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.details-container,
+.agents-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.services.card {
+    margin-top: 20px;
+}

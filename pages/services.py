@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback, State
 import unicodedata
 from collections import Counter
 import plotly.express as px
@@ -7,6 +7,7 @@ from datetime import datetime
 import pandas as pd
 
 from data.dados import Ocur_Vehicles, agents
+from firebase_functions import add_viario_service, get_all_service_types
 
 dash.register_page(__name__, path='/services', name='Serviços', className='pg-at')
 
@@ -32,6 +33,20 @@ def get_page_data():
 
 def layout():
     servicos = get_page_data()
+    service_types = get_all_service_types()
+
+    service_types_table = html.Table([
+        html.Thead(html.Tr([html.Th("Tipos de Serviço")])),
+        html.Tbody([
+            html.Tr([html.Td(st['nome'])]) for st in service_types
+        ])
+    ], className='serv-table')
+
+    service_types_container = html.Div([
+        html.H4("Tipos de Serviço"),
+        html.Div(service_types_table, className='service-types-list'),
+        html.A('Adicionar Tipo', id='add-service-type-btn', className='btn_add')
+    ], className='service-types-container card')
 
     if servicos:
         meses_unicos = sorted(list(set(
@@ -88,11 +103,27 @@ def layout():
                 ], className='btn_rem_add_pdf'),
 
             ], className='oco_serv_container card'),
+            html.Div([
+                html.Div(dcc.Graph(id='fig_serv_tipos', className='fig_serv'), className='graph_tipes card'),
+                service_types_container
+            ], className='graph-and-table-container'),
         ]),
 
-        html.Div([
-            dcc.Graph(id='fig_serv_tipos', className='fig_serv'),
-        ], className='graph_tipes card'),
+        html.Div(id='modal-add-service-type', className='modal', style={'display': 'none'}, children=[
+            html.Div(className='modal-content', children=[
+                html.Div(className='modal-header', children=[
+                    html.H5('Adicionar Novo Tipo de Serviço', className='modal-title'),
+                    html.Button('×', id='modal-add-service-type-close', n_clicks=0, className='modal-close-button'),
+                ]),
+                html.Div(className='modal-body', children=[
+                    dcc.Input(id='input-new-service-type-name', type='text', placeholder='Nome do tipo de serviço',
+                              className='modal-input'),
+                ]),
+                html.Div(className='modal-footer', children=[
+                    html.Button('Salvar', id='save-new-service-type-btn', className='modal-button submit'),
+                ])
+            ])
+        ]),
     ], className='page-content')
 
 
@@ -122,12 +153,13 @@ def update_list(search_value, mes):
         search_term = remover_acentos(search_value)
         filtered_by_search = []
         for item in filtered:
-            responsavel_info = next((agent for agent in agents if agent.get('viatura_mes') == item.get('viatura')), None)
+            responsavel_info = next((agent for agent in agents if agent.get('viatura_mes') == item.get('viatura')),
+                                    None)
             responsavel_nome_item = remover_acentos(responsavel_info['nome']) if responsavel_info else ''
 
             if search_term in remover_acentos(item.get('viatura', '')) or \
-               search_term in remover_acentos(item.get('nomenclatura', '')) or \
-               search_term in responsavel_nome_item:
+                    search_term in remover_acentos(item.get('nomenclatura', '')) or \
+                    search_term in responsavel_nome_item:
                 filtered_by_search.append(item)
         filtered = filtered_by_search
 
@@ -212,3 +244,40 @@ def update_graph(mes):
         paper_bgcolor='rgba(0,0,0,0)',
     )
     return fig_tipos
+
+
+@callback(
+    Output('modal-add-service-type', 'style'),
+    [Input('add-service-type-btn', 'n_clicks'),
+     Input('modal-add-service-type-close', 'n_clicks'),
+     Input('save-new-service-type-btn', 'n_clicks')],
+    [State('modal-add-service-type', 'style')],
+    prevent_initial_call=True,
+)
+def toggle_modal(n1, n2, n3, style):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return style
+
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if button_id == 'add-service-type-btn':
+        return {'display': 'block'}
+
+    if button_id in ['modal-add-service-type-close', 'save-new-service-type-btn']:
+        return {'display': 'none'}
+
+    return style
+
+
+@callback(
+    Output('url-services', 'pathname'),
+    Input('save-new-service-type-btn', 'n_clicks'),
+    State('input-new-service-type-name', 'value'),
+    prevent_initial_call=True
+)
+def save_new_service_type(n_clicks, name):
+    if n_clicks and name:
+        add_viario_service({'nome': name})
+        return '/dashboard/services'
+    return dash.no_update

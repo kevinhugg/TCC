@@ -41,11 +41,9 @@ def layout(id=None):
         dcc.Store(id='serv-store', data=id),
         dcc.Location(id='redirect-serv', refresh=True),
 
-        # Deletion Modal REMOVED
-
         html.Div([
-            html.H3(f"{dados.get('nomenclatura', 'N/A')}", className='tittle'),
             html.Div([
+                html.H3(f"{dados.get('nomenclatura', 'N/A')}", className='tittle'),
                 html.Div([
                     html.P(f"Descrição: {dados.get('descricao', 'Não informada.')}"),
                     html.P(f"Endereço: {dados.get('endereco', 'Não informado.')}"),
@@ -57,14 +55,34 @@ def layout(id=None):
                         className='link-ag-vt'
                     )
                 ], className='texts-det'),
-            ], className='details-items'),
-            html.Div([
-                # REMOVED Delete button
-                html.Div([
+                 html.Div([
                     html.A(id='pdf_serv_det_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
                 ], className='btn-pdf'),
-            ], className='btn_rem_pdf'),
-        ], className='details-container'),
+            ], className='details-container card'),
+
+            html.Div([
+                html.H3(f"Equipe Responsável"),
+                html.Div([
+                    dcc.Link(
+                        html.Div([
+                            html.Img(src=motorista.get('foto_agnt', '/static/img/default-user.png'), className='img'),
+                            html.P(motorista.get('nome', 'N/A')),
+                            html.P(f"Função: {motorista.get('func_mes', 'N/A').capitalize()}"),
+                        ], className='agent-box motorista'),
+                        href=f"/dashboard/agent/{motorista.get('id')}"
+                    ) if motorista else html.Div("Sem motorista designado", className='agent-box'),
+
+                    *[dcc.Link(
+                        html.Div([
+                            html.Img(src=agente.get('foto_agnt', '/static/img/default-user.png'), className='img'),
+                            html.P(agente.get('nome', 'N/A')),
+                            html.P(f"Função: {agente.get('func_mes', 'N/A').capitalize()}"),
+                        ], className='agent-box'),
+                        href=f"/dashboard/agent/{agente.get('id')}"
+                    ) for agente in another_agents]
+                ], className='agents-grid'),
+            ], className='agents-container card'),
+        ], className='grid-details'),
 
         html.Div([
             html.H4(f"Histórico de Serviços do Veículo {dados.get('viatura', '')}"),
@@ -76,30 +94,8 @@ def layout(id=None):
                 className='filter-month'
             ),
             html.Div(id='table-serv-viat'),
-        ], className='services'),
+        ], className='services card'),
 
-        html.Div([
-            html.H3(f"Equipe Responsável"),
-            html.Div([
-                dcc.Link(
-                    html.Div([
-                        html.Img(src=motorista.get('foto_agnt', '/static/img/default-user.png'), className='img'),
-                        html.P(motorista.get('nome', 'N/A')),
-                        html.P(f"Função: {motorista.get('func_mes', 'N/A').capitalize()}"),
-                    ], className='agent-box motorista'),
-                    href=f"/dashboard/agent/{motorista.get('id')}"
-                ) if motorista else html.Div("Sem motorista designado", className='agent-box'),
-
-                *[dcc.Link(
-                    html.Div([
-                        html.Img(src=agente.get('foto_agnt', '/static/img/default-user.png'), className='img'),
-                        html.P(agente.get('nome', 'N/A')),
-                        html.P(f"Função: {agente.get('func_mes', 'N/A').capitalize()}"),
-                    ], className='agent-box'),
-                    href=f"/dashboard/agent/{agente.get('id')}"
-                ) for agente in another_agents]
-            ], className='agents-grid'),
-        ], className='agents-container'),
     ], className='page-content')
 
 @callback(
