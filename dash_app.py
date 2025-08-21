@@ -24,7 +24,10 @@ def create_dash_app(flask_app):
         html.Div(id='theme', children=[
             # Header fixo no topo
             html.Div([
-                html.Img(src='/static/assets/img/persona.png', className='profile-pic')
+                dcc.Link(
+                    html.Img(src='/static/assets/img/persona.png', className='profile-pic'),
+                    href='/dashboard/profile'
+                )
             ], className='header'),
 
             # Sidebar

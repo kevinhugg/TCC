@@ -1,0 +1,35 @@
+.profile-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin-left: 0 !important;
+}
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    width: 400px;
+}
+
+.profile-img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1.5rem;
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.profile-info {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
