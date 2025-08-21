@@ -231,6 +231,12 @@
     }
 }
 
+.page-content.details-page {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 2rem;
+}
+
 .grid-details {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));

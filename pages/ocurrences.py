@@ -10,115 +10,110 @@ from data.dados import agents, Ocur_Vehicles, occurrence_types
 
 dash.register_page(__name__, path='/ocurrences', name='Ocorrências', className='pg-at')
 
-item = next((v for v in Ocur_Vehicles))
-responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-viat_func = next((a['viatura_mes'] for a in agents))
-meses_unicos = sorted(set(
-    datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
-    for o in Ocur_Vehicles if o['viatura'] == viat_func
-))
 
-ocorrencias = [o for o in Ocur_Vehicles if o.get('class') == 'ocorrencia']
+def get_page_data():
+    """Fetches and prepares all data needed for the occurrences page from data/dados.py."""
+    try:
+        ocorrencias = [o for o in Ocur_Vehicles if o.get('class') == 'ocorrencia']
+        return ocorrencias
+    except Exception as e:
+        print(f"Error fetching data for occurrences page from dados.py: {e}")
+        return []
 
-dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
-    {
-        'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(),
-        'value': m
-    } for m in meses_unicos
-]
 
-layout = html.Div([
+def layout():
+    ocorrencias = get_page_data()
 
-    html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
-    html.Link(rel='stylesheet', href='/static/css/modal.css'),
-    dcc.Location(id='url-occurrences', refresh=True),
-    dcc.Store(id='filtro-search'),
+    occurrence_types_table = html.Table([
+        html.Thead(html.Tr([html.Th("Tipos de Ocorrência")])),
+        html.Tbody([
+            html.Tr([html.Td(ot['nome'])]) for ot in occurrence_types
+        ])
+    ], className='serv-table')
 
-    html.Div([
+    occurrence_types_container = html.Div([
+        html.H4("Tipos de Ocorrência"),
+        html.Div(occurrence_types_table, className='service-types-list'),
+        html.A('Adicionar Tipo', id='add-occurrence-type-btn', className='btn_add')
+    ], className='graph_tipes card')
+
+    if ocorrencias:
+        meses_unicos = sorted(list(set(
+            datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
+            for o in ocorrencias
+        )))
+        dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
+            {'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(), 'value': m}
+            for m in meses_unicos
+        ]
+    else:
+        dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}]
+
+    return html.Div([
+        html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
+        html.Link(rel='stylesheet', href='/static/css/modal.css'),
+        dcc.Store(id='filtro-search-oco'),
+        dcc.Location(id='url-occurrences', refresh=True),
 
         html.Div([
-
             html.Div([
-                html.H3('Ocorrências Gerais', className='title'),
-                dcc.Dropdown(
-                    id='filter-month',
-                    options=dropdown_options,
-                    value='todos',
-                    placeholder="Filtrar por mês...",
-                    className='filter-month'
-                ),
-                dcc.Input(id='input-search', type='text', placeholder='Buscar por responsável ou viatura...',
-                          className='input-search'),
-            ], className='searchbar'),
+                html.Div([
+                    html.H3('Ocorrências Gerais', className='title'),
+                    html.Div([
+                        dcc.Input(id='input-search-oco', type='text', placeholder='Buscar por tipo ou viatura...',
+                                  className='input-search'),
+                        dcc.Dropdown(
+                            id='filter-month-oco',
+                            options=dropdown_options,
+                            value='todos',
+                            placeholder="Filtrar por mês...",
+                            className='filter-month'
+                        ),
+                    ], className='search-controls'),
+                ], className='searchbar'),
 
-            html.Table([
-                html.Thead([
-                    html.Tr([
-                        html.Th('Data'),
-                        html.Th('Responsável'),
-                        html.Th('Tipo'),
-                        html.Th('Veículo'),
-                    ])
+                html.Table([
+                    html.Thead(html.Tr([
+                        html.Th('Data'), html.Th('Responsável'), html.Th('Tipo'),
+                        html.Th('Veículo'), html.Th('Ações')
+                    ])),
+                    html.Tbody(id='oco-table')
+                ], className='oco-table'),
+
+                html.Div([
+                    html.Div(
+                        html.A(id='rem_oco', children='Apagar Ocorrências', className='rem_serv btn-danger'),
+                        className='btn'
+                    ),
+                    html.Div(
+                        html.A(id='pdf_oco_gerar', children='Gerar PDF', target="_blank", className='btn-pdf'),
+                        className='btn-pdf-oco'
+                    ),
+                ], className='btn_rem_add_pdf'),
+
+            ], className='oco_serv_container card'),
+            html.Div([
+                occurrence_types_container
+            ], className='graph-and-table-container'),
+        ]),
+
+        html.Div(id='modal-add-occurrence-type', className='modal', style={'display': 'none'}, children=[
+            html.Div(className='modal-content', children=[
+                html.Div(className='modal-header', children=[
+                    html.H5('Adicionar Novo Tipo de Ocorrência', className='modal-title'),
+                    html.Button('×', id='modal-add-occurrence-type-close', n_clicks=0, className='modal-close-button'),
                 ]),
-                html.Tbody(id='oco-table', children=[
-                    html.Tr([
-                        html.Td(item['data']),
-                        html.Td(
-                            dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
-                        ),
-                        html.Td(item['nomenclatura']),
-                        html.Td(
-                            dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
-                        ),
-                        html.Td(
-                            dcc.Link('Ver Mais', href=f"/dashboard/ocurrences/{item['id']}"), className='btn_view'
-                        ),
-                    ])
-                    for item in Ocur_Vehicles
+                html.Div(className='modal-body', children=[
+                    dcc.Input(id='input-new-occurrence-type-name', type='text',
+                              placeholder='Nome do tipo de ocorrência',
+                              className='modal-input'),
+                ]),
+                html.Div(className='modal-footer', children=[
+                    html.Button('Salvar', id='save-new-occurrence-type-btn', className='modal-button submit'),
                 ])
-            ], className='oco-table'),
-
-            html.Div([
-                html.Div([
-                    html.A(id='rem_oco', children='Apagar Ocorrências', className='rem_serv btn-danger')
-                ], className='btn'),
-
-                html.Div([
-                    html.A(id='pdf_oco_gerar', children='Gerar PDF', target="_blank", className='btn-pdf')
-                ], className='btn-pdf-oco'),
-            ], className='btn_rem_add_pdf'),
-
-        ], className='oco_serv_container'),
-    ]),
-
-    html.Div([
-        html.H4("Tipos de Ocorrência"),
-        html.Table([
-            html.Thead(html.Tr([html.Th("Tipos de Ocorrência")])),
-            html.Tbody([
-                html.Tr([html.Td(ot['nome'])]) for ot in occurrence_types
             ])
-        ], className='serv-table'),
-        html.A('Adicionar Tipo', id='add-occurrence-type-btn', className='btn_add')
-    ], className='graph_tipes card'),
-
-    html.Div(id='modal-add-occurrence-type', className='modal', style={'display': 'none'}, children=[
-        html.Div(className='modal-content', children=[
-            html.Div(className='modal-header', children=[
-                html.H5('Adicionar Novo Tipo de Ocorrência', className='modal-title'),
-                html.Button('×', id='modal-add-occurrence-type-close', n_clicks=0, className='modal-close-button'),
-            ]),
-            html.Div(className='modal-body', children=[
-                dcc.Input(id='input-new-occurrence-type-name', type='text', placeholder='Nome do tipo de ocorrência',
-                          className='modal-input'),
-            ]),
-            html.Div(className='modal-footer', children=[
-                html.Button('Salvar', id='save-new-occurrence-type-btn', className='modal-button submit'),
-            ])
-        ])
-    ]),
-], className='page-content')
+        ]),
+    ], className='page-content')
 
 
 @callback(
@@ -190,6 +185,8 @@ def save_new_occurrence_type(n_clicks, name):
 
 
 def remover_acentos(txt):
+    if not txt:
+        return ""
     return ''.join(
         c for c in unicodedata.normalize('NFD', txt)
         if unicodedata.category(c) != 'Mn'
@@ -199,51 +196,66 @@ def remover_acentos(txt):
 @callback(
     Output('oco-table', 'children'),
     Output('pdf_oco_gerar', 'href'),
-    Input('input-search', 'value'),
-    Input('filter-month', 'value'),
+    Input('input-search-oco', 'value'),
+    Input('filter-month-oco', 'value'),
 )
 def update_list(search_value, mes):
-    if not search_value:
-        filtered = ocorrencias
-    else:
-        search_value = remover_acentos(search_value.lower())
-        filtered = [
-            item for item in ocorrencias
-            if search_value in remover_acentos(item['viatura'].lower()) or
-               any(search_value in remover_acentos(a['nome'].lower()) for a in agents if
-                   a['viatura_mes'] == item['viatura'])
-        ]
+    ocorrencias = get_page_data()
+
+    if not ocorrencias:
+        return html.Tr([
+            html.Td("Nenhuma ocorrência encontrada.", colSpan=5, className='not-found'),
+        ]), "/gerar_pdf_ocorrencias"
 
     if mes != 'todos':
         filtered = [
-            item for item in filtered
+            item for item in ocorrencias
             if datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
         ]
+    else:
+        filtered = ocorrencias
+
+    if search_value:
+        search_term = remover_acentos(search_value)
+        filtered_by_search = []
+        for item in filtered:
+            responsavel_info = next((agent for agent in agents if agent.get('viatura_mes') == item.get('viatura')),
+                                    None)
+            responsavel_nome_item = remover_acentos(responsavel_info['nome']) if responsavel_info else ''
+
+            if search_term in remover_acentos(item.get('viatura', '')) or \
+                    search_term in remover_acentos(item.get('nomenclatura', '')) or \
+                    search_term in responsavel_nome_item:
+                filtered_by_search.append(item)
+        filtered = filtered_by_search
 
     if not filtered:
         return html.Tr([
             html.Td("Ocorrência não encontrada!", colSpan=5, className='not-found'),
-        ]), f"/gerar_pdf_ocorrencias?filtro={search_value}&mes={mes}"
+        ]), f"/gerar_pdf_ocorrencias?filtro={search_value or ''}&mes={mes}"
 
     rows = []
     for item in filtered:
-        responsavel = next((a['nome'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
-        respon_id = next((a['id'] for a in agents if a['viatura_mes'] == item['viatura']), 'Desconhecido')
+        agent_info = next((a for a in agents if a.get('viatura_mes') == item.get('viatura')), None)
+        agent_name = agent_info['nome'] if agent_info else 'N/A'
+        agent_id = agent_info['id'] if agent_info else ''
+
         row = html.Tr([
-            html.Td(item['data']),
+            html.Td(item.get('data', 'N/A')),
             html.Td(
-                dcc.Link(responsavel, href=f"/dashboard/agent/{respon_id}"), className='btn_ag'
+                dcc.Link(agent_name, href=f"/dashboard/agent/{agent_id}") if agent_id else agent_name,
+                className='btn_ag'
             ),
-            html.Td(item['nomenclatura']),
+            html.Td(item.get('nomenclatura', 'N/A')),
             html.Td(
-                dcc.Link(item['viatura'], href=f"/dashboard/veiculo/{item['viatura']}"), className='btn_veh'
+                dcc.Link(item.get('viatura', 'N/A'), href=f"/dashboard/veiculo/{item.get('viatura', '')}"),
+                className='btn_veh'
             ),
             html.Td(
-                dcc.Link('Ver Mais', href=f"/dashboard/ocurrences/{item['id']}"), className='btn_view'
+                dcc.Link('Ver Mais', href=f"/dashboard/ocurrences/{item.get('id', '')}"), className='btn_view'
             ),
         ])
         rows.append(row)
 
-    pdf_link = f"/gerar_pdf_ocorrencias?filtro={search_value}&mes={mes}"
-
+    pdf_link = f"/gerar_pdf_ocorrencias?filtro={search_value or ''}&mes={mes}"
     return rows, pdf_link

@@ -105,7 +105,7 @@ Ocur_Vehicles = [
         'class': 'serviço'
     },
     {
-        'viatura': 'V003',
+        'viatura': 'V004',
         'nomenclatura': 'Fiscalização ambiental',
         'id': 'q',
         'descricao': 'Ronda noturna',

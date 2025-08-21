@@ -112,7 +112,7 @@ def layout(id=None):
                 ) for agente in another_agents]
             ], className='agents-grid'),
         ], className='agents-container'),
-    ], className='page-content')
+    ], className='page-content details-page')
 
 @callback(
     Output('table-oco-viat', 'children'),

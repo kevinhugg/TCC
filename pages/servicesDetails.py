@@ -96,7 +96,7 @@ def layout(id=None):
             html.Div(id='table-serv-viat'),
         ], className='services card'),
 
-    ], className='page-content')
+    ], className='page-content details-page')
 
 @callback(
     Output('table-serv-viat', 'children'),
