@@ -9,11 +9,14 @@
     gap: 20px;
     padding: 2rem;
     margin-left: 8em;
-    margin-top: 20px;
+    margin-top: 60px;
     transition: margin-left 0.3s ease;
 }
 
-.details-container {
+.details-container,
+.ocurrences,
+.services,
+.agents-container {
     background: var(--card-bg-color);
     border-radius: 12px;
     padding: 1.5rem;
@@ -21,7 +24,21 @@
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     display: flex;
     flex-direction: column;
-    width: 68rem; /* Occupy full width */
+}
+
+.details-container {
+    flex: 1 1 400px;
+    max-width: 68rem;
+    margin: 0 auto;
+}
+
+.ocurrences,
+.services {
+    flex: 2 1 500px;
+}
+
+.agents-container {
+    flex: 1 1 100%; /* Takes full width on its own row if others wrap */
 }
 
 .tittle {
@@ -32,9 +49,10 @@
 
 .details-items {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 2rem;
     align-items: center;
+    justify-content: center;
 }
 
 .texts-det {
@@ -45,6 +63,7 @@
     font-size: 1.2rem;
     gap: 1rem;
     color: var(--secondary-text-color);
+    justify-content: center;
 }
 
 .img {
@@ -222,10 +241,27 @@
     padding: 2rem;
 }
 
+.grid-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.details-container,
+.agents-container {
+    display: flex;
+    flex-direction: column;
+}
+
 .card {
     background: var(--card-bg-color);
     border-radius: 12px;
     padding: 1.5rem;
     border: 1px solid var(--border-color);
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.services.card {
+    margin-top: 20px;
 }
