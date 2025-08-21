@@ -9,7 +9,7 @@
     gap: 20px;
     padding: 2rem;
     margin-left: 8em;
-    margin-top: 60px;
+    margin-top: 20px;
     transition: margin-left 0.3s ease;
 }
 
@@ -28,7 +28,7 @@
 
 .details-container {
     flex: 1 1 400px;
-    max-width: 68rem;
+    width: 65rem;
     margin: 0 auto;
 }
 
