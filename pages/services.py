@@ -177,12 +177,11 @@ def update_list(search_value, mes):
         search_term = remover_acentos(search_value)
         filtered_by_search = []
         for item in filtered:
-            responsavel = agent_map.get(item.get('viatura'), {})
-            responsavel_nome = remover_acentos(responsavel.get('nome', ''))
+            responsavel_nome_item = remover_acentos(item.get('responsavel', ''))
 
             if search_term in remover_acentos(item.get('viatura', '')) or \
                     search_term in remover_acentos(item.get('nomenclatura', '')) or \
-                    search_term in responsavel_nome:
+                    search_term in responsavel_nome_item:
                 filtered_by_search.append(item)
         filtered = filtered_by_search
 

@@ -199,7 +199,7 @@ def update_selected_agents(selected_values):
 def toggle_edit_mode(n_clicks, current_mode):
     if n_clicks:
         new_mode = not current_mode
-        button_text = "Cancelar" if new_mode else "Remover Agentes"
+        button_text = "Remover" if new_mode else "Remover Agentes"
         return new_mode, button_text
     return current_mode, "Remover Agentes"
 

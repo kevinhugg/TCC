@@ -212,6 +212,8 @@ def get_all_occurrences_and_services():
         if not agent_id:
             continue
 
+        agent_name = agent.get('nome', 'N/A')
+
         ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
         date_docs = ocorrencias_ref.stream()
 
@@ -231,7 +233,9 @@ def get_all_occurrences_and_services():
                     'tipo': item_type,
                     'class': item_class,
                     'path': 'services' if item_class == 'serviço' else 'ocurrences',
-                    'viatura': data.get('viatura', 'N/A')
+                    'viatura': data.get('viatura', 'N/A'),
+                    'responsavel': agent_name,
+                    'responsavel_id': agent_id
                 })
 
     return history
@@ -439,45 +443,20 @@ def delete_occurrence_or_service(doc_id):
 
 def get_all_service_types():
     """Fetches all service types from the 'tipos_servico' collection."""
-    docs = db.collection('tipos_servico').stream()
+    docs = db.collection('services').stream()
     return [{'id': doc.id, 'nome': doc.to_dict().get('nome')} for doc in docs]
 
 
 def get_viario_services():
-    """Fetches all services from the 'viario' collection."""
-    docs = db.collection('viario').stream()
-    services = []
-    for doc in docs:
-        service_data = doc.to_dict()
-        service_data['id'] = doc.id
-        services.append(service_data)
+    """Fetches all services from the 'ocorrencias' subcollection in 'agentes'."""
+    all_items = get_all_occurrences_and_services()
+    services = [item for item in all_items if item['class'] == 'viario']
     return services
-
-
-def add_service_type(service_type_name):
-    """Adds a new service type to the 'tipos_servico' collection."""
-    try:
-        # Verifica se já existe um tipo de serviço com o mesmo nome (case-insensitive)
-        existing_types = db.collection('tipos_servico').where('nome_lower', '==', service_type_name.lower()).limit(1).stream()
-        if next(existing_types, None):
-            print(f"Service type '{service_type_name}' already exists.")
-            return None, False  # Indica que o tipo já existe
-
-        doc_ref = db.collection('tipos_servico').document()
-        doc_ref.set({
-            'nome': service_type_name,
-            'nome_lower': service_type_name.lower()  # Campo para busca case-insensitive
-        })
-        return doc_ref.id, True
-    except Exception as e:
-        print(f"An error occurred while adding service type: {e}")
-        return None, False
-
 
 def add_viario_service(service_data):
     """Adds a new service document to the 'viario' collection."""
     try:
-        doc_ref = db.collection('viario').document()
+        doc_ref = db.collection('servico').document()
         doc_ref.set(service_data)
         return doc_ref.id
     except Exception as e:
@@ -488,7 +467,7 @@ def add_viario_service(service_data):
 def delete_service_type(service_type_id):
     """Deletes a service type by its ID."""
     try:
-        db.collection('tipos_servico').document(service_type_id).delete()
+        db.collection('servico').document(service_type_id).delete()
         return True
     except Exception as e:
         print(f"An error occurred while deleting service type {service_type_id}: {e}")
