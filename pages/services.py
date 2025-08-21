@@ -6,8 +6,7 @@ import plotly.express as px
 from datetime import datetime
 import pandas as pd
 
-from data.dados import Ocur_Vehicles, agents
-from firebase_functions import add_viario_service, get_all_service_types
+from data.dados import Ocur_Vehicles, agents, service_types
 
 dash.register_page(__name__, path='/services', name='Serviços', className='pg-at')
 
@@ -33,7 +32,6 @@ def get_page_data():
 
 def layout():
     servicos = get_page_data()
-    service_types = get_all_service_types()
 
     service_types_table = html.Table([
         html.Thead(html.Tr([html.Th("Tipos de Serviço")])),
@@ -46,7 +44,7 @@ def layout():
         html.H4("Tipos de Serviço"),
         html.Div(service_types_table, className='service-types-list'),
         html.A('Adicionar Tipo', id='add-service-type-btn', className='btn_add')
-    ], className='service-types-container card')
+    ], className='graph_tipes card')
 
     if servicos:
         meses_unicos = sorted(list(set(
@@ -104,7 +102,6 @@ def layout():
 
             ], className='oco_serv_container card'),
             html.Div([
-                html.Div(dcc.Graph(id='fig_serv_tipos', className='fig_serv'), className='graph_tipes card'),
                 service_types_container
             ], className='graph-and-table-container'),
         ]),
@@ -196,57 +193,6 @@ def update_list(search_value, mes):
 
 
 @callback(
-    Output('fig_serv_tipos', 'figure'),
-    Input('filter-month-serv', 'value'),
-)
-def update_graph(mes):
-    servicos = get_page_data()
-
-    if not servicos:
-        return px.bar(title='Nenhum Serviço Cadastrado')
-
-    if mes != 'todos':
-        filtered = [
-            item for item in servicos
-            if datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
-        ]
-    else:
-        filtered = servicos
-
-    tipos = [item['nomenclatura'].strip() for item in filtered]
-    contagem_tipos = Counter(tipos)
-
-    if not contagem_tipos:
-        return px.bar(title=f'Nenhum serviço em {mes}')
-
-    df_servicos = pd.DataFrame({
-        'Tipo': list(contagem_tipos.keys()),
-        'Quantidade': list(contagem_tipos.values())
-    })
-
-    fig_tipos = px.bar(
-        df_servicos,
-        x='Tipo',
-        y='Quantidade',
-        text='Quantidade',
-        labels={'Tipo': '', 'Quantidade': ''},
-        title='Serviços Cadastrados'
-    )
-
-    fig_tipos.update_traces(marker_color='#4682B4', textposition='outside')
-    fig_tipos.update_layout(
-        title={
-            'text': 'Serviços Cadastrados',
-            'x': 0.5,
-            'xanchor': 'center'
-        },
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-    )
-    return fig_tipos
-
-
-@callback(
     Output('modal-add-service-type', 'style'),
     [Input('add-service-type-btn', 'n_clicks'),
      Input('modal-add-service-type-close', 'n_clicks'),
@@ -278,6 +224,44 @@ def toggle_modal(n1, n2, n3, style):
 )
 def save_new_service_type(n_clicks, name):
     if n_clicks and name:
-        add_viario_service({'nome': name})
+        # Atualiza a lista em memória
+        new_id = max(st['id'] for st in service_types) + 1 if service_types else 1
+        service_types.append({'id': new_id, 'nome': name})
+
+        # Lê o conteúdo do arquivo
+        with open('data/dados.py', 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        # Encontra a linha onde a lista service_types é definida
+        start_index = -1
+        for i, line in enumerate(lines):
+            if 'service_types = [' in line:
+                start_index = i
+                break
+
+        if start_index != -1:
+            # Encontra o final da lista
+            end_index = start_index
+            bracket_count = 0
+            for i, line in enumerate(lines[start_index:]):
+                bracket_count += line.count('[')
+                bracket_count -= line.count(']')
+                if bracket_count == 0:
+                    end_index = start_index + i
+                    break
+
+            # Recria a string da lista
+            new_list_str = "service_types = [\n"
+            for st in service_types:
+                new_list_str += f"    {{'id': {st['id']}, 'nome': '{st['nome']}'}},\n"
+            new_list_str += "]\n"
+
+            # Substitui a lista antiga pela nova
+            lines = lines[:start_index] + [new_list_str] + lines[end_index + 1:]
+
+            # Escreve o conteúdo de volta no arquivo
+            with open('data/dados.py', 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+
         return '/dashboard/services'
     return dash.no_update

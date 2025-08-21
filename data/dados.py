@@ -113,3 +113,16 @@ Ocur_Vehicles = [
         'class': 'ocorrencia'
     },
 ]
+
+service_types = [
+    {'id': 1, 'nome': 'Atendimento ao cidadão'},
+    {'id': 2, 'nome': 'Sinistro de Trânsito'},
+    {'id': 3, 'nome': 'Sinistro de Grande Vulto'},
+    {'id': 4, 'nome': 'Ambiental'},
+    {'id': 5, 'nome': 'Sinalização ineficiente'},
+]
+
+occurrence_types = [
+    {'id': 1, 'nome': 'Fiscalização ambiental'},
+    {'id': 2, 'nome': 'Fiscalização de trânsito'},
+]
