@@ -20,12 +20,27 @@ def layout(numero=None):
         dcc.Location(id='url-redirect', refresh=True),
         dcc.Store(id='vehicle-store', data=numero),
         dcc.Store(id='agent-assignment-trigger', data=0),
+        dcc.ConfirmDialog(id='update-confirm', message=''),
 
         html.Div([
             html.H3(f"Viatura - {dados['numero']}", className='tittle'),
 
             html.Div([
-                html.Img(src=dados.get('imagem', '/static/assets/img/imageNot.png'), className='img'),
+                html.Img(id='vehicle-image', src=dados.get('imagem', '/static/assets/img/imageNot.png'), className='img'),
+                html.Div([
+                    dcc.Upload(
+                        id='upload-new-image',
+                        children=html.Div(['Arraste ou ', html.A('Selecione uma Imagem')]),
+                        style={
+                            'width': '90%', 'height': '50px', 'lineHeight': '50px',
+                            'borderWidth': '1px', 'borderStyle': 'dashed',
+                            'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px'
+                        },
+                        accept='image/*'
+                    ),
+                    html.Button('Alterar Imagem', id='submit-new-image', n_clicks=0, className='btn-submit'),
+                    html.Div(id='output-image-upload'),
+                ], className='upload-section'),
                 html.Div([
                     html.P(f"Placa: {dados.get('placa', '---')}", className='det placa'),
                     html.P(f"Tipo: {dados.get('veiculo', '---')}", className='det tipo'),
@@ -448,3 +463,43 @@ def delete_vehicle(n_clicks, numero):
         if fb.delete_vehicle(numero):
             return '/dashboard/pageVehicles'
     return dash.no_update
+
+
+@callback(
+    Output('output-image-upload', 'children'),
+    Input('upload-new-image', 'filename')
+)
+def update_output(filename):
+    if filename:
+        return html.Div(f"Arquivo selecionado: {filename}")
+    return html.Div("")
+
+
+@callback(
+    [Output('update-confirm', 'displayed'),
+     Output('update-confirm', 'message'),
+     Output('url-redirect', 'pathname')],
+    [Input('submit-new-image', 'n_clicks')],
+    [State('upload-new-image', 'contents'),
+     State('upload-new-image', 'filename'),
+     State('vehicle-store', 'data'),
+     State('url-redirect', 'pathname')],
+    prevent_initial_call=True
+)
+def update_vehicle_image(n_clicks, contents, filename, numero, current_path):
+    if not contents:
+        return True, "Por favor, selecione uma imagem para fazer o upload.", dash.no_update
+
+    # Fazer upload da imagem
+    image_url = fb.upload_image_to_storage(contents, filename)
+
+    if not image_url:
+        return True, "Ocorreu um erro durante o upload da imagem.", dash.no_update
+
+    # Atualizar o veículo no banco de dados
+    success = fb.update_vehicle(numero, {'imagem': image_url})
+
+    if success:
+        return True, "Imagem atualizada com sucesso! A página será recarregada.", current_path
+    else:
+        return True, "Falha ao atualizar as informações do veículo no banco de dados.", dash.no_update

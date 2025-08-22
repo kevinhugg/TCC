@@ -381,6 +381,25 @@ def update_agent(agent_mat, updates: dict):
     db.collection('agentes').document(agent_mat).update(updates)
 
 
+def update_vehicle(numero, updates: dict):
+    """Atualiza um veículo na coleção 'veiculos' pelo seu número."""
+    try:
+        # Encontra o documento pelo campo 'numero'
+        docs = db.collection('veiculos').where('numero', '==', numero).limit(1).stream()
+        doc_to_update = next(docs, None)
+
+        if doc_to_update:
+            doc_to_update.reference.update(updates)
+            print(f"Viatura com número {numero} atualizada com sucesso.")
+            return True
+        else:
+            print(f"Nenhuma viatura encontrada com o número {numero}.")
+            return False
+    except Exception as e:
+        print(f"Ocorreu um erro ao atualizar a viatura {numero}: {e}")
+        return False
+
+
 # remove atribuiçoes do agente
 def clear_agent_assignment(agent_mat):
     update_agent(agent_mat, {
