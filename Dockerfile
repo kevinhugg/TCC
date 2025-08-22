@@ -8,4 +8,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+EXPOSE 5000
+
 CMD ["python", "app.py"]
