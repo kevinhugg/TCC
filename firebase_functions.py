@@ -7,7 +7,9 @@ from urllib.parse import quote
 # inicializa o app uma vez só
 if not firebase_admin._apps:
     cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred)
+    firebase_admin.initialize_app(cred, {
+        'storageBucket': 'tcc-semurb-2ea61.firebasestorage.app'
+    })
 
 db = firestore.client()
 
@@ -264,7 +266,8 @@ def upload_image_to_storage(contents, filename):
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
 
-        bucket = storage.bucket()
+        # Força o nome do bucket diretamente para evitar problemas de descoberta
+        bucket = storage.bucket('tcc-semurb-2ea61.firebasestorage.app')
         unique_filename = f"viaturas/{uuid.uuid4()}-{filename}"
         blob = bucket.blob(unique_filename)
 
@@ -379,6 +382,25 @@ def delete_all_vehicles():
 # att agente por id/matricula
 def update_agent(agent_mat, updates: dict):
     db.collection('agentes').document(agent_mat).update(updates)
+
+
+def update_vehicle(numero, updates: dict):
+    """Atualiza um veículo na coleção 'veiculos' pelo seu número."""
+    try:
+        # Encontra o documento pelo campo 'numero'
+        docs = db.collection('veiculos').where('numero', '==', numero).limit(1).stream()
+        doc_to_update = next(docs, None)
+
+        if doc_to_update:
+            doc_to_update.reference.update(updates)
+            print(f"Viatura com número {numero} atualizada com sucesso.")
+            return True
+        else:
+            print(f"Nenhuma viatura encontrada com o número {numero}.")
+            return False
+    except Exception as e:
+        print(f"Ocorreu um erro ao atualizar a viatura {numero}: {e}")
+        return False
 
 
 # remove atribuiçoes do agente

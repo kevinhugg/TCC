@@ -9,6 +9,7 @@ def get_sidebar():
         "/pageAgents": {"name": "Agentes", "icon": "fas fa-users"},
         "/services": {"name": "Serviços", "icon": "fas fa-concierge-bell"},
         "/ocurrences": {"name": "Ocorrências", "icon": "fas fa-exclamation-triangle"},
+        "/profile": {"name": "Perfil", "icon": "fas fa-user-circle"},
         "/configurations": {"name": "Configurações", "icon": "fas fa-cog"},
     }
 

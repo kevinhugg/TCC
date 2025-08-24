@@ -1,6 +1,7 @@
 import dash
 from dash import html, dcc, Input, Output, callback, State
 from datetime import datetime
+import uuid
 import dash_bootstrap_components as dbc
 import firebase_functions as fb
 
@@ -20,12 +21,20 @@ def layout(numero=None):
         dcc.Location(id='url-redirect', refresh=True),
         dcc.Store(id='vehicle-store', data=numero),
         dcc.Store(id='agent-assignment-trigger', data=0),
+        dcc.ConfirmDialog(id='update-confirm', message=''),
 
         html.Div([
             html.H3(f"Viatura - {dados['numero']}", className='tittle'),
 
             html.Div([
-                html.Img(src=dados.get('imagem', '/static/assets/img/imageNot.png'), className='img'),
+                # A imagem principal da viatura, agora clicável para abrir o modal de upload.
+                html.Img(
+                    id='vehicle-image-clickable',
+                    src=dados.get('imagem', '/static/assets/img/imageNot.png'),
+                    className='img',
+                    style={'cursor': 'pointer'},
+                    title='Clique para alterar a imagem'
+                ),
                 html.Div([
                     html.P(f"Placa: {dados.get('placa', '---')}", className='det placa'),
                     html.P(f"Tipo: {dados.get('veiculo', '---')}", className='det tipo'),
@@ -33,8 +42,9 @@ def layout(numero=None):
                         f"Situação: {'Avariada' if dados.get('avariada') else 'Operante'}",
                         className='det avariada' if dados.get('avariada') else 'det operante'
                     ),
-                    html.P(f"Partes Avariadas: {', '.join(sorted(list(set(p['parte'] for p in partes_avariadas))))}" if partes_avariadas else "Partes Avariadas: Sem avarias",
-                           className='det loc_av'),
+                    html.P(
+                        f"Partes Avariadas: {', '.join(sorted(list(set(p['parte'] for p in partes_avariadas))))}" if partes_avariadas else "Partes Avariadas: Sem avarias",
+                        className='det loc_av'),
                 ], className='texts-det'),
             ], className='details-items'),
 
@@ -45,6 +55,42 @@ def layout(numero=None):
             ], className='btn_rem_add'),
 
         ], className='details-container card'),
+
+        # Modal para fazer upload de uma nova imagem para a viatura
+        html.Div(
+            id='modal-upload-image',
+            className='modal',
+            style={'display': 'none'},  # Inicia escondido
+            children=[
+                html.Div(
+                    className='modal-content',
+                    children=[
+                        html.Div(className='modal-header', children=[
+                            html.H5('Alterar Imagem da Viatura', className='modal-title'),
+                            html.Button('×', id='cancel-upload-x', className='modal-close-button')
+                        ]),
+                        html.Div(className='modal-body', children=[
+                            dcc.Upload(
+                                id='upload-new-image',
+                                children=html.Div(['Arraste ou ', html.A('Selecione uma Imagem')]),
+                                style={
+                                    'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                                    'borderWidth': '1px', 'borderStyle': 'dashed',
+                                    'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px 0'
+                                },
+                                accept='image/*'
+                            ),
+                            html.Div(id='output-image-upload'),  # Mostra o nome do arquivo selecionado
+                        ]),
+                        html.Div(className='modal-footer', children=[
+                            html.Button('Cancelar', id='cancel-upload-button', className='modal-button cancel'),
+                            html.Button('Salvar Nova Imagem', id='submit-new-image', n_clicks=0,
+                                        className='modal-button submit'),
+                        ])
+                    ]
+                )
+            ]
+        ),
 
         html.Div(
             id='modal-delete-vehicle',
@@ -173,6 +219,7 @@ def layout(numero=None):
 
     ], className='page-content'),
 
+
 @callback(
     Output('history-table-div', 'children'),
     [Input('history-filter', 'value'),
@@ -234,6 +281,7 @@ def update_history_table(filter_value, numero):
 
     return html.Table(table_header + table_body, className='table-ocurrences')
 
+
 @callback(
     [Output('agent-list', 'options'),
      Output('agent-list', 'value')],
@@ -260,6 +308,7 @@ def update_agent_list(filter_value, modal_style, current_value):
         return options, current_value
     else:
         return options, None
+
 
 @callback(
     [Output('agent-modal', 'style', allow_duplicate=True),
@@ -368,6 +417,7 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
 
     return children
 
+
 @callback(
     Output('agent-modal', 'style'),
     Input('add-agent-button', 'n_clicks'),
@@ -438,7 +488,7 @@ def toggle_delete_modal(n_open, n_cancel, n_cancel_x, style):
 
 
 @callback(
-    Output('url-redirect', 'pathname'),
+    Output('url-redirect', 'pathname', allow_duplicate=True),
     Input('confirm-delete-vehicle', 'n_clicks'),
     State('vehicle-store', 'data'),
     prevent_initial_call=True
@@ -447,4 +497,95 @@ def delete_vehicle(n_clicks, numero):
     if n_clicks:
         if fb.delete_vehicle(numero):
             return '/dashboard/pageVehicles'
+    return dash.no_update
+
+
+# Callback para mostrar o nome do arquivo selecionado no componente de upload.
+@callback(
+    Output('output-image-upload', 'children'),
+    Input('upload-new-image', 'filename')
+)
+def update_output(filename):
+    if filename:
+        return html.Div(f"Arquivo selecionado: {filename}")
+    return html.Div("")
+
+
+# Callback para processar o upload da imagem, atualizar o banco de dados e notificar o usuário.
+@callback(
+    [Output('update-confirm', 'displayed'),
+     Output('update-confirm', 'message'),
+     Output('modal-upload-image', 'style', allow_duplicate=True)],
+    [Input('submit-new-image', 'n_clicks')],
+    [State('upload-new-image', 'contents'),
+     State('upload-new-image', 'filename'),
+     State('vehicle-store', 'data')],
+    prevent_initial_call=True
+)
+def update_vehicle_image(n_clicks, contents, filename, numero):
+    # Estilo para fechar o modal
+    hide_modal_style = {'display': 'none'}
+
+    if not contents:
+        # Retorna 3 valores: (confirm dialog, mensagem, sem fechar o modal)
+        return True, "Por favor, selecione uma imagem para fazer o upload.", dash.no_update
+
+    # 1. Fazer upload da nova imagem para o Firebase Storage
+    image_url = fb.upload_image_to_storage(contents, filename)
+
+    if not image_url:
+        # Em caso de erro no upload, notifica o usuário e fecha o modal
+        return True, "Ocorreu um erro durante o upload da imagem.", hide_modal_style
+
+    # 2. Atualizar o documento do veículo no Firestore com a nova URL da imagem
+    success = fb.update_vehicle(numero, {'imagem': image_url})
+
+    if success:
+        # Se sucesso, notifica e fecha o modal. A atualização da página será feita por outro callback.
+        return True, "Imagem atualizada com sucesso!", hide_modal_style
+    else:
+        # Se falhar, notifica e fecha o modal
+        return True, "Falha ao atualizar as informações do veículo no banco de dados.", hide_modal_style
+
+
+# Callback para abrir e fechar o modal de upload de imagem.
+@callback(
+    Output('modal-upload-image', 'style'),
+    [Input('vehicle-image-clickable', 'n_clicks'),
+     Input('cancel-upload-button', 'n_clicks'),
+     Input('cancel-upload-x', 'n_clicks')],
+    [State('modal-upload-image', 'style')],
+    prevent_initial_call=True,
+)
+def toggle_upload_modal(n_open, n_cancel, n_cancel_x, style):
+    # Usa o callback_context para saber qual input foi acionado
+    triggered_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+
+    # Se o usuário clicou na imagem da viatura, abre o modal
+    if triggered_id == 'vehicle-image-clickable':
+        return {'display': 'flex'}
+
+    # Se o usuário clicou em um dos botões de fechar, esconde o modal
+    if triggered_id in ['cancel-upload-button', 'cancel-upload-x']:
+        return {'display': 'none'}
+
+    # Se nenhum gatilho relevante foi acionado, não faz nada
+    return style
+
+
+@callback(
+    Output('url-redirect', 'pathname', allow_duplicate=True),
+    Input('update-confirm', 'submit_n_clicks'),
+    State('url-redirect', 'pathname'),
+    prevent_initial_call=True
+)
+def refresh_on_confirm(submit_n_clicks, current_path):
+    """
+    Este callback é acionado quando o usuário clica 'OK' no diálogo de confirmação
+    após um upload de imagem bem-sucedido. Ele força o recarregamento da página.
+    """
+    if submit_n_clicks:
+        # Adiciona um parâmetro de query aleatório para garantir que o navegador
+        # veja a URL como 'nova' e force um recarregamento completo.
+        return f"{current_path}?refresh={uuid.uuid4()}"
     return dash.no_update

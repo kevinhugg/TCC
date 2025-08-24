@@ -3,12 +3,28 @@ from dash import html, dcc, Input, Output, callback, State, ctx
 from collections import Counter
 import plotly.express as px
 import pandas as pd
+from pathlib import Path
 import dash_bootstrap_components as dbc
 import firebase_functions as fb
 from datetime import datetime
+import os
+import base64
 
 dash.register_page(__name__, path='/pageVehicles', name='Veículos')
 
+def save_temp_file(contents, filename):
+    """Salva a imagem recebida do Dash como arquivo temporário e retorna Path"""
+    header, encoded = contents.split(',', 1)
+    data = base64.b64decode(encoded)
+
+    temp_dir = Path("temp_uploads")
+    temp_dir.mkdir(exists_ok=True)
+
+    temp_path = temp_dir / filename
+    with open(temp_path, 'wb') as f:
+        f.write(data)
+
+    return temp_path
 
 def create_damage_graph():
     data_damVeh = fb.get_damages_dates()
@@ -296,28 +312,37 @@ def toggle_vehicle_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
     State('upload-vehicle-image', 'filename'),
     prevent_initial_call=True
 )
-def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
-    if n_clicks:
-        if not all([placa, numero, tipo]):
-            return dash.no_update, {'display': 'flex'}, "Por favor, preencha todos os campos."
+def handle_add_vehicle(placa, numero, tipo, contents, filename):
+    if ctx.triggered_id != "btn-add-viatura":
+        return dash.no_update
 
-        image_url = '/static/assets/img/viatura1.png'  # Default image
-        if contents:
-            uploaded_url = fb.upload_image_to_storage(contents, filename)
-            if uploaded_url:
-                image_url = uploaded_url
-            # If upload fails, silently use the default image_url
+    if not placa or not numero or not tipo:
+        return dbc.Alert("Preencha todos os campos!", color="danger")
 
-        vehicle_data = {
-            'placa': placa,
-            'numero': numero,
-            'veiculo': tipo,
-            'imagem': image_url
+    try:
+        image_url = None
+        if contents and filename:
+            # temp save
+            temp_path = save_temp_file(contents, filename)
+
+            # upload no fb
+            image_url = fb.upload_image_to_storage(temp_path)
+
+            # remove o local
+            os.remove(temp_path)
+
+        data = {
+            "placa": placa,
+            "numero": numero,
+            "tipo": tipo,
+            "imagem": image_url
         }
-        fb.add_vehicle(vehicle_data)
-        return '/dashboard/pageVehicles', {'display': 'none'}, ""
-    return dash.no_update, dash.no_update, ""
+        fb.add_vehicle(data)
 
+        return dbc.Alert("✅ Viatura adicionada com sucesso!", color="success")
+
+    except Exception as e:
+        return dbc.Alert(f"Erro ao adicionar viatura: {e}", color="danger")
 
 @callback(
     Output("modal-delete-all-vehicles", "style"),
