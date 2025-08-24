@@ -26,8 +26,8 @@ def save_temp_file(contents, filename):
 
     return temp_path
 
-def create_damage_graph():
-    data_damVeh = fb.get_damages_dates()
+def create_damage_graph(damages_data):
+    data_damVeh = [d.get('data') for d in damages_data]
     data_damVeh_filtered = [date for date in data_damVeh if date is not None]
 
     if not data_damVeh_filtered:
@@ -69,7 +69,7 @@ def layout():
         v['damage_count'] = damage_counts.get(v.get('numero'), 0)
     viaturas_sorted = sorted(viaturas, key=lambda x: x.get('damage_count', 0), reverse=True)
 
-    fig = create_damage_graph()
+    fig = create_damage_graph(damVehicles)
     graph_bar_horizontal = dcc.Graph(id='damage-graph', figure=fig, config={'displayModeBar': True, 'modeBarButtonsToRemove': ['autoScale2d', 'resetScale2d'], 'displaylogo': False}, style={'height': '600px', 'width': '100%'}, className='bar-damVeh')
 
     all_parts = sorted(list(set(d['parte'] for d in damVehicles if d.get('parte'))))
@@ -280,12 +280,13 @@ def atualizar_link_pdf(filtro_status):
     return f"/pdf_viaturas_Danificadas?status={filtro_status}"
 
 
-@callback(Output('damage-graph', 'figure'), Input('theme-store', 'data'))
+@callback(Output('damage-graph', 'figure'), Input('theme-mode', 'data'))
 def update_graph_theme(theme):
-    fig = create_damage_graph()
-    fig_copy = fig.to_dict()
-    # ... (theme update logic remains the same)
-    return fig_copy
+    damVehicles = fb.get_all_damage_reports()
+    fig = create_damage_graph(damVehicles)
+    # The original theme update logic was incomplete, so we just return the figure.
+    # A more complete implementation would modify the figure's layout based on the theme.
+    return fig
 
 
 @callback(

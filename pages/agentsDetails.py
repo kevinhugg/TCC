@@ -69,7 +69,7 @@ def update_agent_details(store_data):
             html.Div([
                 html.Img(src=agent_data.get('foto_agnt', '/static/assets/img/persona.png'), className='img_agent'),
                 html.Div([
-                    html.P(f"Cargo: {agent_data.get('cargo', 'N/A')}", className='det carg'),
+                    html.P(f"Cargo: {agent_data.get('cargo_at', 'N/A')}", className='det carg'),
                     html.P(f"Função: {agent_data.get('funcao', 'Sem função')}", className='det func'),
                     dcc.Link(
                         html.P(f"Viatura: {agent_data.get('viatura', 'N/A')}"),
