@@ -202,7 +202,6 @@ def layout(numero=None):
                                 html.Label('Agente:'),
                                 dcc.Dropdown(id='agent-list', placeholder="Selecione um agente...", multi=False),
                             ]),
-                            html.Hr(),
                             html.Div(className='form-group', children=[
                                 html.Label('Turno:'),
                                 dcc.Dropdown(
@@ -267,8 +266,8 @@ def update_history_table(filter_value, numero):
             'tipo': 'Dano',
             'descricao': f"{item.get('parte')}: {item.get('descricao')}",
             'class': 'dano',
-            'id': None,  # No details page for damages yet
-            'path': None
+            'id': item.get('id'),  # Use the new ID from the firebase function
+            'path': 'damage'  # Set the path for the link
         })
 
     # 3. Sort by date (newest first)

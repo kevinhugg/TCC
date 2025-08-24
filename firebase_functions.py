@@ -23,17 +23,6 @@ def get_all_vehicles():
     return vehicles
 
 
-def get_all_viario():
-    """Fetches all documents from the 'viario' collection."""
-    docs = db.collection('viario').stream()
-    viario_list = []
-    for doc in docs:
-        doc_data = doc.to_dict()
-        doc_data['id'] = doc.id
-        viario_list.append(doc_data)
-    return viario_list
-
-
 # busca viatura por numero
 def get_vehicle_by_number(numero):
     docs = db.collection('veiculos').where('numero', '==', numero).stream()
@@ -101,53 +90,110 @@ def get_damage_reports_by_vehicle(numero):
 
             for parte, danos in inspecao_data.items():
                 if isinstance(danos, list):
-                    for dano_info in danos:
+                    for i, dano_info in enumerate(danos):
                         if isinstance(dano_info, dict):
                             descricao = dano_info.get("descricao", "").strip()
                             uri_foto = dano_info.get("uriFoto", "").strip()
 
                             if descricao or uri_foto:
+                                # Generate a unique ID
+                                raw_id = f"{veiculo_id}:{data_inspecao}:{parte}:{i}"
+                                damage_id = base64.urlsafe_b64encode(raw_id.encode()).decode()
+
                                 reports.append({
+                                    "id": damage_id,
                                     "viatura": veiculo_data.get('numero', 'Sem número'),
                                     "parte": parte,
                                     "descricao": descricao if descricao else "Sem descrição",
                                     "status": "Aberta",
-                                    "data": data_inspecao
+                                    "data": data_inspecao,
+                                    "uriFoto": uri_foto
                                 })
 
     return reports
 
 
-def get_damages_dates():
-    dates = []
-    veiculos_ref = db.collection('veiculos').stream()
+def get_damage_by_id(damage_id):
+    """Gets a single damage report by its unique ID."""
+    try:
+        # Decode the ID
+        decoded_id = base64.urlsafe_b64decode(damage_id.encode()).decode()
+        veiculo_id, data_inspecao, parte, index_str = decoded_id.split(':')
+        index = int(index_str)
 
-    for veiculo in veiculos_ref:
-        veiculo_id = veiculo.id
+        # Fetch the inspection document
+        inspecao_doc = db.collection('veiculos').document(veiculo_id).collection('inspecoes').document(
+            data_inspecao).get()
 
-        inspecoes_ref = (
-            db.collection('veiculos')
-            .document(veiculo_id)
-            .collection('inspecoes')
-            .stream()
-        )
+        if not inspecao_doc.exists:
+            return None
 
-        for inspecao in inspecoes_ref:
-            inspecao_data = inspecao.to_dict()
-            data_inspecao = inspecao.id
+        inspecao_data = inspecao_doc.to_dict()
+        danos_lista = inspecao_data.get(parte)
 
-            for parte, danos in inspecao_data.items():
-                if isinstance(danos, list):
-                    for dano_info in danos:
-                        if isinstance(dano_info, dict):
-                            descricao = dano_info.get("descricao", "").strip()
-                            uri_foto = dano_info.get("uriFoto", "").strip()
+        if isinstance(danos_lista, list) and 0 <= index < len(danos_lista):
+            dano_info = danos_lista[index]
+            veiculo_doc = db.collection('veiculos').document(veiculo_id).get()
+            veiculo_data = veiculo_doc.to_dict() if veiculo_doc.exists else {}
 
-                            if descricao or uri_foto:
-                                dates.append(data_inspecao)
-                                break
+            return {
+                "id": damage_id,
+                "viatura": veiculo_data.get('numero', 'N/A'),
+                "parte": parte,
+                "descricao": dano_info.get("descricao", "Sem descrição"),
+                "data": data_inspecao,
+                "uriFoto": dano_info.get("uriFoto", "")
+            }
+        return None
 
-    return dates
+    except Exception as e:
+        print(f"Error fetching damage by ID {damage_id}: {e}")
+        return None
+
+
+def delete_damage_by_id(damage_id):
+    """Deletes a single damage report by its unique ID."""
+    try:
+        decoded_id = base64.urlsafe_b64decode(damage_id.encode()).decode()
+        veiculo_id, data_inspecao, parte, index_str = decoded_id.split(':')
+        index = int(index_str)
+
+        inspection_ref = db.collection('veiculos').document(veiculo_id).collection('inspecoes').document(data_inspecao)
+        inspection_doc = inspection_ref.get()
+
+        if not inspection_doc.exists:
+            print(f"Inspection document not found for damage ID {damage_id}")
+            return False
+
+        inspection_data = inspection_doc.to_dict()
+        damages_list = inspection_data.get(parte)
+
+        if not isinstance(damages_list, list) or not (0 <= index < len(damages_list)):
+            print(f"Damage not found at index {index} for part {parte}")
+            return False
+
+        # Remove the damage from the list
+        damages_list.pop(index)
+
+        # If the list is now empty, remove the part field from the document
+        if not damages_list:
+            inspection_ref.update({parte: firestore.DELETE_FIELD})
+            # After removing the field, check if the document is now empty
+            updated_doc = inspection_ref.get().to_dict()
+            if not updated_doc:
+                inspection_ref.delete()
+                print(f"Deleted empty inspection document {data_inspecao}")
+        else:
+            # Otherwise, update the document with the modified list
+            inspection_ref.update({parte: damages_list})
+
+        print(f"Successfully deleted damage {damage_id}")
+        return True
+
+    except Exception as e:
+        print(f"Error deleting damage by ID {damage_id}: {e}")
+        return False
+
 
 # busca agentes pela matricula
 def get_agent_by_id(matricula):
@@ -168,13 +214,6 @@ def get_all_agents():
 def get_unassigned_agents():
     docs = db.collection('agentes').where('funcao', '==', "").stream()
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
-
-
-# busca ocorrencias por agente pela subcoleção
-def get_ocurrences_by_agent(agent_mat):
-    ocorrencias_ref = db.collection('agentes').document(agent_mat).collection('ocorrencias')
-    docs = ocorrencias_ref.stream()
-    return next((doc.to_dict() | {'matricula': doc.id} for doc in docs))
 
 
 def get_occurrences_and_services_by_vehicle(veiculo_numero):
@@ -313,16 +352,6 @@ def add_occurrence_or_service(agent_id, date, data):
         return False
 
 
-def add_service(agent_id, service_date, service_data):
-    """Adds a new service for a specific agent."""
-    return add_occurrence_or_service(agent_id, service_date, service_data)
-
-
-def add_occurrence(agent_id, occ_date, occ_data):
-    """Adds a new occurrence for a specific agent."""
-    return add_occurrence_or_service(agent_id, occ_date, occ_data)
-
-
 def add_vehicle(vehicle_data):
     """Adds a new vehicle to the 'veiculos' collection."""
     try:
@@ -360,19 +389,6 @@ def delete_vehicle(numero):
             return False
     except Exception as e:
         print(f"An error occurred while deleting vehicle {numero}: {e}")
-        return False
-
-
-def delete_all_vehicles():
-    """Deletes all vehicles from the 'veiculos' collection."""
-    try:
-        docs = db.collection('veiculos').stream()
-        for doc in docs:
-            doc.reference.delete()
-        print("All vehicles have been deleted.")
-        return True
-    except Exception as e:
-        print(f"An error occurred while deleting all vehicles: {e}")
         return False
 
 
@@ -463,36 +479,6 @@ def clear_agent_assignment(agent_mat):
     })
 
 
-def get_history_by_agent(agent_id):
-    """Gets all occurrences and services for a specific agent."""
-    history = []
-    if not agent_id:
-        return history
-
-    ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
-    date_docs = ocorrencias_ref.stream()
-
-    for date_doc in date_docs:
-        data_str = date_doc.id
-        lista_ref = date_doc.reference.collection('lista').stream()
-
-        for item_doc in lista_ref:
-            data = item_doc.to_dict()
-            item_class = data.get('class', 'ocorrencia')
-            item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
-
-            history.append({
-                'id': item_doc.id,
-                'data': data_str,
-                'nomenclatura': data.get('nomenclatura', 'N/A'),
-                'descricao': data.get('descricao', 'N/A'),
-                'tipo': item_type,
-                'class': item_class,
-                'path': 'services' if item_class == 'serviço' else 'ocurrences',
-                'viatura': data.get('viatura', 'N/A')
-            })
-    return history
-
 def get_occurrence_or_service_by_id(doc_id):
     """Gets a single occurrence or service by its unique ID, searching across all agents."""
     agents = get_all_agents()
@@ -510,42 +496,3 @@ def get_occurrence_or_service_by_id(doc_id):
             if doc.exists:
                 return doc.to_dict() | {'id': doc.id, 'data': date_doc.id}
     return None
-
-
-def delete_occurrence_or_service(doc_id):
-    dias_docs = db.collection('ocorrencias').list_documents()
-    for dia_doc in dias_docs:
-        doc_ref = dia_doc.collection('lista').document(doc_id)
-        if doc_ref.get().exists:
-            doc_ref.delete()
-            # Se a subcoleção 'lista' ficar vazia, remove o documento do dia
-            if not dia_doc.collection('lista').limit(1).get():
-                dia_doc.delete()
-            return True
-    return False
-
-
-def get_all_service_types():
-    """Fetches all service types from the 'tipos_servico' collection."""
-    docs = db.collection('tipos_servicos').stream()
-    return [{'id': doc.id, 'nome': doc.to_dict().get('nome')} for doc in docs]
-
-def add_viario_service(service_data):
-    """Adds a new service document to the 'viario' collection."""
-    try:
-        doc_ref = db.collection('tipos_servico').document()
-        doc_ref.set(service_data)
-        return doc_ref.id
-    except Exception as e:
-        print(f"An error occurred while adding viario service: {e}")
-        return None
-
-
-def delete_service_type(service_type_id):
-    """Deletes a service type by its ID."""
-    try:
-        db.collection('tipos_servico').document(service_type_id).delete()
-        return True
-    except Exception as e:
-        print(f"An error occurred while deleting service type {service_type_id}: {e}")
-        return False

@@ -311,3 +311,38 @@
 .services.card {
     margin-top: 20px;
 }
+
+/* Styles for Damage Details Page */
+.damage-content-wrapper {
+    display: flex;
+    align-items: center; /* Vertically center the items */
+    gap: 2rem; /* space between image and text */
+    margin-bottom: 1.5rem; /* Add space above the delete button */
+}
+
+.damage-image-container {
+    flex: 0 0 250px; /* Do not grow, do not shrink, base width of 250px */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.damage-image {
+    width: 100%;
+    height: auto;
+    max-width: 250px; /* Max width of the image */
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.damage-text-container {
+    flex: 1 1 auto; /* Grow to fill space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    gap: 1rem;
+    font-size: 1.2rem;
+    color: var(--secondary-text-color);
+}
