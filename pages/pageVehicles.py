@@ -325,10 +325,11 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
         return dash.no_update, dash.no_update, "Por favor, preencha todos os campos."
 
     image_url = '/static/assets/img/imageNot.png'
+    image_path = ''
     if contents and filename:
         try:
             # Chama a função de upload do Firebase diretamente
-            image_url = fb.upload_image_to_storage(contents, filename)
+            image_url, image_path = fb.upload_image_to_storage(contents, filename)
             if not image_url:
                 # Se o upload falhar por algum motivo, usa a imagem padrão e reporta o erro
                 return dash.no_update, dash.no_update, "Erro no upload da imagem."
@@ -338,6 +339,7 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
     vehicle_data = {
         "placa": placa, "numero": numero, "veiculo": tipo,
         "imagem": image_url,
+        "imagemPath": image_path,
         "avariada": False, "danos": {}
     }
     fb.add_vehicle(vehicle_data)

@@ -282,10 +282,10 @@ def upload_image_to_storage(contents, filename):
         encoded_path = quote(blob.name, safe='')
         download_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{encoded_path}?alt=media&token={download_token}"
 
-        return download_url
+        return download_url, unique_filename
     except Exception as e:
         print(f"An error occurred while uploading image: {e}")
-        return None
+        return None, None
 
 
 # ADD / DELETE
@@ -400,6 +400,58 @@ def update_vehicle(numero, updates: dict):
     except Exception as e:
         print(f"Ocorreu um erro ao atualizar a viatura {numero}: {e}")
         return False
+
+
+def replace_vehicle_image(numero, contents, filename):
+    """Substitui a imagem de uma viatura: apaga a antiga e sobe a nova."""
+    try:
+        # 1. Busca a viatura
+        viatura = get_vehicle_by_number(numero)
+        if not viatura:
+            print(f"Nenhuma viatura encontrada com numero {numero}")
+            return None
+
+        bucket = storage.bucket('tcc-semurb-2ea61.firebasestorage.app')
+
+        # 2. Apaga a imagem antiga (se existir)
+        old_path = viatura.get("imagemPath")
+        if old_path:
+            try:
+                bucket.blob(old_path).delete()
+                print(f"Imagem antiga {old_path} apagada.")
+            except Exception as e:
+                print(f"Erro ao apagar imagem antiga: {e}")
+
+        # 3. Sobe a nova
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+
+        unique_filename = f"viaturas/{uuid.uuid4()}-{filename}"
+        blob = bucket.blob(unique_filename)
+
+        download_token = uuid.uuid4()
+        metadata = {"firebaseStorageDownloadTokens": str(download_token)}
+        blob.metadata = metadata
+
+        blob.upload_from_string(decoded, content_type=content_type)
+
+        encoded_path = quote(blob.name, safe='')
+        download_url = (
+            f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{encoded_path}"
+            f"?alt=media&token={download_token}"
+        )
+
+        # 4. Atualiza o Firestore
+        update_vehicle(numero, {
+            "imagem": download_url,
+            "imagemPath": unique_filename
+        })
+
+        return download_url
+
+    except Exception as e:
+        print(f"Erro ao substituir imagem: {e}")
+        return None
 
 
 # remove atribuiçoes do agente

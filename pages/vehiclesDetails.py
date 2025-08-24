@@ -568,16 +568,9 @@ def update_vehicle_image(n_clicks, contents, filename, numero):
         return True, "Por favor, selecione uma imagem para fazer o upload.", dash.no_update
 
     # 1. Fazer upload da nova imagem para o Firebase Storage
-    image_url = fb.upload_image_to_storage(contents, filename)
+    new_image_url = fb.replace_vehicle_image(numero, contents, filename)
 
-    if not image_url:
-        # Em caso de erro no upload, notifica o usuário e fecha o modal
-        return True, "Ocorreu um erro durante o upload da imagem.", hide_modal_style
-
-    # 2. Atualizar o documento do veículo no Firestore com a nova URL da imagem
-    success = fb.update_vehicle(numero, {'imagem': image_url})
-
-    if success:
+    if new_image_url:
         # Se sucesso, notifica e fecha o modal. A atualização da página será feita por outro callback.
         return True, "Imagem atualizada com sucesso!", hide_modal_style
     else:
