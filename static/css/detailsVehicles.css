@@ -60,11 +60,49 @@
     color: var(--secondary-text-color);
 }
 
-.img {
+.vehicle-image-container {
+    position: relative;
+    cursor: pointer;
+    width: 340px;
     height: 150px;
-    width: 200px;
+}
+
+.img {
+    height: 100%;
+    width: 100%;
     border-radius: 8px;
     object-fit: cover;
+    transition: filter 0.3s ease;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 8px;
+}
+
+.vehicle-image-container:hover .img {
+    filter: brightness(70%);
+}
+
+.vehicle-image-container:hover .image-overlay {
+    opacity: 1;
+}
+
+.image-overlay .fa-camera {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
 }
 
 .det {

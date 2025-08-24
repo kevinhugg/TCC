@@ -108,24 +108,29 @@ def layout():
                             html.Div(id='upload-error-message', style={'color': 'red'}),
                             html.Div(className='form-group', children=[
                                 html.Label("Imagem da Viatura:"),
-                                dcc.Upload(
-                                    id='upload-vehicle-image',
-                                    children=html.Div([
-                                        'Arraste e solte ou ',
-                                        html.A('Selecione uma imagem')
-                                    ]),
-                                    style={
-                                        'width': '100%',
-                                        'height': '60px',
-                                        'lineHeight': '60px',
-                                        'borderWidth': '1px',
-                                        'borderStyle': 'dashed',
-                                        'borderRadius': '5px',
-                                        'textAlign': 'center',
-                                        'margin': '10px 0'
-                                    },
-                                    accept='image/*'
-                                ),
+                                html.Div(
+                                    id='upload-container',
+                                    style={'position': 'relative', 'padding': '10px'},
+                                    children=[
+                                        dcc.Upload(
+                                            id='upload-vehicle-image',
+                                            children=html.Div([
+                                                'Arraste e solte ou ',
+                                                html.A('Selecione uma imagem')
+                                            ]),
+                                            style={
+                                                'width': '100%', 'height': '100px', 'lineHeight': '100px',
+                                                'borderWidth': '2px', 'borderStyle': 'dashed',
+                                                'borderRadius': '5px', 'textAlign': 'center',
+                                            },
+                                            accept='image/*'
+                                        ),
+                                        html.Div(id='image-preview-container', style={'display': 'none'}, children=[
+                                            html.Img(id='image-preview', style={'width': '200px', 'height': '120px', 'objectFit': 'cover'}),
+                                            html.Button('×', id='remove-image-button', className='remove-image-btn')
+                                        ])
+                                    ]
+                                )
                             ]),
                         ]
                     ),
@@ -312,37 +317,61 @@ def toggle_vehicle_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
     State('upload-vehicle-image', 'filename'),
     prevent_initial_call=True
 )
-def handle_add_vehicle(placa, numero, tipo, contents, filename):
-    if ctx.triggered_id != "btn-add-viatura":
-        return dash.no_update
+def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
+    if not n_clicks:
+        return dash.no_update, {'display': 'none'}, ""
 
-    if not placa or not numero or not tipo:
-        return dbc.Alert("Preencha todos os campos!", color="danger")
+    if not all([placa, numero, tipo]):
+        return dash.no_update, dash.no_update, "Por favor, preencha todos os campos."
 
-    try:
-        image_url = None
-        if contents and filename:
-            # temp save
-            temp_path = save_temp_file(contents, filename)
+    image_url = '/static/assets/img/imageNot.png'
+    if contents and filename:
+        try:
+            # Chama a função de upload do Firebase diretamente
+            image_url = fb.upload_image_to_storage(contents, filename)
+            if not image_url:
+                # Se o upload falhar por algum motivo, usa a imagem padrão e reporta o erro
+                return dash.no_update, dash.no_update, "Erro no upload da imagem."
+        except Exception as e:
+            return dash.no_update, dash.no_update, f"Erro no upload da imagem: {e}"
 
-            # upload no fb
-            image_url = fb.upload_image_to_storage(temp_path)
+    vehicle_data = {
+        "placa": placa, "numero": numero, "veiculo": tipo,
+        "imagem": image_url,
+        "avariada": False, "danos": {}
+    }
+    fb.add_vehicle(vehicle_data)
 
-            # remove o local
-            os.remove(temp_path)
+    return '/dashboard/pageVehicles', {'display': 'none'}, ""
 
-        data = {
-            "placa": placa,
-            "numero": numero,
-            "tipo": tipo,
-            "imagem": image_url
-        }
-        fb.add_vehicle(data)
 
-        return dbc.Alert("✅ Viatura adicionada com sucesso!", color="success")
+@callback(
+    Output('image-preview-container', 'style'),
+    Output('image-preview', 'src'),
+    Output('upload-vehicle-image', 'style'),
+    Input('upload-vehicle-image', 'contents'),
+    Input('remove-image-button', 'n_clicks'),
+    prevent_initial_call=True
+)
+def update_image_preview(contents, remove_clicks):
+    triggered_id = ctx.triggered_id
 
-    except Exception as e:
-        return dbc.Alert(f"Erro ao adicionar viatura: {e}", color="danger")
+    # Estilo padrão para o dcc.Upload
+    upload_style = {
+        'width': '100%', 'height': '100px', 'lineHeight': '100px',
+        'borderWidth': '2px', 'borderStyle': 'dashed',
+        'borderRadius': '5px', 'textAlign': 'center', 'display': 'block'
+    }
+    hidden_upload_style = upload_style.copy()
+    hidden_upload_style['display'] = 'none'
+
+    if triggered_id == 'remove-image-button':
+        return {'display': 'none'}, '', upload_style
+
+    if contents:
+        return {'display': 'block', 'textAlign': 'center'}, contents, hidden_upload_style
+
+    return {'display': 'none'}, '', upload_style
 
 @callback(
     Output("modal-delete-all-vehicles", "style"),

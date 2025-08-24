@@ -8,7 +8,7 @@
     height: 100%;
     overflow: auto; /* Allow scroll if content is too long */
     background-color: rgba(0, 0, 0, 0.6); /* Slightly darker backdrop */
-    align-items: center;
+    align-items: flex-start; /* Align to top to prevent overflow issue */
     justify-content: center;
 }
 
@@ -173,4 +173,30 @@
 .modal-button.cancel:hover {
     background-color: var(--border-color);
     color: var(--primary-text-color);
+}
+
+/* Style for the remove image 'X' button */
+.remove-image-btn {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: #ff4d4d;
+    color: white;
+    border: 2px solid var(--card-bg-color); /* Creates a visual separation from the image */
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 24px; /* Adjust for vertical centering */
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.2s, transform 0.2s;
+    z-index: 10; /* Ensure it's on top of the image */
+}
+
+.remove-image-btn:hover {
+    background: #e60000;
+    transform: scale(1.1);
 }

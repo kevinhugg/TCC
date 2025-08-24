@@ -1,7 +1,6 @@
 import dash
-from dash import html, dcc, Input, Output, callback, State
+from dash import html, dcc, Input, Output, callback, State, ctx
 from datetime import datetime
-import uuid
 import dash_bootstrap_components as dbc
 import firebase_functions as fb
 
@@ -16,6 +15,7 @@ def layout(numero=None):
         return html.H3("Veículo não encontrado")
 
     return html.Div([
+        html.Link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.8.1/css/all.css'),
         html.Link(rel='stylesheet', href='/static/css/detailsVehicles.css'),
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Location(id='url-redirect', refresh=True),
@@ -27,13 +27,21 @@ def layout(numero=None):
             html.H3(f"Viatura - {dados['numero']}", className='tittle'),
 
             html.Div([
-                # A imagem principal da viatura, agora clicável para abrir o modal de upload.
-                html.Img(
-                    id='vehicle-image-clickable',
-                    src=dados.get('imagem', '/static/assets/img/imageNot.png'),
-                    className='img',
-                    style={'cursor': 'pointer'},
-                    title='Clique para alterar a imagem'
+                html.Div(
+                    id='vehicle-image-container',
+                    className='vehicle-image-container',
+                    children=[
+                        html.Img(
+                            id='vehicle-image-clickable',
+                            src=dados.get('imagem', '/static/assets/img/imageNot.png'),
+                            className='img',
+                            title='Clique para alterar a imagem'
+                        ),
+                        html.Div(className='image-overlay', children=[
+                            html.I(className='fas fa-camera'),  # Ícone de câmera
+                            html.Span('Mudar foto')
+                        ])
+                    ]
                 ),
                 html.Div([
                     html.P(f"Placa: {dados.get('placa', '---')}", className='det placa'),
@@ -66,21 +74,31 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H5('Alterar Imagem da Viatura', className='modal-title'),
+                            html.H3('Alterar Imagem da Viatura', className='modal-title'),
                             html.Button('×', id='cancel-upload-x', className='modal-close-button')
                         ]),
                         html.Div(className='modal-body', children=[
-                            dcc.Upload(
-                                id='upload-new-image',
-                                children=html.Div(['Arraste ou ', html.A('Selecione uma Imagem')]),
-                                style={
-                                    'width': '100%', 'height': '60px', 'lineHeight': '60px',
-                                    'borderWidth': '1px', 'borderStyle': 'dashed',
-                                    'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px 0'
-                                },
-                                accept='image/*'
+                            html.Div(
+                                id='upload-container-details',
+                                style={'position': 'relative', 'padding': '10px'},
+                                children=[
+                                    dcc.Upload(
+                                        id='upload-new-image',
+                                        children=html.Div(['Arraste ou ', html.A('Selecione uma Imagem')]),
+                                        style={
+                                            'width': '100%', 'height': '100px', 'lineHeight': '100px',
+                                            'borderWidth': '2px', 'borderStyle': 'dashed',
+                                            'borderRadius': '5px', 'textAlign': 'center',
+                                        },
+                                        accept='image/*'
+                                    ),
+                                    html.Div(id='image-preview-container-details', style={'display': 'none'}, children=[
+                                        html.Img(id='image-preview-details', style={'width': '200px', 'height': '120px', 'objectFit': 'cover'}),
+                                        html.Button('×', id='remove-image-button-details', className='remove-image-btn')
+                                    ])
+                                ]
                             ),
-                            html.Div(id='output-image-upload'),  # Mostra o nome do arquivo selecionado
+                            html.Div(id='output-image-upload', style={'textAlign': 'center', 'marginTop': '10px'}),
                         ]),
                         html.Div(className='modal-footer', children=[
                             html.Button('Cancelar', id='cancel-upload-button', className='modal-button cancel'),
@@ -101,7 +119,7 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H5('Confirmar Exclusão', className='modal-title'),
+                            html.H3('Confirmar Exclusão', className='modal-title'),
                             html.Button('×', id='cancel-delete-vehicle-x', className='modal-close-button')
                         ]),
                         html.Div(className='modal-body', children=[
@@ -163,7 +181,7 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H5('Adicionar Agente'),
+                            html.H3('Adicionar Agente'),
                             html.Button('×', id='modal-close-button', className='modal-close-button'),
                         ]),
                         html.Div(className='modal-body', children=[
@@ -500,16 +518,34 @@ def delete_vehicle(n_clicks, numero):
     return dash.no_update
 
 
-# Callback para mostrar o nome do arquivo selecionado no componente de upload.
 @callback(
+    Output('image-preview-container-details', 'style'),
+    Output('image-preview-details', 'src'),
+    Output('upload-new-image', 'style'),
     Output('output-image-upload', 'children'),
-    Input('upload-new-image', 'filename')
+    Input('upload-new-image', 'contents'),
+    Input('remove-image-button-details', 'n_clicks'),
+    State('upload-new-image', 'filename'),
+    prevent_initial_call=True
 )
-def update_output(filename):
-    if filename:
-        return html.Div(f"Arquivo selecionado: {filename}")
-    return html.Div("")
+def update_image_preview_details(contents, remove_clicks, filename):
+    triggered_id = ctx.triggered_id
 
+    upload_style = {
+        'width': '100%', 'height': '100px', 'lineHeight': '100px',
+        'borderWidth': '2px', 'borderStyle': 'dashed',
+        'borderRadius': '5px', 'textAlign': 'center', 'display': 'block'
+    }
+    hidden_upload_style = upload_style.copy()
+    hidden_upload_style['display'] = 'none'
+
+    if triggered_id == 'remove-image-button-details':
+        return {'display': 'none'}, '', upload_style, ''
+
+    if contents:
+        return {'display': 'block', 'textAlign': 'center'}, contents, hidden_upload_style, f"Arquivo: {filename}"
+
+    return {'display': 'none'}, '', upload_style, ''
 
 # Callback para processar o upload da imagem, atualizar o banco de dados e notificar o usuário.
 @callback(
@@ -551,7 +587,7 @@ def update_vehicle_image(n_clicks, contents, filename, numero):
 # Callback para abrir e fechar o modal de upload de imagem.
 @callback(
     Output('modal-upload-image', 'style'),
-    [Input('vehicle-image-clickable', 'n_clicks'),
+    [Input('vehicle-image-container', 'n_clicks'),
      Input('cancel-upload-button', 'n_clicks'),
      Input('cancel-upload-x', 'n_clicks')],
     [State('modal-upload-image', 'style')],
@@ -559,10 +595,10 @@ def update_vehicle_image(n_clicks, contents, filename, numero):
 )
 def toggle_upload_modal(n_open, n_cancel, n_cancel_x, style):
     # Usa o callback_context para saber qual input foi acionado
-    triggered_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    triggered_id = ctx.triggered_id
 
     # Se o usuário clicou na imagem da viatura, abre o modal
-    if triggered_id == 'vehicle-image-clickable':
+    if triggered_id == 'vehicle-image-container':
         return {'display': 'flex'}
 
     # Se o usuário clicou em um dos botões de fechar, esconde o modal
@@ -574,18 +610,16 @@ def toggle_upload_modal(n_open, n_cancel, n_cancel_x, style):
 
 
 @callback(
-    Output('url-redirect', 'pathname', allow_duplicate=True),
+    Output('url-redirect', 'href', allow_duplicate=True),
     Input('update-confirm', 'submit_n_clicks'),
-    State('url-redirect', 'pathname'),
+    State('url-redirect', 'href'),
     prevent_initial_call=True
 )
-def refresh_on_confirm(submit_n_clicks, current_path):
+def refresh_on_confirm(submit_n_clicks, current_href):
     """
-    Este callback é acionado quando o usuário clica 'OK' no diálogo de confirmação
-    após um upload de imagem bem-sucedido. Ele força o recarregamento da página.
+    This callback is triggered when the user clicks 'OK' on the confirmation dialog
+    after a successful image upload. It forces a page refresh by updating the href.
     """
     if submit_n_clicks:
-        # Adiciona um parâmetro de query aleatório para garantir que o navegador
-        # veja a URL como 'nova' e force um recarregamento completo.
-        return f"{current_path}?refresh={uuid.uuid4()}"
+        return current_href
     return dash.no_update

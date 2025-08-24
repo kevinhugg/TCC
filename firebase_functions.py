@@ -149,7 +149,6 @@ def get_damages_dates():
 
     return dates
 
-
 # busca agentes pela matricula
 def get_agent_by_id(matricula):
     doc_ref = db.collection('agentes').document(matricula)
