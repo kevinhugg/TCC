@@ -2,6 +2,7 @@ import dash
 from dash import html, dcc, Input, Output, callback, State, ctx
 from datetime import datetime
 import dash_bootstrap_components as dbc
+import time
 import firebase_functions as fb
 
 dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
@@ -74,7 +75,7 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H3('Alterar Imagem da Viatura', className='modal-title'),
+                            html.H5('Alterar Imagem da Viatura', className='modal-title'),
                             html.Button('×', id='cancel-upload-x', className='modal-close-button')
                         ]),
                         html.Div(className='modal-body', children=[
@@ -119,7 +120,7 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H3('Confirmar Exclusão', className='modal-title'),
+                            html.H5('Confirmar Exclusão', className='modal-title'),
                             html.Button('×', id='cancel-delete-vehicle-x', className='modal-close-button')
                         ]),
                         html.Div(className='modal-body', children=[
@@ -181,7 +182,7 @@ def layout(numero=None):
                     className='modal-content',
                     children=[
                         html.Div(className='modal-header', children=[
-                            html.H3('Adicionar Agente'),
+                            html.H5('Adicionar Agente'),
                             html.Button('×', id='modal-close-button', className='modal-close-button'),
                         ]),
                         html.Div(className='modal-body', children=[
@@ -610,16 +611,16 @@ def toggle_upload_modal(n_open, n_cancel, n_cancel_x, style):
 
 
 @callback(
-    Output('url-redirect', 'href', allow_duplicate=True),
-    Input('update-confirm', 'submit_n_clicks'),
-    State('url-redirect', 'href'),
+    Output("vehicle-image-clickable", "src"),
+    Input("update-confirm", "submit_n_clicks"),
+    State("vehicle-store", "data"),
     prevent_initial_call=True
 )
-def refresh_on_confirm(submit_n_clicks, current_href):
-    """
-    This callback is triggered when the user clicks 'OK' on the confirmation dialog
-    after a successful image upload. It forces a page refresh by updating the href.
-    """
-    if submit_n_clicks:
-        return current_href
-    return dash.no_update
+def atualizar_imagem(submit_n_clicks, numero):
+    if not submit_n_clicks:
+        return dash.no_update
+
+    viatura = fb.get_vehicle_by_number(numero)
+
+    # adiciona timestamp p/ forçar atualização
+    return f"{viatura['imagem']}?v={int(time.time())}"
