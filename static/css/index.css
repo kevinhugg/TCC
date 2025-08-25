@@ -8,6 +8,7 @@ body{
 
 
 .bloco_login{
+    height: 100%;
     margin-top: 7%;
     justify-self: center;
     align-items: center;
@@ -17,16 +18,17 @@ body{
     border-radius: 23px;
     flex-direction: row;
     font-family: Montserrat;
+
 }
 
 .logo{
-flex-flow: column wrap;
-justify-content: flex-start;
-padding: 9%;
-background-color: #478992;
-border-radius: 23px;
-border-top-right-radius: 0px;
-border-bottom-right-radius: 0px;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+    padding: 9%;
+    background-color: #478992;
+    border-radius: 23px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 .logo_semurb {

@@ -1,8 +1,10 @@
 import firebase_admin
-from firebase_admin import credentials, firestore, storage
+from firebase_admin import credentials, firestore, storage, auth
 import base64
 import uuid
 from urllib.parse import quote
+import requests
+import os
 
 # inicializa o app uma vez só
 if not firebase_admin._apps:
@@ -12,6 +14,67 @@ if not firebase_admin._apps:
     })
 
 db = firestore.client()
+
+
+# AUTENTICAÇÃO
+
+def sign_in_user(email, password):
+    """
+    Autentica um usuário usando a API REST do Firebase Authentication.
+    Isso é necessário porque o SDK Admin não pode verificar senhas diretamente.
+    """
+    api_key = os.environ.get("FIREBASE_WEB_API_KEY")
+    if not api_key:
+        print("Erro: A variável de ambiente FIREBASE_WEB_API_KEY não está definida.")
+        # Em um ambiente de produção, você pode querer lançar uma exceção ou lidar com isso de forma mais robusta.
+        return None, "Erro de configuração do servidor. A chave da API Web do Firebase não foi encontrada."
+
+    rest_api_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
+
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+
+    try:
+        response = requests.post(rest_api_url, json=payload)
+        response.raise_for_status()  # Lança um erro para respostas 4xx/5xx
+        return response.json(), None
+    except requests.exceptions.HTTPError as err:
+        error_json = err.response.json()
+        error_message = error_json.get("error", {}).get("message", "Erro desconhecido.")
+        print(f"Erro de autenticação: {error_message}")
+
+        # O Firebase retorna 'INVALID_LOGIN_CREDENTIALS' para e-mail/senha incorretos.
+        if error_message == "INVALID_LOGIN_CREDENTIALS":
+            return None, "Credenciais inválidas. Verifique seu e-mail e senha."
+        return None, "Erro ao tentar fazer login."
+    except Exception as e:
+        print(f"Ocorreu um erro inesperado durante o login: {e}")
+        return None, "Ocorreu um erro inesperado no servidor."
+
+
+def create_user(email, password):
+    """
+    Cria um novo usuário no Firebase Authentication.
+    Retorna o objeto de usuário em caso de sucesso ou uma string de erro específica.
+    """
+    try:
+        user = auth.create_user(email=email, password=password)
+        return user
+    except Exception as e:
+        # Tenta extrair a mensagem de erro do Firebase para fornecer feedback específico.
+        error_str = str(e)
+        if "EMAIL_EXISTS" in error_str:
+            print("Erro ao criar usuário: O e-mail já está em uso.")
+            return "EMAIL_EXISTS"
+        if "Password must be a string with at least 6 characters" in error_str:
+            print("Erro ao criar usuário: A senha é muito fraca.")
+            return "WEAK_PASSWORD"
+
+        print(f"Erro desconhecido ao criar usuário: {e}")
+        return None
 
 
 # BUSCAS
@@ -237,7 +300,7 @@ def get_history_by_agent(agent_id):
             history.append({
                 'id': item_doc.id,
                 'data': data_str,
-                'descricao': data.get('nomenclatura', 'N/A'), # Assuming 'nomenclatura' is the description
+                'descricao': data.get('nomenclatura', 'N/A'),  # Assuming 'nomenclatura' is the description
                 'tipo': item_type,
                 'class': item_class,
                 'path': 'services' if item_class == 'serviço' else 'ocurrences',

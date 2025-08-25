@@ -22,14 +22,17 @@
         <div class="inputs">
             <h1>Administrador</h1>
             <h2>LOGIN</h2>
-            <form action="/login" method="post"> <!--Adicinei aqui um form com action login e método post, igual a gente fazia em PHP com a Lilian-->
-            <input name="matricula" class="campo" placeholder="Número de Matrícula" type="text"> <!--Adicionando nome nos inputs, para conseguir puxar eles depois-->
-            <br><br>
-            <input name="senha" class="campo" placeholder="Senha" type="password">
-            <br><br>
-            <button style="color: aliceblue;" id="enviar" type="submit">ENTRAR </button> <!--Mudei o tipo do botão para submit-->
+            <form action="/login" method="post">
+                <!-- O campo de matrícula foi alterado para email para corresponder à autenticação do Firebase -->
+                <input name="email" class="campo" placeholder="Email" type="email" required>
+                <br><br>
+                <input name="senha" class="campo" placeholder="Senha" type="password" required>
+                <br><br>
+                <button style="color: aliceblue;" id="enviar" type="submit">ENTRAR</button>
             </form>
-            <p><a href="{{ url_for('metodoRecSenha') }}">Esqueci minha senha</a></p> <!--Para redirecionar por <a>, tem que usar esse estilo para o Python ver (talvez eu tenha tido alguns problemas por não saber disso)-->
+            <p><a href="{{ url_for('metodoRecSenha') }}">Esqueci minha senha</a></p>
+            <!-- Link para a nova página de registro -->
+            <p>Não tem uma conta? <a href="{{ url_for('pagina_registro') }}">Registre-se aqui</a></p>
         </div>
     </div>
  </div>

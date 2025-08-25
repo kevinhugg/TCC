@@ -18,7 +18,19 @@ from xhtml2pdf.default import DEFAULT_FONT
 DEFAULT_FONT['DejaVuSans'] = '/caminho/para/DejaVuSans.ttf'
 
 from dash_app import create_dash_app
-from data.dados import *
+# from data.dados import *
+from firebase_functions import (
+    sign_in_user, create_user, add_agent,
+    get_all_vehicles, get_vehicle_by_number, get_damage_reports_by_vehicle,
+    get_all_damage_reports, get_damage_by_id, delete_damage_by_id,
+    get_agent_by_doc_id, get_all_agents, get_unassigned_agents,
+    get_history_by_agent, get_occurrences_and_services_by_vehicle,
+    get_all_occurrences_and_services, get_agents_by_vehicle,
+    add_occurrence_or_service, add_vehicle, delete_agent, delete_vehicle,
+    update_agent_by_doc_id, update_vehicle,
+    replace_vehicle_image, replace_agent_image, clear_agent_assignment,
+    get_occurrence_or_service_by_id
+)
 
 app = Flask(__name__)
 
@@ -45,18 +57,93 @@ def pagina_login():
 # Rota para o forms de login
 @app.route('/login', methods=['POST'])
 def info_login():
+    """
+    Processa o formulário de login.
+    Usa a função sign_in_user para autenticar com o Firebase.
+    """
     if request.method == 'POST':
-        matricula = request.form['matricula']
+        # O campo de matrícula foi substituído por e-mail no HTML
+        email = request.form['email']
         senha = request.form['senha']
 
-    # Aqui precisa do Banco de Dados, então é tudo hipotético
-    if matricula == '2' and senha == '2':
-        session['usuario_logado'] = True
-        flash('Login realizado com sucesso!', 'success')
-        return redirect('/dashboard/')
-    else:
-        flash('Matrícula ou senha inválidos', 'danger')
-        return redirect(url_for('pagina_login'))
+        # Chama a função de login do Firebase
+        user_data, error_message = sign_in_user(email, senha)
+
+        if user_data:
+            # Login bem-sucedido
+            session['usuario_logado'] = True
+            session['user_id'] = user_data.get('localId')  # Armazena o UID do usuário na sessão
+            session['id_token'] = user_data.get('idToken')  # Token para futuras requisições autenticadas
+            flash('Login realizado com sucesso!', 'success')
+            return redirect('/dashboard/')  # Idealmente, redirecionar para um painel
+        else:
+            # Falha no login
+            # A mensagem de erro específica de sign_in_user será exibida
+            flash(error_message, 'danger')
+            return redirect(url_for('pagina_login'))
+
+
+# Rota para a página de registro
+@app.route('/register')
+def pagina_registro():
+    """Renderiza a página de registro de novo agente."""
+    return render_template('login/register.html')
+
+
+# Rota para criar um novo agente
+@app.route('/create_agent', methods=['POST'])
+def create_agent_route():
+    """
+    Processa o formulário de registro de novo agente.
+    Cria o usuário no Firebase Auth e depois adiciona os dados no Firestore.
+    """
+    if request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        matricula = request.form['matricula']
+        senha = request.form['senha']
+        confirmar_senha = request.form['confirmar_senha']
+
+        # Validação básica
+        if senha != confirmar_senha:
+            flash('As senhas não coincidem!', 'danger')
+            return redirect(url_for('pagina_registro'))
+
+        # Tenta criar o usuário no Firebase Authentication
+        user = create_user(email, senha)
+
+        if user == "EMAIL_EXISTS":
+            flash('Este e-mail já está cadastrado.', 'danger')
+            return redirect(url_for('pagina_registro'))
+        elif user == "WEAK_PASSWORD":
+            flash('A senha é muito fraca. Use pelo menos 6 caracteres.', 'danger')
+            return redirect(url_for('pagina_registro'))
+        elif user is None:
+            flash('Ocorreu um erro ao criar o usuário.', 'danger')
+            return redirect(url_for('pagina_registro'))
+
+        # Se o usuário foi criado com sucesso no Auth, adicione os dados ao Firestore
+        agent_data = {
+            "nome": nome,
+            "email": email,
+            "matricula": matricula,
+            "uid": user.uid,  # Armazena o UID do Firebase Auth no documento do agente
+            "cargo_at": "",  # Campos adicionais podem ser definidos aqui ou em um perfil
+            "func_mes": "",
+            "viatura_mes": ""
+        }
+
+        # Adiciona o agente no Firestore
+        agent_id = add_agent(agent_data)
+
+        if agent_id:
+            flash('Agente registrado com sucesso! Faça o login.', 'success')
+            return redirect(url_for('pagina_login'))
+        else:
+            # Isso seria um estado inconsistente (Auth user existe, mas DB user não)
+            # Idealmente, teríamos uma lógica para lidar com isso (ex: deletar o user do Auth)
+            flash('Erro ao salvar os dados do agente no banco de dados.', 'danger')
+            return redirect(url_for('pagina_registro'))
 
 
 # Rota para metodoRecSenha.html

@@ -9,6 +9,11 @@
     max-width: 60rem;
     margin: 2rem auto;
     text-align: center;
+    margin-right: 5rem;
+}
+
+.page-content {
+    margin-top: 1.5rem;
 }
 
 .profile-pic-large {

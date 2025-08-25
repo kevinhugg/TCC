@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Registrar Novo Agente</title>
+</head>
+<body>
+    <div class="bloco_login">
+        <div class="logo">
+            <img id="logo" src="/static/assets/img/logoSemurb.png" alt="Logo da Semurb" class="logo_semurb">
+            <h1>SEMURB</h1>
+        </div>
+
+        <div class="forms">
+            <div class="inputs">
+                <h1>Novo Agente</h1>
+                <h2>REGISTRO</h2>
+                <!-- Formulário para criar um novo agente -->
+                <form action="/create_agent" method="post">
+                    <input name="nome" class="campo" placeholder="Nome Completo" type="text" required>
+                    <br><br>
+                    <input name="email" class="campo" placeholder="Email" type="email" required>
+                    <br><br>
+                    <input name="matricula" class="campo" placeholder="Número de Matrícula" type="text" required>
+                    <br><br>
+                    <input name="senha" class="campo" placeholder="Senha" type="password" required>
+                    <br><br>
+                    <input name="confirmar_senha" class="campo" placeholder="Confirmar Senha" type="password" required>
+                    <br><br>
+                    <button style="color: aliceblue;" id="enviar" type="submit">REGISTRAR</button>
+                </form>
+                <p><a href="{{ url_for('pagina_login') }}">Já tem uma conta? Faça login</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
