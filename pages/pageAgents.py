@@ -59,6 +59,31 @@ def layout():
                             html.Label("Idade:"),
                             dcc.Input(id='add-agent-idade', type='number', placeholder="Idade", className='modal-input'),
                         ]),
+                        html.Div(id='upload-error-message-agent', style={'color': 'red'}),
+                        html.Div(className='form-group', children=[
+                            html.Label("Foto do Agente:"),
+                            html.Div(
+                                id='upload-container-agent',
+                                style={'position': 'relative', 'padding': '10px'},
+                                children=[
+                                    dcc.Upload(
+                                        id='upload-agent-image',
+                                        children=html.Div([
+                                            html.I(className="fas fa-camera", style={'fontSize': '2rem', 'marginBottom': '0.5rem'}),
+                                            html.Br(),
+                                            'Arraste e solte ou ',
+                                            html.A('Selecione uma imagem')
+                                        ]),
+                                        className='upload-area-agent',
+                                        accept='image/*'
+                                    ),
+                                    html.Div(id='image-preview-container-agent', style={'display': 'none'}, children=[
+                                        html.Img(id='image-preview-agent', style={'width': '200px', 'height': '120px', 'objectFit': 'cover'}),
+                                        html.Button('×', id='remove-image-button-agent', className='remove-image-btn')
+                                    ])
+                                ]
+                            )
+                        ]),
                     ]
                 ),
                 html.Div(
@@ -80,6 +105,7 @@ def layout():
 
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleAgents.css'),
+        html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Store(id='selected-agents', data=[]),
         dcc.Store(id='edit-mode', data=False),
         dcc.Location(id='url-agents', refresh=True),
@@ -119,6 +145,34 @@ def layout():
 
 
 @callback(
+    Output('image-preview-container-agent', 'style'),
+    Output('image-preview-agent', 'src'),
+    Output('upload-agent-image', 'style'),
+    Input('upload-agent-image', 'contents'),
+    Input('remove-image-button-agent', 'n_clicks'),
+    prevent_initial_call=True
+)
+def update_image_preview_agent(contents, remove_clicks):
+    triggered_id = ctx.triggered_id
+
+    upload_style = {
+        'width': '100%', 'height': '100px', 'lineHeight': '100px',
+        'borderWidth': '2px', 'borderStyle': 'dashed',
+        'borderRadius': '5px', 'textAlign': 'center', 'display': 'block'
+    }
+    hidden_upload_style = upload_style.copy()
+    hidden_upload_style['display'] = 'none'
+
+    if triggered_id == 'remove-image-button-agent':
+        return {'display': 'none'}, '', upload_style
+
+    if contents:
+        return {'display': 'block', 'textAlign': 'center'}, contents, hidden_upload_style
+
+    return {'display': 'none'}, '', upload_style
+
+
+@callback(
     Output('modal-add-agent', 'style'),
     Input('add_agents', 'n_clicks'),
     Input('cancel-add-agent', 'n_clicks'),
@@ -139,32 +193,46 @@ def toggle_agent_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
 @callback(
     Output('url-agents', 'pathname'),
     Output('modal-add-agent', 'style', allow_duplicate=True),
+    Output('upload-error-message-agent', 'children'),
     Input('submit-add-agent', 'n_clicks'),
     State('add-agent-name', 'value'),
     State('add-agent-matricula', 'value'),
     State('add-agent-idade', 'value'),
+    State('upload-agent-image', 'contents'),
+    State('upload-agent-image', 'filename'),
     prevent_initial_call=True
 )
-def handle_add_agent(n_clicks, name, matricula, idade):
-    if n_clicks:
-        if not all([name, matricula, idade]):
-            print("Agent not added, missing fields")
-            return no_update, {'display': 'flex'}
+def handle_add_agent(n_clicks, name, matricula, idade, contents, filename):
+    if not n_clicks:
+        return dash.no_update, dash.no_update, ""
 
-        new_agent = {
-            'nome': name,
-            'matricula': matricula,
-            'idade': idade,
-            'cargo_at': "",
-            'funcao': "",
-            'turno': "",
-            'viatura': "",
-            'ocorrencias': "0",
-            'foto_agnt': 'https://firebasestorage.googleapis.com/v0/b/tcc-semurb-2ea61.appspot.com/o/agentes%2Fpersona.png?alt=media&token=c23068da-25a5-45elyn-846c-d2a637886358'
-        }
-        fb.add_agent(new_agent)
-        return '/dashboard/pageAgents', {'display': 'none'}
-    return no_update, no_update
+    if not all([name, matricula, idade]):
+        return dash.no_update, dash.no_update, "Por favor, preencha todos os campos."
+
+    foto_url = 'https://firebasestorage.googleapis.com/v0/b/tcc-semurb-2ea61.appspot.com/o/agentes%2Fpersona.png?alt=media&token=c23068da-25a5-45elyn-846c-d2a637886358'
+    foto_path = ''
+    if contents and filename:
+        try:
+            foto_url, foto_path = fb.upload_image_to_storage(contents, filename, folder='agentes')
+            if not foto_url:
+                return dash.no_update, dash.no_update, "Erro no upload da imagem."
+        except Exception as e:
+            return dash.no_update, dash.no_update, f"Erro no upload da imagem: {e}"
+
+    new_agent = {
+        'nome': name,
+        'matricula': matricula,
+        'idade': idade,
+        'cargo_at': "",
+        'funcao': "",
+        'turno': "",
+        'viatura': "",
+        'ocorrencias': "0",
+        'foto_agnt': foto_url,
+        'fotoPath': foto_path
+    }
+    fb.add_agent(new_agent)
+    return '/dashboard/pageAgents', {'display': 'none'}, ""
 
 
 @callback(

@@ -91,112 +91,13 @@
     gap: 1rem;
 }
 
-
-
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
-}
-
-.modal-content {
-    background-color: var(--card-bg-color);
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    border: 1px solid var(--border-color);
-    animation: modalFadeIn 0.3s ease-out;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .modal-title {
-    color: rgb(0 0 0);
+    color: var(--primary-text-color);
     margin-bottom: 1.5rem;
     text-align: center;
     font-size: 1.5rem;
 }
 
-.modal-input {
-    width: 95%;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-color);
-    color: var(--primary-text-color);
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-}
-
-.modal-input:focus {
-    outline: none;
-    color: var(--primary-text-color);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-}
-
-.modal-dropdown {
-    width: 100%;
-    margin-bottom: 1.5rem;
-    color: var(--primary-text-color);
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.modal-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-}
-
-.modal-button.cancel {
-    background-color: transparent;
-    color: var(--secondary-text-color);
-    border-color: var(--border-color);
-}
-
-.modal-button.cancel:hover {
-    background-color: var(--table-header-bg-color);
-    color: var(--primary-text-color);
-}
-
-.modal-button.submit {
-    background-color: var(--accent-color);
-    color: rgb(255, 255, 255);
-}
-
-.modal-button.submit:hover {
-    background-color: var(--accent-hover-color);
-    transform: translateY(-1px);
-}
 
 
 
@@ -418,4 +319,32 @@
 .btn-danger {
     background-color: var(--remove-btn-bg) !important;
     color: white !important;
+}
+
+/* Custom styles for the agent image upload area */
+.upload-area-agent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 150px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--secondary-text-color);
+    background-color: var(--bg-color);
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.upload-area-agent:hover {
+    border-color: var(--accent-color);
+    background-color: var(--card-bg-color);
+}
+
+.upload-area-agent a {
+    color: var(--accent-color);
+    font-weight: bold;
+    text-decoration: none;
 }

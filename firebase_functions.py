@@ -328,7 +328,7 @@ def get_agents_by_vehicle(viatura_numero):
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
 
 
-def upload_image_to_storage(contents, filename):
+def upload_image_to_storage(contents, filename, folder='viaturas'):
     """Uploads an image to Firebase Storage and returns its download URL."""
     try:
         content_type, content_string = contents.split(',')
@@ -336,7 +336,7 @@ def upload_image_to_storage(contents, filename):
 
         # Força o nome do bucket diretamente para evitar problemas de descoberta
         bucket = storage.bucket('tcc-semurb-2ea61.firebasestorage.app')
-        unique_filename = f"viaturas/{uuid.uuid4()}-{filename}"
+        unique_filename = f"{folder}/{uuid.uuid4()}-{filename}"
         blob = bucket.blob(unique_filename)
 
         # Create a new token and set it in the metadata
@@ -497,6 +497,45 @@ def replace_vehicle_image(numero, contents, filename):
 
     except Exception as e:
         print(f"Erro ao substituir imagem: {e}")
+        return None
+
+
+def replace_agent_image(agent_id, contents, filename):
+    """Substitui a foto de um agente: apaga a antiga e sobe a nova."""
+    try:
+        # 1. Busca o agente
+        agente = get_agent_by_doc_id(agent_id)
+        if not agente:
+            print(f"Nenhum agente encontrado com o ID {agent_id}")
+            return None
+
+        bucket = storage.bucket('tcc-semurb-2ea61.firebasestorage.app')
+
+        # 2. Apaga a imagem antiga (se existir e não for a padrão)
+        old_path = agente.get("fotoPath")
+        if old_path:
+            try:
+                bucket.blob(old_path).delete()
+                print(f"Foto antiga {old_path} apagada.")
+            except Exception as e:
+                print(f"Erro ao apagar foto antiga: {e}")
+
+        # 3. Sobe a nova
+        new_image_url, new_image_path = upload_image_to_storage(contents, filename, folder='agentes')
+
+        if not new_image_url:
+            raise Exception("Falha no upload da nova imagem.")
+
+        # 4. Atualiza o Firestore
+        update_agent_by_doc_id(agent_id, {
+            "foto_agnt": new_image_url,
+            "fotoPath": new_image_path
+        })
+
+        return new_image_url
+
+    except Exception as e:
+        print(f"Erro ao substituir foto do agente: {e}")
         return None
 
 
