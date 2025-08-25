@@ -328,7 +328,7 @@ def get_agents_by_vehicle(viatura_numero):
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
 
 
-def upload_image_to_storage(contents, filename, folder='viaturas'):
+def upload_image_to_storage(contents, filename):
     """Uploads an image to Firebase Storage and returns its download URL."""
     try:
         content_type, content_string = contents.split(',')
@@ -336,7 +336,7 @@ def upload_image_to_storage(contents, filename, folder='viaturas'):
 
         # Força o nome do bucket diretamente para evitar problemas de descoberta
         bucket = storage.bucket('tcc-semurb-2ea61.firebasestorage.app')
-        unique_filename = f"{folder}/{uuid.uuid4()}-{filename}"
+        unique_filename = f"viaturas/{uuid.uuid4()}-{filename}"
         blob = bucket.blob(unique_filename)
 
         # Create a new token and set it in the metadata
@@ -511,31 +511,46 @@ def replace_agent_image(agent_id, contents, filename):
 
         bucket = storage.bucket('tcc-semurb-2ea61.firebasestorage.app')
 
-        # 2. Apaga a imagem antiga (se existir e não for a padrão)
-        old_path = agente.get("fotoPath")
+        # 2. Apaga a foto antiga do Storage (se existir um caminho salvo)
+        old_path = agente.get("foto_path")
         if old_path:
             try:
                 bucket.blob(old_path).delete()
                 print(f"Foto antiga {old_path} apagada.")
             except Exception as e:
-                print(f"Erro ao apagar foto antiga: {e}")
+                # Se o arquivo não existir no storage, não há problema.
+                print(f"Info: Não foi possível apagar a foto antiga (pode já ter sido removida): {e}")
 
-        # 3. Sobe a nova
-        new_image_url, new_image_path = upload_image_to_storage(contents, filename, folder='agentes')
+        # 3. Faz upload da nova foto
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
 
-        if not new_image_url:
-            raise Exception("Falha no upload da nova imagem.")
+        unique_filename = f"agentes/{uuid.uuid4()}-{filename}"
+        blob = bucket.blob(unique_filename)
 
-        # 4. Atualiza o Firestore
+        download_token = uuid.uuid4()
+        metadata = {"firebaseStorageDownloadTokens": str(download_token)}
+        blob.metadata = metadata
+
+        blob.upload_from_string(decoded, content_type=content_type)
+
+        # Constrói a URL de download manualmente
+        encoded_path = quote(blob.name, safe='')
+        download_url = (
+            f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{encoded_path}"
+            f"?alt=media&token={download_token}"
+        )
+
+        # 4. Atualiza o documento do agente no Firestore com a nova URL e caminho
         update_agent_by_doc_id(agent_id, {
-            "foto_agnt": new_image_url,
-            "fotoPath": new_image_path
+            "foto_agnt": download_url,
+            "foto_path": unique_filename
         })
 
-        return new_image_url
+        return download_url
 
     except Exception as e:
-        print(f"Erro ao substituir foto do agente: {e}")
+        print(f"Erro ao substituir a foto do agente: {e}")
         return None
 
 

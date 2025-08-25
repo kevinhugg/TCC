@@ -2,6 +2,7 @@ import dash
 from dash import html, dcc, Input, Output, callback, State, ctx
 from datetime import datetime
 import time
+
 import firebase_functions as fb
 
 dash.register_page(__name__, path_template='/agent/<id>', name=None)
@@ -14,9 +15,9 @@ def layout(id=None):
         html.Link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.8.1/css/all.css'),
         html.Link(rel='stylesheet', href='/static/css/detailsVehicles.css'),
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
+        dcc.ConfirmDialog(id='update-confirm-agent', message=''),
 
         dcc.Store(id='agent-store', data={'id': id, 'trigger': 0}),
-        dcc.ConfirmDialog(id='update-confirm-agent', message=''),
 
         # Removal Confirmation Modal
         html.Div(id='removal-modal-agent', className='modal', style={'display': 'none'}, children=[
@@ -35,9 +36,12 @@ def layout(id=None):
             ])
         ]),
 
+        # The main content will be loaded here by a callback
+        html.Div(id='agent-details-content', className='agent-details-wrapper'),
+
         # Modal para fazer upload de uma nova imagem para o agente
         html.Div(
-            id='modal-upload-image-agent',
+            id='modal-upload-agent-image',
             className='modal',
             style={'display': 'none'},  # Inicia escondido
             children=[
@@ -46,15 +50,15 @@ def layout(id=None):
                     children=[
                         html.Div(className='modal-header', children=[
                             html.H5('Alterar Imagem do Agente', className='modal-title'),
-                            html.Button('×', id='cancel-upload-x-agent', className='modal-close-button')
+                            html.Button('×', id='cancel-upload-agent-x', className='modal-close-button')
                         ]),
                         html.Div(className='modal-body', children=[
                             html.Div(
-                                id='upload-container-details-agent',
+                                id='upload-container-agent',
                                 style={'position': 'relative', 'padding': '10px'},
                                 children=[
                                     dcc.Upload(
-                                        id='upload-new-image-agent',
+                                        id='upload-new-agent-image',
                                         children=html.Div(['Arraste ou ', html.A('Selecione uma Imagem')]),
                                         style={
                                             'width': '100%', 'height': '100px', 'lineHeight': '100px',
@@ -63,30 +67,25 @@ def layout(id=None):
                                         },
                                         accept='image/*'
                                     ),
-                                    html.Div(id='image-preview-container-details-agent', style={'display': 'none'},
-                                             children=[
-                                                 html.Img(id='image-preview-details-agent',
-                                                          style={'width': '200px', 'height': '120px',
-                                                                 'objectFit': 'cover'}),
-                                                 html.Button('×', id='remove-image-button-details-agent',
-                                                             className='remove-image-btn')
-                                             ])
+                                    html.Div(id='image-preview-container-agent', style={'display': 'none'}, children=[
+                                        html.Img(id='image-preview-agent',
+                                                 style={'width': '200px', 'height': '120px', 'objectFit': 'cover'}),
+                                        html.Button('×', id='remove-image-button-agent', className='remove-image-btn')
+                                    ])
                                 ]
                             ),
-                            html.Div(id='output-image-upload-agent', style={'textAlign': 'center', 'marginTop': '10px'}),
+                            html.Div(id='output-image-upload-agent',
+                                     style={'textAlign': 'center', 'marginTop': '10px'}),
                         ]),
                         html.Div(className='modal-footer', children=[
                             html.Button('Cancelar', id='cancel-upload-button-agent', className='modal-button cancel'),
-                            html.Button('Salvar Nova Imagem', id='submit-new-image-agent', n_clicks=0,
+                            html.Button('Salvar Nova Imagem', id='submit-new-agent-image', n_clicks=0,
                                         className='modal-button submit'),
                         ])
                     ]
                 )
             ]
         ),
-
-        # The main content will be loaded here by a callback
-        html.Div(id='agent-details-content', className='agent-details-wrapper'),
 
     ], className='page-content')
 
@@ -115,16 +114,18 @@ def update_agent_details(store_data):
         {'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(), 'value': m} for m in meses_unicos
     ]
 
-    return [
+    return html.Div([
+        # Coluna 1: Detalhes do Agente
         html.Div([
             html.H3(f"Agente - {agent_data.get('nome', 'N/A')}", className='tittle'),
             html.Div([
                 html.Div(
-                    id='vehicle-image-container',
-                    className='vehicle-image-container',  # Reutilizando a classe CSS
+                    id='agent-image-container',
+                    className='agent-image-container',
+                    n_clicks=0,
                     children=[
                         html.Img(
-                            id='img',
+                            id='agent-image-clickable',
                             src=agent_data.get('foto_agnt', '/static/assets/img/persona.png'),
                             className='img',
                             title='Clique para alterar a imagem'
@@ -152,6 +153,7 @@ def update_agent_details(store_data):
             ], className='btn_rem_add'),
         ], className='details-container card'),
 
+        # Coluna 2: Histórico do Agente
         html.Div([
             html.H4("Histórico do Agente na Viatura"),
             dcc.Dropdown(
@@ -164,6 +166,7 @@ def update_agent_details(store_data):
             html.Div(id='table-ocurrences-agents'),
         ], className='ocurrences card'),
 
+        # Coluna 3: Equipe da Viatura
         html.Div([
             html.H3(f"Equipe da Viatura"),
             html.Div([
@@ -184,7 +187,7 @@ def update_agent_details(store_data):
                 ) for agente in another_agents]
             ], className='agents-grid'),
         ], className='agents-container card'),
-    ]
+    ], className='agent-details-wrapper')
 
 
 @callback(
@@ -266,91 +269,67 @@ def handle_remove_agent(n_clicks, store_data):
 
 
 @callback(
-    Output('image-preview-container-details-agent', 'style'),
-    Output('image-preview-details-agent', 'src'),
-    Output('upload-new-image-agent', 'style'),
-    Output('output-image-upload-agent', 'children'),
-    Input('upload-new-image-agent', 'contents'),
-    Input('remove-image-button-details-agent', 'n_clicks'),
-    State('upload-new-image-agent', 'filename'),
+    Output('modal-upload-agent-image', 'style'),
+    [Input('agent-image-container', 'n_clicks'),
+     Input('cancel-upload-button-agent', 'n_clicks'),
+     Input('cancel-upload-agent-x', 'n_clicks')],
     prevent_initial_call=True
 )
-def update_image_preview_details_agent(contents, remove_clicks, filename):
-    triggered_id = ctx.triggered_id
+def toggle_upload_modal_agent(n_open, n_cancel, n_cancel_x):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return dash.no_update
 
-    upload_style = {
-        'width': '100%', 'height': '100px', 'lineHeight': '100px',
-        'borderWidth': '2px', 'borderStyle': 'dashed',
-        'borderRadius': '5px', 'textAlign': 'center', 'display': 'block'
-    }
-    hidden_upload_style = upload_style.copy()
-    hidden_upload_style['display'] = 'none'
+    triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    if triggered_id == 'remove-image-button-details-agent':
-        return {'display': 'none'}, '', upload_style, ''
+    # Só abre se o n_clicks for maior que 0
+    if triggered_id == 'agent-image-container' and n_open and n_open > 0:
+        return {'display': 'flex'}
 
-    if contents:
-        return {'display': 'block', 'textAlign': 'center'}, contents, hidden_upload_style, f"Arquivo: {filename}"
+    if triggered_id in ['cancel-upload-button-agent', 'cancel-upload-agent-x']:
+        return {'display': 'none'}
 
-    return {'display': 'none'}, '', upload_style, ''
-
+    return dash.no_update
 
 @callback(
-    [Output('update-confirm-agent', 'displayed'),
-     Output('update-confirm-agent', 'message'),
-     Output('modal-upload-image-agent', 'style', allow_duplicate=True)],
-    [Input('submit-new-image-agent', 'n_clicks')],
-    [State('upload-new-image-agent', 'contents'),
-     State('upload-new-image-agent', 'filename'),
-     State('agent-store', 'data')],
+    Output('update-confirm-agent', 'displayed'),
+    Output('update-confirm-agent', 'message'),
+    Output('modal-upload-agent-image', 'style', allow_duplicate=True),
+    Input('submit-new-agent-image', 'n_clicks'),
+    State('upload-new-agent-image', 'contents'),
+    State('upload-new-agent-image', 'filename'),
+    State('agent-store', 'data'),
     prevent_initial_call=True
 )
 def update_agent_image(n_clicks, contents, filename, store_data):
     hide_modal_style = {'display': 'none'}
+    agent_id = store_data.get('id')
 
     if not contents:
         return True, "Por favor, selecione uma imagem para fazer o upload.", dash.no_update
 
-    agent_id = store_data['id']
+    if not agent_id:
+        return True, "ID do agente não encontrado. Não é possível salvar a imagem.", hide_modal_style
+
     new_image_url = fb.replace_agent_image(agent_id, contents, filename)
 
     if new_image_url:
-        return True, "Imagem atualizada com sucesso!", hide_modal_style
+        return True, "Imagem do agente atualizada com sucesso!", hide_modal_style
     else:
         return True, "Falha ao atualizar a imagem do agente.", hide_modal_style
 
 
 @callback(
-    Output('modal-upload-image-agent', 'style'),
-    [Input('agent-image-container', 'n_clicks'),
-     Input('cancel-upload-button-agent', 'n_clicks'),
-     Input('cancel-upload-x-agent', 'n_clicks')],
-    [State('modal-upload-image-agent', 'style')],
-    prevent_initial_call=True,
-)
-def toggle_upload_modal_agent(n_open, n_cancel, n_cancel_x, style):
-    triggered_id = ctx.triggered_id
-    if not triggered_id:
-        return dash.no_update
-
-    if triggered_id == 'agent-image-container':
-        return {'display': 'flex'}
-    if triggered_id in ['cancel-upload-button-agent', 'cancel-upload-x-agent']:
-        return {'display': 'none'}
-    return dash.no_update
-
-
-@callback(
-    Output("agent-image-clickable", "src"),
-    Input("update-confirm-agent", "submit_n_clicks"),
-    State("agent-store", "data"),
+    Output('agent-store', 'data', allow_duplicate=True),
+    Input('update-confirm-agent', 'submit_n_clicks'),
+    State('agent-store', 'data'),
     prevent_initial_call=True
 )
-def refresh_agent_image_on_page(submit_n_clicks, store_data):
+def refresh_agent_data_after_update(submit_n_clicks, store_data):
     if not submit_n_clicks:
         return dash.no_update
 
-    agent_id = store_data['id']
-    agent_data = fb.get_agent_by_doc_id(agent_id)
-    # Adiciona timestamp para forçar a atualização do cache do navegador
-    return f"{agent_data['foto_agnt']}?v={int(time.time())}"
+    # Increment trigger to force a refresh of the agent-details-content
+    new_store_data = store_data.copy()
+    new_store_data['trigger'] += 1
+    return new_store_data

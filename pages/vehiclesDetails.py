@@ -449,15 +449,14 @@ def toggle_modal(add_agent_clicks, close_clicks):
 
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    if trigger_id == 'add-agent-button':
-        print("Abrindo modal")
+    # Só abre se n_clicks > 0
+    if trigger_id == 'add-agent-button' and add_agent_clicks and add_agent_clicks > 0:
         return {'display': 'block'}
 
     if trigger_id == 'modal-close-button':
         return {'display': 'none'}
 
     return {'display': 'none'}
-
 
 @callback(
     Output('agent-assignment-trigger', 'data', allow_duplicate=True),
