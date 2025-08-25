@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_mail import Mail, Message
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import unicodedata
 
 from xhtml2pdf import pisa
@@ -29,17 +29,20 @@ from firebase_functions import (
     add_occurrence_or_service, add_vehicle, delete_agent, delete_vehicle,
     update_agent_by_doc_id, update_vehicle,
     replace_vehicle_image, replace_agent_image, clear_agent_assignment,
-    get_occurrence_or_service_by_id
+    get_occurrence_or_service_by_id,
+    reset_password
 )
+
+from data.dados import *
 
 app = Flask(__name__)
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'seu_email@gmail.com'
-app.config['MAIL_PASSWORD'] = 'sua_senha_do_app'
-app.config['MAIL_DEFAULT_SENDER'] = 'seu_email@gmail.com'
+app.config['MAIL_USERNAME'] = 'kevinmar704@gmail.com'
+app.config['MAIL_PASSWORD'] = 'xfju vcgm ylkm hzgt'
+app.config['MAIL_DEFAULT_SENDER'] = 'kevinmar704@gmail.com'
 app.secret_key = 'semurb'
 
 mail = Mail(app)
@@ -159,7 +162,7 @@ def enviar_codigo():
 
     session['reset_code'] = codigo
     session['reset_email'] = email
-    session['reset_code_expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=10)
+    session['reset_code_expiry'] = datetime.now(timezone.utc) + timedelta(minutes=10)
 
     try:
         msg = Message("Código de Recuperação de Senha",
@@ -195,7 +198,7 @@ def validar_codigo():
         return redirect(url_for('metodoRecSenha'))
 
     # Aqui é para ver se o código expirou
-    if datetime.datetime.now() > session['reset_code_expiry']:
+    if datetime.now(timezone.utc) > session['reset_code_expiry']:
         session.pop('reset_code', None)
         session.pop('reset_email', None)
         session.pop('reset_code_expiry', None)
@@ -222,6 +225,31 @@ def red_senha():
         flash('Acesso inválido à página de redefinição de senha.', 'danger')
         return redirect(url_for('pagina_login'))
     return render_template('login/redefinirSenha.html')
+
+
+@app.route('/redefinir-senha-final', methods=['POST'])
+def redefinir_senha_final():
+    if 'reset_email' not in session:
+        flash('Sua sessão de redefinição de senha expirou.', 'danger')
+        return redirect(url_for('pagina_login'))
+
+    nova_senha = request.form['nova_senha']
+    confirmar_senha = request.form['confirmar_senha']
+
+    if nova_senha != confirmar_senha:
+        flash('As senhas não coincidem.', 'danger')
+        return redirect(url_for('red_senha'))
+
+    email = session['reset_email']
+    success, message = reset_password(email, nova_senha)
+
+    if success:
+        flash('Senha redefinida com sucesso! Você já pode fazer o login.', 'success')
+        session.pop('reset_email', None)  # Limpa a sessão
+        return redirect(url_for('pagina_login'))
+    else:
+        flash(f'Erro ao redefinir a senha: {message}', 'danger')
+        return redirect(url_for('red_senha'))
 
 
 ##LOGOUT

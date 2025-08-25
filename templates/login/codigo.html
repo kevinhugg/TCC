@@ -3,35 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="/static/css/index.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <title>Login</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Código de Verificação</title>
 </head>
 <body>
-    
+    <div class="bloco_login">
+        <div class="logo">
+            <img id="logo" src="/static/assets/img/logoSemurb.png" alt="Logo da Semurb" class="logo_semurb">
+            <h1>SEMURB</h1>
+        </div>
 
- <div class="bloco_login">
-    <div class="logo">
-        <img id="logo" src="/static/assets/img/logoSemurb.png" alt="Logo da Semurb" class="logo_semurb">
-        <h1>SEMURB</h1>
-    </div>
-
-    <div class="forms">
-        <div class="inputs">
-            <h1>Administrador</h1>
-            <h3>REDEFINIR SENHA</h3>
- <form action="{{ url_for('validar_codigo') }}" method="POST">
-        <label for="codigo">Insira o código:</label><br>
-        <input type="text" id="codigo" name="codigo" required><br><br>
-        <button type="submit">Validar Código</button>
-    </form>
-                <br><br>
-           <p><a href="{{ url_for('metodoRecSenha') }}">Reenviar código</a></p> 
+        <div class="forms">
+            <div class="inputs">
+                <h1>Verificação</h1>
+                <h3>Insira o código enviado para o seu email.</h3>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flashes">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                <form action="{{ url_for('validar_codigo') }}" method="POST">
+                    <input class="campo" type="text" id="codigo" name="codigo" required placeholder="Código de 6 dígitos">
+                    <br><br>
+                    <button id="enviar" type="submit">VALIDAR CÓDIGO</button>
+                </form>
+                <br>
+                <p><a href="{{ url_for('metodoRecSenha') }}">Reenviar código</a></p>
+            </div>
         </div>
     </div>
- </div>
 
 
 

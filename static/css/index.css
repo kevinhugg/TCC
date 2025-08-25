@@ -11,7 +11,7 @@ body{
     height: 100%;
     margin-top: 7%;
     justify-self: center;
-    align-items: center;
+    align-items: stretch;
     background-color: aliceblue;
     display: flex;
     max-width: fit-content;
@@ -22,8 +22,10 @@ body{
 }
 
 .logo{
+    display: flex;
     flex-flow: column wrap;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
     padding: 9%;
     background-color: #478992;
     border-radius: 23px;
@@ -47,6 +49,8 @@ body{
     padding: 2%;
     margin-right: 160px;
     text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 
 .inputs{

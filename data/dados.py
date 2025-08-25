@@ -120,6 +120,7 @@ service_types = [
     {'id': 3, 'nome': 'Sinistro de Grande Vulto'},
     {'id': 4, 'nome': 'Ambiental'},
     {'id': 5, 'nome': 'Sinalização ineficiente'},
+    {'id': 6, 'nome': 'fiscalização'},
 ]
 
 occurrence_types = [

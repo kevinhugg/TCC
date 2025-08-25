@@ -22,6 +22,15 @@
         <div class="inputs">
             <h1>Administrador</h1>
             <h2>LOGIN</h2>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flashes">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             <form action="/login" method="post">
                 <!-- O campo de matrícula foi alterado para email para corresponder à autenticação do Firebase -->
                 <input name="email" class="campo" placeholder="Email" type="email" required>

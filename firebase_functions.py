@@ -77,6 +77,24 @@ def create_user(email, password):
         return None
 
 
+def reset_password(email, new_password):
+    """
+    Redefine a senha de um usuário usando o e-mail.
+    """
+    try:
+        user = auth.get_user_by_email(email)
+        uid = user.uid
+        auth.update_user(uid, password=new_password)
+        print(f"Senha do usuário {email} (UID: {uid}) foi redefinida com sucesso.")
+        return True, "Senha redefinida com sucesso."
+    except auth.UserNotFoundError:
+        print(f"Erro ao redefinir senha: Usuário com e-mail {email} não encontrado.")
+        return False, "Usuário não encontrado."
+    except Exception as e:
+        print(f"Ocorreu um erro ao redefinir a senha: {e}")
+        return False, f"Ocorreu um erro ao redefinir a senha: {e}"
+
+
 # BUSCAS
 
 # Busca todos as viaturas
