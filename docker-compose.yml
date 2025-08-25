@@ -1,0 +1,19 @@
+# Defines the version of the Docker Compose file format.
+version: '3.8'
+
+# Defines the services that make up the application.
+services:
+  # The name of our service (can be anything).
+  web:
+    # Tells Docker Compose to build the image from the Dockerfile in the current directory.
+    build: .
+    # Maps port 5000 on the host to port 5000 in the container.
+    # This lets you access the application at http://localhost:5000.
+    ports:
+      - "5000:5000"
+    # Mounts the current directory on the host to /app in the container.
+    # This is useful for development, as changes to your code are immediately
+    # reflected in the container without needing to rebuild the image.
+    # For production, you might remove this line.
+    volumes:
+      - .:/app
