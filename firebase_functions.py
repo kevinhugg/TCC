@@ -195,9 +195,9 @@ def delete_damage_by_id(damage_id):
         return False
 
 
-# busca agentes pela matricula
-def get_agent_by_id(matricula):
-    doc_ref = db.collection('agentes').document(matricula)
+# busca agentes pelo id do documento
+def get_agent_by_doc_id(agent_id):
+    doc_ref = db.collection('agentes').document(agent_id)
     doc = doc_ref.get()
     if doc.exists:
         return doc.to_dict() | {'id': doc.id}
@@ -214,6 +214,36 @@ def get_all_agents():
 def get_unassigned_agents():
     docs = db.collection('agentes').where('funcao', '==', "").stream()
     return [doc.to_dict() | {'id': doc.id} for doc in docs]
+
+
+def get_history_by_agent(agent_id):
+    """Gets all occurrences and services for a specific agent."""
+    history = []
+    if not agent_id:
+        return history
+
+    ocorrencias_ref = db.collection('agentes').document(agent_id).collection('ocorrencias')
+    date_docs = ocorrencias_ref.stream()
+
+    for date_doc in date_docs:
+        data_str = date_doc.id
+        lista_ref = date_doc.reference.collection('lista').stream()
+
+        for item_doc in lista_ref:
+            data = item_doc.to_dict()
+            item_class = data.get('class', 'ocorrencia')
+            item_type = 'Serviço' if item_class == 'serviço' else 'Ocorrência'
+
+            history.append({
+                'id': item_doc.id,
+                'data': data_str,
+                'descricao': data.get('nomenclatura', 'N/A'), # Assuming 'nomenclatura' is the description
+                'tipo': item_type,
+                'class': item_class,
+                'path': 'services' if item_class == 'serviço' else 'ocurrences',
+                'viatura': data.get('viatura', 'N/A')
+            })
+    return history
 
 
 def get_occurrences_and_services_by_vehicle(veiculo_numero):
@@ -394,9 +424,9 @@ def delete_vehicle(numero):
 
 # UPDATES
 
-# att agente por id/matricula
-def update_agent(agent_mat, updates: dict):
-    db.collection('agentes').document(agent_mat).update(updates)
+# att agente por id do documento
+def update_agent_by_doc_id(agent_id, updates: dict):
+    db.collection('agentes').document(agent_id).update(updates)
 
 
 def update_vehicle(numero, updates: dict):
@@ -471,8 +501,8 @@ def replace_vehicle_image(numero, contents, filename):
 
 
 # remove atribuiçoes do agente
-def clear_agent_assignment(agent_mat):
-    update_agent(agent_mat, {
+def clear_agent_assignment(agent_id):
+    update_agent_by_doc_id(agent_id, {
         'funcao': '',
         'viatura': '',
         'turno': '',

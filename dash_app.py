@@ -14,6 +14,7 @@ def create_dash_app(flask_app):
             '/static/css/global.css',
             "https://use.fontawesome.com/releases/v5.15.4/css/all.css"
         ],
+        suppress_callback_exceptions=True,
     )
 
     dash_app.layout = html.Div([

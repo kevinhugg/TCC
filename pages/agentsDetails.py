@@ -45,7 +45,7 @@ def layout(id=None):
 )
 def update_agent_details(store_data):
     agent_id = store_data['id']
-    agent_data = fb.get_agent_by_id(agent_id)
+    agent_data = fb.get_agent_by_doc_id(agent_id)
 
     if not agent_data:
         return html.H3("Agente não encontrado")
