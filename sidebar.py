@@ -2,7 +2,6 @@ import dash
 from dash import html
 
 def get_sidebar():
-    # Define a mapping of page paths to icons and names
     page_map = {
         "/": {"name": "Home", "icon": "fas fa-home"},
         "/pageVehicles": {"name": "Viaturas", "icon": "fas fa-car"},

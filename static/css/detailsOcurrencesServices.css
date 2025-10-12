@@ -1,8 +1,3 @@
-/*
-  INFO: This file has been refactored to use variables and base styles from global.css.
-  It contains styles specific to the Details pages for Occurrences and Services.
-*/
-
 .page-content {
     display: flex;
     flex-wrap: wrap;
@@ -39,7 +34,7 @@
 }
 
 .agents-container {
-    flex: 1 1 500px; /* Takes full width on its own row if others wrap */
+    flex: 1 1 500px;
     margin: 0 auto;
 }
 
@@ -80,7 +75,6 @@
     margin: 0;
 }
 
-/* Table Styles */
 .filter-month {
     width: 200px;
     margin: 0 auto 1rem auto;
@@ -123,7 +117,6 @@
     color: var(--table-row-hover-text-color);
 }
 
-/* Buttons */
 .btn_rem_pdf {
     display: flex;
     justify-content: center;
@@ -153,8 +146,6 @@
     color: #ef4444;
 }
 
-
-/* Agents Section */
 .dropdown-title {
     display: flex;
     align-items: right;
@@ -269,7 +260,6 @@
     transition: 0.2s ease-in;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .page-content {
         margin-left: 0;
@@ -312,16 +302,15 @@
     margin-top: 20px;
 }
 
-/* Styles for Damage Details Page */
 .damage-content-wrapper {
     display: flex;
-    align-items: center; /* Vertically center the items */
-    gap: 2rem; /* space between image and text */
-    margin-bottom: 1.5rem; /* Add space above the delete button */
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .damage-image-container {
-    flex: 0 0 250px; /* Do not grow, do not shrink, base width of 250px */
+    flex: 0 0 250px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -330,19 +319,181 @@
 .damage-image {
     width: 100%;
     height: auto;
-    max-width: 250px; /* Max width of the image */
+    max-width: 250px;
     border-radius: 8px;
     object-fit: cover;
     border: 1px solid var(--border-color);
 }
 
 .damage-text-container {
-    flex: 1 1 auto; /* Grow to fill space */
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Center content vertically */
-    align-items: center; /* Center content horizontally */
+    justify-content: center;
+    align-items: center;
     gap: 1rem;
     font-size: 1.2rem;
     color: var(--secondary-text-color);
+}
+
+.btn-view {
+    text-decoration: none;
+    color: white;
+    padding: 5px 10px;
+    background-color: #007bff;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.btn-view:hover {
+    background-color: #0056b3;
+    text-decoration: none;
+    color: white;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+.dcc-link {
+    text-decoration: none !important;
+}
+
+.details-page {
+    padding: 20px;
+}
+
+.team-container {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.team-title {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.role-title {
+    color: #34495e;
+    margin: 15px 0 10px 0;
+}
+
+.agent-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.agent-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 3px solid #3498db;
+}
+
+.agent-info {
+    flex: 1;
+}
+
+.agent-name {
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.agent-role, .agent-shift {
+    color: #7f8c8d;
+    margin: 2px 0;
+    font-size: 0.9em;
+}
+
+.agents-grid {
+    display: grid;
+    gap: 10px;
+}
+
+.no-agent {
+    color: #95a5a6;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.btn-pdf-container, .back-btn-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+}
+
+.checkbox-column {
+    width: 40px;
+}
+
+.checkbox-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.service-checkbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.service-checkbox .form-check-input {
+    margin: 0;
+    cursor: pointer;
+}
+
+.btn-danger:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.modal-button.delete-confirm {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.modal-button.delete-confirm:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.modal-button.cancel {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.modal-button.cancel:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
 }

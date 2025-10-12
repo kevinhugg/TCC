@@ -1,14 +1,14 @@
 .modal {
-    display: flex; /* Always flex, use 'display: none' on the element style to hide/show */
+    display: flex;
     position: fixed;
     z-index: 1050;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; /* Allow scroll if content is too long */
-    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker backdrop */
-    align-items: flex-start; /* Align to top to prevent overflow issue */
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: flex-start;
     justify-content: center;
 }
 
@@ -18,13 +18,13 @@
     color: var(--primary-text-color);
     background-clip: padding-box;
     border: 1px solid var(--border-color);
-    border-radius: 0.5rem; /* Smoother corners */
+    border-radius: 0.5rem;
     outline: 0;
     max-width: 500px;
     margin: 1.75rem auto;
     display: flex;
     flex-direction: column;
-    width: 90%; /* Use percentage for better responsiveness */
+    width: 90%;
     pointer-events: auto;
 }
 
@@ -82,7 +82,6 @@
     opacity: 1;
 }
 
-/* Dark mode specific styles for modal text */
 .dark-mode .modal .form-group label,
 .dark-mode .modal .modal-input::placeholder {
     color: var(--secondary-text-color) !important;
@@ -93,7 +92,6 @@
     background-color: var(--bg-color) !important;
 }
 
-/* Form elements inside modal */
 .modal .form-group {
     margin-bottom: 1.5rem;
     text-align: left;
@@ -128,36 +126,38 @@
     background-color: var(--bg-color);
     border-color: var(--accent-color);
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(var(--accent-color-rgb), 0.25); /* Needs RGB version of accent color */
+    box-shadow: 0 0 0 0.2rem rgba(var(--accent-color-rgb), 0.25);
 }
 
-/* Dash Dropdown styles inside modal */
 .modal .Select-control {
     background-color: var(--bg-color) !important;
     border: 1px solid var(--border-color) !important;
 }
+
 .modal .Select-value-label, .modal .Select-placeholder {
     color: var(--primary-text-color) !important;
 }
+
 .modal .Select-menu-outer {
     background-color: var(--card-bg-color) !important;
     border: 1px solid var(--border-color) !important;
 }
+
 .modal .Select-option {
     background-color: var(--card-bg-color) !important;
     color: var(--primary-text-color) !important;
 }
+
 .modal .Select-option.is-focused {
     background-color: var(--accent-color) !important;
     color: var(--button-text-color) !important;
 }
+
 .modal .Select-option.is-selected {
     background-color: var(--accent-color) !important;
     color: var(--button-text-color) !important;
 }
 
-
-/* Modal buttons */
 .modal-button {
     padding: 0.5rem 1rem;
     font-size: 1rem;
@@ -190,7 +190,6 @@
     color: var(--primary-text-color);
 }
 
-/* Style for the remove image 'X' button */
 .remove-image-btn {
     position: absolute;
     top: -10px;
@@ -212,7 +211,7 @@
 }
 
 .remove-image-btn:hover {
-    background: #ef4444; /* Red color for delete action */
+    background: #ef4444;
     color: white;
     transform: scale(1.1);
 }

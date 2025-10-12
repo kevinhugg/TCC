@@ -121,11 +121,13 @@ service_types = [
     {'id': 4, 'nome': 'Ambiental'},
     {'id': 5, 'nome': 'Sinalização ineficiente'},
     {'id': 6, 'nome': 'fiscalização'},
+    {'id': 7, 'nome': 'Ajuda ao Pedestre'},
 ]
 
 occurrence_types = [
     {'id': 1, 'nome': 'Fiscalização ambiental'},
     {'id': 2, 'nome': 'Fiscalização de trânsito'},
+    {'id': 3, 'nome': 'Ajuda ao Pedestre'},
 ]
 
 adm = {

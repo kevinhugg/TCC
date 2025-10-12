@@ -30,7 +30,7 @@
             {% endfor %}
             </ul>
         {% endif %}
-    {% endwith %} <!--Isso aqui é para ver os flashes (tipo um alert)-->
+    {% endwith %}
 
 <form action="{{ url_for('enviar_codigo') }}" method="POST">
             <input class="campo" placeholder="Email" type="email" name="email" required>

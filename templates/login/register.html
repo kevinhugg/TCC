@@ -18,7 +18,7 @@
 
         <div class="forms">
             <div class="inputs">
-                <h1>Novo Agente</h1>
+                <h1>Novo Administrador</h1>
                 <h2>REGISTRO</h2>
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -29,8 +29,7 @@
                         </div>
                     {% endif %}
                 {% endwith %}
-                <!-- Formulário para criar um novo agente -->
-                <form action="/create_agent" method="post">
+                <form action="/create_adm" method="post">
                     <input name="nome" class="campo" placeholder="Nome Completo" type="text" required>
                     <br><br>
                     <input name="email" class="campo" placeholder="Email" type="email" required>

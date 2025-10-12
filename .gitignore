@@ -1,2 +1,3 @@
 firebase_config.json
 .venv/
+.env

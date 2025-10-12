@@ -1,12 +1,7 @@
-/*
-  INFO: This file has been refactored to use global styles and variables.
-  It contains styles specific to the Configurations page.
-*/
-
 .page-content {
     padding: 5rem;
-    margin-left: 4em; /* Corresponds to sidebar width */
-    margin-top: 10px; /* Corresponds to header height */
+    margin-left: 4em; 
+    margin-top: 10px; 
     transition: margin-left 0.3s ease;
 }
 
@@ -16,7 +11,7 @@
     padding: 2rem;
     border: 1px solid var(--border-color);
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    max-width: 60rem; /* Constrain width for better readability */
+    max-width: 60rem; 
     margin: 0 auto;
 }
 
@@ -49,10 +44,9 @@
 .icon-config {
     width: 2.5rem;
     height: 2.5rem;
-    filter: var(--primary-text-color) /* Quick way to theme icons, might need adjustment */;
+    filter: var(--icon-filter);
 }
 
-/* Specific wrapper for the dark mode toggle if needed, otherwise can be removed */
 .dark-mode-wrapper {
     display: flex;
     align-items: center;
@@ -60,6 +54,52 @@
 
 .dark-mode-item {
     justify-content: space-between;
+}
+
+.theme-buttons-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.theme-buttons-wrapper > div {
+    display: flex;
+    gap: 10px;
+}
+
+.theme-btn-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--card-bg-color);
+}
+
+.theme-btn-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.theme-btn-container.active {
+    border: 2px solid var(--accent-color);
+    background-color: var(--accent-color);
+}
+
+.theme-btn-label {
+    margin: 5px 0 0 0;
+    font-size: 12px;
+    color: var(--primary-text-color);
+    text-align: center;
+    font-weight: 500;
+}
+
+.high-contrast-mode .theme-btn-container.active .theme-btn-label {
+    color: var(--button-text-color) !important;
+    font-weight: bold;
 }
 
 @media (max-width: 768px) {
@@ -73,4 +113,51 @@
         align-items: flex-start;
         gap: 1rem;
     }
+}
+
+.sobre-nos-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.sobre-nos-card {
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    margin-bottom: 2rem;
+}
+
+.equipe-member-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.equipe-member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.config-item {
+    transition: all 0.3s ease;
+}
+
+.config-item:hover {
+    background-color: var(--hover-color) !important;
+    transform: translateY(-2px);
+}
+
+#logout-btn:hover {
+    background-color: rgba(244, 67, 54, 0.1) !important;
+}
+
+.modal-content {
+    background-color: var(--card-bg-color) !important;
+    border: 1px solid var(--border-color);
+}
+
+.modal-header, .modal-footer {
+    border-color: var(--border-color) !important;
 }

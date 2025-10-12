@@ -13,17 +13,13 @@ import base64
 dash.register_page(__name__, path='/pageVehicles', name='Veículos')
 
 def save_temp_file(contents, filename):
-    """Salva a imagem recebida do Dash como arquivo temporário e retorna Path"""
     header, encoded = contents.split(',', 1)
     data = base64.b64decode(encoded)
-
     temp_dir = Path("temp_uploads")
-    temp_dir.mkdir(exists_ok=True)
-
+    temp_dir.mkdir(exist_ok=True)
     temp_path = temp_dir / filename
     with open(temp_path, 'wb') as f:
         f.write(data)
-
     return temp_path
 
 def create_damage_graph(damages_data):
@@ -54,7 +50,6 @@ def create_damage_graph(damages_data):
         hoverlabel=dict(font_size=12)
     )
     return fig
-
 
 def layout():
     viaturas = fb.get_all_vehicles()
@@ -200,7 +195,6 @@ def layout():
                 html.Div([html.A(id='add_vehicle', children='Adicionar Veículo', className='btn add_vehicle')], className='btn_add'),
             ], className='btn_rem_add'),
         ], className='vehicles card'),
-
         html.Div([
             html.H4('Viaturas danificadas'),
             html.Div([
@@ -215,10 +209,8 @@ def layout():
             ], className='table_ocu'),
             html.Div([html.A(id='link-pdf', children='Gerar PDF', target="_blank", className='btn-pdf')], style={'margin': '1rem 10rem'})
         ], className="Ranking_Ocu card"),
-
         html.Div([html.H4('Danos por Data'), graph_bar_horizontal], className='graph-line card'),
     ], className='page-content')
-
 
 @callback(
     Output('list-vehicles', 'children'),
@@ -261,7 +253,6 @@ def update_list(search_value, selected_part, pathname):
         for v in filtered_vehicles
     ]
 
-
 @callback(
     Output('table_dam_body', 'children'),
     [Input('status-filter', 'value'), Input('damage-part-filter', 'value')]
@@ -274,20 +265,15 @@ def filter_damage_reports(status, selected_part):
         damVehicles = [o for o in damVehicles if o.get('parte') == selected_part]
     return [html.Tr([html.Td(item.get('viatura')), html.Td(item.get('parte')), html.Td(item.get('descricao')), html.Td(item.get('status')), html.Td(item.get('data'))]) for item in damVehicles]
 
-
 @callback(Output('link-pdf', 'href'), Input('status-filter', 'value'))
 def atualizar_link_pdf(filtro_status):
     return f"/pdf_viaturas_Danificadas?status={filtro_status}"
-
 
 @callback(Output('damage-graph', 'figure'), Input('theme-mode', 'data'))
 def update_graph_theme(theme):
     damVehicles = fb.get_all_damage_reports()
     fig = create_damage_graph(damVehicles)
-    # The original theme update logic was incomplete, so we just return the figure.
-    # A more complete implementation would modify the figure's layout based on the theme.
     return fig
-
 
 @callback(
     Output('modal-add-vehicle', 'style'),
@@ -304,7 +290,6 @@ def toggle_vehicle_modal(add_clicks, cancel_clicks, cancel_x_clicks, style):
         else:
             return {'display': 'flex'}
     return style
-
 
 @callback(
     Output('url-vehicles', 'pathname'),
@@ -329,10 +314,8 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
     image_path = ''
     if contents and filename:
         try:
-            # Chama a função de upload do Firebase diretamente
             image_url, image_path = fb.upload_image_to_storage(contents, filename)
             if not image_url:
-                # Se o upload falhar por algum motivo, usa a imagem padrão e reporta o erro
                 return dash.no_update, dash.no_update, "Erro no upload da imagem."
         except Exception as e:
             return dash.no_update, dash.no_update, f"Erro no upload da imagem: {e}"
@@ -347,7 +330,6 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
 
     return '/dashboard/pageVehicles', {'display': 'none'}, ""
 
-
 @callback(
     Output('image-preview-container', 'style'),
     Output('image-preview', 'src'),
@@ -359,7 +341,6 @@ def handle_add_vehicle(n_clicks, placa, numero, tipo, contents, filename):
 def update_image_preview(contents, remove_clicks):
     triggered_id = ctx.triggered_id
 
-    # Estilo padrão para o dcc.Upload
     upload_style = {
         'width': '100%', 'height': '100px', 'lineHeight': '100px',
         'borderWidth': '2px', 'borderStyle': 'dashed',
@@ -391,7 +372,6 @@ def toggle_delete_all_modal(n_open, n_cancel, n_cancel_x, style):
         else:
             return {'display': 'flex'}
     return style
-
 
 @callback(
     Output('url-vehicles', 'pathname', allow_duplicate=True),

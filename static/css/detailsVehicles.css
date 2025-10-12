@@ -64,16 +64,16 @@
 .vehicle-image-container {
     position: relative;
     cursor: pointer;
-    width: 200px; /* Ajustado para um tamanho bom para a foto do agente */
+    width: 200px;
     height: 200px;
-    border-radius: 25%; /* Para corresponder à borda da imagem */
-    overflow: hidden; /* Garante que a sobreposição não saia dos cantos arredondados */
+    border-radius: 25%;
+    overflow: hidden;
 }
 
 .vehicle-image-container {
     width: 340px;
     height: 150px;
-    border-radius: 8px; /* Mantém o estilo original da viatura */
+    border-radius: 8px;
 }
 
 .img {
@@ -136,7 +136,6 @@
     margin-top: 1rem;
 }
 
-/* Table Styles */
 .filter-month {
     width: 200px;
     margin: 0 auto 1rem auto;
@@ -177,6 +176,7 @@
 .table-ocurrences tr {
     color: var(--primary-text-color);
 }
+
 .table-ocurrences tr:nth-child(even) {
     background-color: var(--bg-color);
     color: var(--secondary-text-color);
@@ -189,13 +189,9 @@
 
 .btn_view {
     text-decoration: none;
-}
-
-.btn_view {
     color: var(--accent-color-hover);
 }
 
-/* Buttons */
 .btn_rem_add {
     display: flex;
     justify-content: center;
@@ -228,7 +224,6 @@
     color: #ef4444;
 }
 
-/* Agents Section */
 .agents-grid {
     display: flex;
     gap: 1.5rem;
@@ -337,7 +332,6 @@
     color: white;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .page-content {
         margin-left: 0;

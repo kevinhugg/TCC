@@ -321,7 +321,6 @@
     color: white !important;
 }
 
-/* Custom styles for the agent image upload area */
 .upload-area-agent {
     display: flex;
     flex-direction: column;
@@ -348,3 +347,4 @@
     font-weight: bold;
     text-decoration: none;
 }
+

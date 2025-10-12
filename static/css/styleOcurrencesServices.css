@@ -77,14 +77,14 @@
 
 .search-controls {
     display: flex;
-    justify-content: center; /* Centraliza os controles */
+    justify-content: center; 
     flex-grow: 1;
     gap: 5rem;
 }
 
 .input-search {
-    width: 50%; /* Largura da barra de pesquisa */
-    height: 1.5rem; /* Aumenta a altura */
+    width: 50%;
+    height: 1.5rem;
     padding: 0.5rem 1rem;
     font-size: 1rem;
     border: 1px solid var(--border-color);
@@ -96,7 +96,7 @@
 }
 
 .filter-month {
-    width: 10.5rem; /* Largura do dropdown */
+    width: 10.5rem; 
 }
 
 .filter-month .Select-control {
@@ -584,4 +584,64 @@ a, .dash-link {
 
 .service-type-item:hover {
     background-color: var(--table-row-hover-bg-color);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.modal-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.modal-button.submit {
+    background-color: #007bff;
+    color: white;
+}
+
+.modal-button.cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.modal-button:hover {
+    opacity: 0.8;
+}
+
+.search-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn_add {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn_add:hover {
+    background-color: #218838;
 }

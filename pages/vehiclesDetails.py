@@ -1,18 +1,16 @@
 import dash
 from dash import html, dcc, Input, Output, callback, State, ctx
-from datetime import datetime
 import dash_bootstrap_components as dbc
 import time
 import firebase_functions as fb
 
 dash.register_page(__name__, path_template='/veiculo/<numero>', name=None)
 
-
 def layout(numero=None):
     dados = fb.get_vehicle_by_number(numero)
     partes_avariadas = fb.get_damage_reports_by_vehicle(numero)
 
-    if not (dados):
+    if not dados:
         return html.H3("Veículo não encontrado")
 
     return html.Div([
@@ -26,7 +24,6 @@ def layout(numero=None):
 
         html.Div([
             html.H3(f"Viatura - {dados['numero']}", className='tittle'),
-
             html.Div([
                 html.Div(
                     id='vehicle-image-container',
@@ -39,7 +36,7 @@ def layout(numero=None):
                             title='Clique para alterar a imagem'
                         ),
                         html.Div(className='image-overlay', children=[
-                            html.I(className='fas fa-camera'),  # Ícone de câmera
+                            html.I(className='fas fa-camera'),
                             html.Span('Mudar foto')
                         ])
                     ]
@@ -56,20 +53,17 @@ def layout(numero=None):
                         className='det loc_av'),
                 ], className='texts-det'),
             ], className='details-items'),
-
             html.Div([
                 html.Div([
                     html.A(id='rem_vehicle_btn', children='Remover Veículo', className='btn rem_vehicle')
                 ], className='btn_rem'),
             ], className='btn_rem_add'),
-
         ], className='details-container card'),
 
-        # Modal para fazer upload de uma nova imagem para a viatura
         html.Div(
             id='modal-upload-image',
             className='modal',
-            style={'display': 'none'},  # Inicia escondido
+            style={'display': 'none'},
             children=[
                 html.Div(
                     className='modal-content',
@@ -168,9 +162,7 @@ def layout(numero=None):
                     style={'height': '40px', 'width': '200px'}
                 ),
             ], className='dropdown-title'),
-
             html.Div(id='agents-grid', className='agents-grid'),
-
         ], className='agents-container card'),
 
         html.Div(
@@ -234,9 +226,7 @@ def layout(numero=None):
                 )
             ]
         ),
-
-    ], className='page-content'),
-
+    ], className='page-content')
 
 @callback(
     Output('history-table-div', 'children'),
@@ -244,11 +234,9 @@ def layout(numero=None):
      Input('vehicle-store', 'data')]
 )
 def update_history_table(filter_value, numero):
-    # 1. Fetch all data
     occurrences_and_services = fb.get_occurrences_and_services_by_vehicle(numero)
     damages = fb.get_damage_reports_by_vehicle(numero)
 
-    # 2. Combine and standardize data
     combined_history = []
     for item in occurrences_and_services:
         combined_history.append({
@@ -266,14 +254,12 @@ def update_history_table(filter_value, numero):
             'tipo': 'Dano',
             'descricao': f"{item.get('parte')}: {item.get('descricao')}",
             'class': 'dano',
-            'id': item.get('id'),  # Use the new ID from the firebase function
-            'path': 'damage'  # Set the path for the link
+            'id': item.get('id'),
+            'path': 'damage'
         })
 
-    # 3. Sort by date (newest first)
     combined_history.sort(key=lambda x: x['data'], reverse=True)
 
-    # 4. Filter data
     if filter_value != 'todos':
         filtered_history = [item for item in combined_history if item['class'] == filter_value]
     else:
@@ -282,7 +268,6 @@ def update_history_table(filter_value, numero):
     if not filtered_history:
         return html.P("Nenhum registro encontrado para este filtro.")
 
-    # 5. Create table
     table_header = [
         html.Thead(html.Tr([html.Th("Data"), html.Th("Tipo"), html.Th("Descrição")]))
     ]
@@ -298,7 +283,6 @@ def update_history_table(filter_value, numero):
     ])]
 
     return html.Table(table_header + table_body, className='table-ocurrences')
-
 
 @callback(
     [Output('agent-list', 'options'),
@@ -327,7 +311,6 @@ def update_agent_list(filter_value, modal_style, current_value):
     else:
         return options, None
 
-
 @callback(
     [Output('agent-modal', 'style', allow_duplicate=True),
      Output('agent-assignment-trigger', 'data')],
@@ -346,10 +329,8 @@ def assign_agent(n_clicks, agent_id, vehicle_numero, shift, role, trigger):
             'turno': shift,
             'funcao': role
         })
-        print(f"Assigned agent {agent_id} to vehicle {vehicle_numero} with shift {shift} and role {role}")
         return {'display': 'none'}, trigger + 1
     return dash.no_update, dash.no_update
-
 
 @callback(
     Output('agents-grid', 'children'),
@@ -363,20 +344,16 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
 
     all_agents_for_vehicle = fb.get_agents_by_vehicle(vehicle_numero)
 
-    # 2. Filtra por turno
     if selected_shift and selected_shift != 'todos':
         agents_to_display = [a for a in all_agents_for_vehicle if a.get('turno') == selected_shift]
     else:
         agents_to_display = all_agents_for_vehicle
 
-    # 3. Separa motorista e outros agentes
     motorista = next((a for a in agents_to_display if a.get('funcao', '').lower() == 'motorista'), None)
     another_agents = [a for a in agents_to_display if a != motorista]
 
-    # 4. Cria os componentes HTML
     children = []
 
-    # Box do Motorista
     if motorista:
         children.append(
             html.Div([
@@ -404,7 +381,6 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
             )
         )
 
-    # Boxes dos outros agentes
     for agente in another_agents:
         children.append(
             html.Div([
@@ -422,7 +398,6 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
             ], className='agent-box')
         )
 
-    # Box para adicionar agente
     children.append(
         html.Button(
             "+",
@@ -434,7 +409,6 @@ def update_agents_by_shift(selected_shift, trigger, vehicle_numero):
     )
 
     return children
-
 
 @callback(
     Output('agent-modal', 'style'),
@@ -449,7 +423,6 @@ def toggle_modal(add_agent_clicks, close_clicks):
 
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    # Só abre se n_clicks > 0
     if trigger_id == 'add-agent-button' and add_agent_clicks and add_agent_clicks > 0:
         return {'display': 'block'}
 
@@ -465,7 +438,6 @@ def toggle_modal(add_agent_clicks, close_clicks):
     prevent_initial_call=True
 )
 def remove_agent(n_clicks, trigger):
-    # Encontra qual botão foi clicado
     ctx = dash.callback_context
     if not ctx.triggered or not any(n_clicks):
         return dash.no_update
@@ -481,11 +453,9 @@ def remove_agent(n_clicks, trigger):
             'funcao': '',
             'turno': ''
         })
-        print(f"Removed agent {agent_id_to_remove} from their vehicle.")
         return trigger + 1
 
     return dash.no_update
-
 
 @callback(
     Output("modal-delete-vehicle", "style"),
@@ -503,7 +473,6 @@ def toggle_delete_modal(n_open, n_cancel, n_cancel_x, style):
             return {'display': 'flex'}
     return style
 
-
 @callback(
     Output('url-redirect', 'pathname', allow_duplicate=True),
     Input('confirm-delete-vehicle', 'n_clicks'),
@@ -515,7 +484,6 @@ def delete_vehicle(n_clicks, numero):
         if fb.delete_vehicle(numero):
             return '/dashboard/pageVehicles'
     return dash.no_update
-
 
 @callback(
     Output('image-preview-container-details', 'style'),
@@ -546,7 +514,6 @@ def update_image_preview_details(contents, remove_clicks, filename):
 
     return {'display': 'none'}, '', upload_style, ''
 
-# Callback para processar o upload da imagem, atualizar o banco de dados e notificar o usuário.
 @callback(
     [Output('update-confirm', 'displayed'),
      Output('update-confirm', 'message'),
@@ -558,25 +525,18 @@ def update_image_preview_details(contents, remove_clicks, filename):
     prevent_initial_call=True
 )
 def update_vehicle_image(n_clicks, contents, filename, numero):
-    # Estilo para fechar o modal
     hide_modal_style = {'display': 'none'}
 
     if not contents:
-        # Retorna 3 valores: (confirm dialog, mensagem, sem fechar o modal)
         return True, "Por favor, selecione uma imagem para fazer o upload.", dash.no_update
 
-    # 1. Fazer upload da nova imagem para o Firebase Storage
     new_image_url = fb.replace_vehicle_image(numero, contents, filename)
 
     if new_image_url:
-        # Se sucesso, notifica e fecha o modal. A atualização da página será feita por outro callback.
         return True, "Imagem atualizada com sucesso!", hide_modal_style
     else:
-        # Se falhar, notifica e fecha o modal
         return True, "Falha ao atualizar as informações do veículo no banco de dados.", hide_modal_style
 
-
-# Callback para abrir e fechar o modal de upload de imagem.
 @callback(
     Output('modal-upload-image', 'style'),
     [Input('vehicle-image-container', 'n_clicks'),
@@ -586,20 +546,15 @@ def update_vehicle_image(n_clicks, contents, filename, numero):
     prevent_initial_call=True,
 )
 def toggle_upload_modal(n_open, n_cancel, n_cancel_x, style):
-    # Usa o callback_context para saber qual input foi acionado
     triggered_id = ctx.triggered_id
 
-    # Se o usuário clicou na imagem da viatura, abre o modal
     if triggered_id == 'vehicle-image-container':
         return {'display': 'flex'}
 
-    # Se o usuário clicou em um dos botões de fechar, esconde o modal
     if triggered_id in ['cancel-upload-button', 'cancel-upload-x']:
         return {'display': 'none'}
 
-    # Se nenhum gatilho relevante foi acionado, não faz nada
     return style
-
 
 @callback(
     Output("vehicle-image-clickable", "src"),
@@ -612,6 +567,4 @@ def atualizar_imagem(submit_n_clicks, numero):
         return dash.no_update
 
     viatura = fb.get_vehicle_by_number(numero)
-
-    # adiciona timestamp p/ forçar atualização
     return f"{viatura['imagem']}?v={int(time.time())}"

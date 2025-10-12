@@ -1,15 +1,29 @@
 import dash
-from dash import html, dcc, Input, Output, callback, State
-import unicodedata
-from collections import Counter
-import plotly.express as px
+from dash import html, dcc, Input, Output, callback, State, no_update
+from dash.exceptions import PreventUpdate
+import sys
+import os
 from datetime import datetime
-import pandas as pd
+import unicodedata
 
-from data.dados import Ocur_Vehicles, agents, service_types
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(current_dir)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
+try:
+    from firebase_functions import (
+        get_all_services_with_agents, 
+        get_all_agents, 
+        get_all_service_types, 
+        add_service_type,
+        delete_service
+    )
+    FIREBASE_AVAILABLE = True
+except ImportError:
+    FIREBASE_AVAILABLE = False
 
 dash.register_page(__name__, path='/services', name='Serviços', className='pg-at')
-
 
 def remover_acentos(txt):
     if not txt:
@@ -19,19 +33,23 @@ def remover_acentos(txt):
         if unicodedata.category(c) != 'Mn'
     ).lower()
 
-
 def get_page_data():
-    """Fetches and prepares all data needed for the services page from data/dados.py."""
     try:
-        servicos = [o for o in Ocur_Vehicles if o.get('class') == 'serviço']
+        servicos = get_all_services_with_agents()
         return servicos
-    except Exception as e:
-        print(f"Error fetching data for services page from dados.py: {e}")
+    except Exception:
         return []
 
+def get_service_types_data():
+    try:
+        service_types = get_all_service_types()
+        return service_types
+    except Exception:
+        return []
 
 def layout():
     servicos = get_page_data()
+    service_types = get_service_types_data()
 
     service_types_table = html.Table([
         html.Thead(html.Tr([html.Th("Tipos de Serviço")])),
@@ -49,7 +67,7 @@ def layout():
     if servicos:
         meses_unicos = sorted(list(set(
             datetime.strptime(o['data'], "%Y-%m-%d").strftime("%Y/%m")
-            for o in servicos
+            for o in servicos if o.get('data')
         )))
         dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}] + [
             {'label': datetime.strptime(m, "%Y/%m").strftime("%B/%Y").capitalize(), 'value': m}
@@ -58,11 +76,25 @@ def layout():
     else:
         dropdown_options = [{'label': 'Todos os meses', 'value': 'todos'}]
 
+    confirm_remove_services = dcc.ConfirmDialog(
+        id='confirm-remove-services',
+        message='Deseja realmente apagar os serviços selecionados?',
+    )
+
     return html.Div([
         html.Link(rel='stylesheet', href='/static/css/styleOcurrencesServices.css'),
         html.Link(rel='stylesheet', href='/static/css/modal.css'),
         dcc.Store(id='filtro-search-serv'),
         dcc.Location(id='url-services', refresh=True),
+        dcc.Store(id='selected-services', data=[]),
+        dcc.Store(id='edit-mode-services', data=False),
+        dcc.Interval(
+            id='interval-services',
+            interval=10*1000,
+            n_intervals=0
+        ),
+
+        confirm_remove_services,
 
         html.Div([
             html.Div([
@@ -83,17 +115,18 @@ def layout():
 
                 html.Table([
                     html.Thead(html.Tr([
-                        html.Th('Data'), html.Th('Responsável'), html.Th('Tipo'),
-                        html.Th('Veículo'), html.Th('Ações')
+                        html.Th('Selecionar', id='select-header-services', style={'display': 'none'}),
+                        html.Th('Data'), 
+                        html.Th('Responsável'), 
+                        html.Th('Tipo'),
+                        html.Th('Veículo'), 
+                        html.Th('Ações')
                     ])),
                     html.Tbody(id='serv-table')
                 ], className='serv-table'),
 
                 html.Div([
-                    html.Div(
-                        html.A(id='rem_serv', children='Apagar Serviços', className='rem_serv btn-danger'),
-                        className='btn'
-                    ),
+                    html.Button(id='rem_serv', children='Apagar Serviços', className='rem_serv btn-danger'),
                     html.Div(
                         html.A(id='pdf_serv_gerar', children='Gerar PDF', target="_blank", className='btn-pdf'),
                         className='btn-pdf-serv'
@@ -121,27 +154,34 @@ def layout():
                 ])
             ])
         ]),
+        
+        dcc.Store(id='service-types-store', data=service_types),
     ], className='page-content')
-
 
 @callback(
     Output('serv-table', 'children'),
     Output('pdf_serv_gerar', 'href'),
+    Output('select-header-services', 'style'),
     Input('input-search-serv', 'value'),
     Input('filter-month-serv', 'value'),
+    Input('edit-mode-services', 'data'),
+    Input('url-services', 'pathname'),
+    Input('interval-services', 'n_intervals')
 )
-def update_list(search_value, mes):
+def update_list(search_value, mes, edit_mode, pathname, n_intervals):
     servicos = get_page_data()
+    agents_data = get_all_agents()
 
     if not servicos:
+        col_span = 6 if edit_mode else 5
         return html.Tr([
-            html.Td("Nenhum serviço encontrado.", colSpan=5, className='not-found'),
-        ]), "/gerar_pdf_servicos_gerais"
+            html.Td("Nenhum serviço encontrado.", colSpan=col_span, className='not-found'),
+        ]), "/gerar_pdf_servicos_gerais", {'display': 'none'}
 
     if mes != 'todos':
         filtered = [
             item for item in servicos
-            if datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
+            if item.get('data') and datetime.strptime(item['data'], '%Y-%m-%d').strftime('%Y/%m') == mes
         ]
     else:
         filtered = servicos
@@ -150,28 +190,38 @@ def update_list(search_value, mes):
         search_term = remover_acentos(search_value)
         filtered_by_search = []
         for item in filtered:
-            responsavel_info = next((agent for agent in agents if agent.get('viatura_mes') == item.get('viatura')),
-                                    None)
-            responsavel_nome_item = remover_acentos(responsavel_info['nome']) if responsavel_info else ''
-
-            if search_term in remover_acentos(item.get('viatura', '')) or \
-                    search_term in remover_acentos(item.get('nomenclatura', '')) or \
-                    search_term in responsavel_nome_item:
+            if (search_term in remover_acentos(item.get('viatura', '')) or 
+                search_term in remover_acentos(item.get('nomenclatura', '')) or 
+                search_term in remover_acentos(item.get('tipo', '')) or
+                search_term in remover_acentos(item.get('responsavel', ''))):
                 filtered_by_search.append(item)
         filtered = filtered_by_search
 
     if not filtered:
+        col_span = 6 if edit_mode else 5
         return html.Tr([
-            html.Td("Serviço não encontrado!", colSpan=5, className='not-found'),
-        ]), f"/gerar_pdf_servicos_gerais?filtro={search_value}&mes={mes}"
+            html.Td("Serviço não encontrado!", colSpan=col_span, className='not-found'),
+        ]), f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes or ''}", {'display': 'none'}
 
     rows = []
     for item in filtered:
-        agent_info = next((a for a in agents if a.get('viatura_mes') == item.get('viatura')), None)
-        agent_name = agent_info['nome'] if agent_info else 'N/A'
-        agent_id = agent_info['id'] if agent_info else ''
+        agent_id = item.get('responsavel_id', '')
+        agent_name = item.get('responsavel', 'N/A')
+        viatura = item.get('viatura', 'N/A')
+        service_id = item.get('id', '')
 
-        row = html.Tr([
+        checkbox_cell = html.Td(
+            dcc.Checklist(
+                id={'type': 'service-select', 'index': service_id},
+                options=[{'label': '', 'value': service_id}],
+                value=[],
+                className='service-checkbox'
+            ),
+            style={'display': 'table-cell' if edit_mode else 'none'}
+        )
+
+        cells = [
+            checkbox_cell,
             html.Td(item.get('data', 'N/A')),
             html.Td(
                 dcc.Link(agent_name, href=f"/dashboard/agent/{agent_id}") if agent_id else agent_name,
@@ -179,26 +229,88 @@ def update_list(search_value, mes):
             ),
             html.Td(item.get('nomenclatura', 'N/A')),
             html.Td(
-                dcc.Link(item.get('viatura', 'N/A'), href=f"/dashboard/veiculo/{item.get('viatura', '')}"),
+                dcc.Link(viatura, href=f"/dashboard/veiculo/{viatura}"),
                 className='btn_veh'
             ),
             html.Td(
-                dcc.Link('Ver Mais', href=f"/dashboard/services/{item.get('id', '')}"), className='btn_view'
+                dcc.Link('Ver Mais', href=f"/dashboard/services/{item.get('id', '')}", className='btn_view')
             ),
-        ])
+        ]
+
+        row = html.Tr(cells)
         rows.append(row)
 
-    pdf_link = f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes}"
-    return rows, pdf_link
+    pdf_link = f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes or ''}"
+    header_style = {'display': 'table-cell' if edit_mode else 'none'}
+    
+    return rows, pdf_link, header_style
 
+@callback(
+    Output('selected-services', 'data', allow_duplicate=True),
+    Input({'type': 'service-select', 'index': dash.ALL}, 'value'),
+    prevent_initial_call=True
+)
+def update_selected_services(selected_values):
+    selected = [item for sublist in selected_values for item in sublist if sublist]
+    return selected
+
+@callback(
+    Output('edit-mode-services', 'data'),
+    Output('rem_serv', 'children'),
+    Input('rem_serv', 'n_clicks'),
+    State('edit-mode-services', 'data')
+)
+def toggle_edit_mode(n_clicks, current_mode):
+    if n_clicks:
+        new_mode = not current_mode
+        button_text = "Confirmar Remoção" if new_mode else "Apagar Serviços"
+        return new_mode, button_text
+    return current_mode, "Apagar Serviços"
+
+@callback(
+    Output('confirm-remove-services', 'displayed'),
+    Input('rem_serv', 'n_clicks'),
+    State('selected-services', 'data'),
+    State('edit-mode-services', 'data')
+)
+def confirm_removal(n_clicks, selected_services, edit_mode):
+    if n_clicks and edit_mode and selected_services:
+        return True
+    elif n_clicks and edit_mode and not selected_services:
+        return False
+    return False
+
+@callback(
+    Output('url-services', 'pathname', allow_duplicate=True),
+    Output('selected-services', 'data', allow_duplicate=True),
+    Output('edit-mode-services', 'data', allow_duplicate=True),
+    Input('confirm-remove-services', 'submit_n_clicks'),
+    State('selected-services', 'data'),
+    prevent_initial_call=True
+)
+def remove_selected_services(submit_clicks, selected_services):
+    if submit_clicks and selected_services:
+        success_count = 0
+        error_count = 0
+        
+        for service_id in selected_services:
+            if FIREBASE_AVAILABLE:
+                success, message = delete_service(service_id)
+                if success:
+                    success_count += 1
+                else:
+                    error_count += 1
+        
+        return '/dashboard/services', [], False
+    
+    return no_update, no_update, no_update
 
 @callback(
     Output('modal-add-service-type', 'style'),
     [Input('add-service-type-btn', 'n_clicks'),
      Input('modal-add-service-type-close', 'n_clicks'),
      Input('save-new-service-type-btn', 'n_clicks')],
-    [State('modal-add-service-type', 'style')],
-    prevent_initial_call=True,
+    [State('modal-add-service-type', 'style')]
 )
 def toggle_modal(n1, n2, n3, style):
     ctx = dash.callback_context
@@ -215,53 +327,18 @@ def toggle_modal(n1, n2, n3, style):
 
     return style
 
-
 @callback(
-    Output('url-services', 'pathname'),
+    Output('url-services', 'pathname', allow_duplicate=True),
+    Output('input-new-service-type-name', 'value'),
     Input('save-new-service-type-btn', 'n_clicks'),
     State('input-new-service-type-name', 'value'),
     prevent_initial_call=True
 )
 def save_new_service_type(n_clicks, name):
     if n_clicks and name:
-        # Atualiza a lista em memória
-        new_id = max(st['id'] for st in service_types) + 1 if service_types else 1
-        service_types.append({'id': new_id, 'nome': name})
+        success, message = add_service_type({'nome': name})
+        
+        if success:
+            return '/dashboard/services', ''
 
-        # Lê o conteúdo do arquivo
-        with open('data/dados.py', 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-
-        # Encontra a linha onde a lista service_types é definida
-        start_index = -1
-        for i, line in enumerate(lines):
-            if 'service_types = [' in line:
-                start_index = i
-                break
-
-        if start_index != -1:
-            # Encontra o final da lista
-            end_index = start_index
-            bracket_count = 0
-            for i, line in enumerate(lines[start_index:]):
-                bracket_count += line.count('[')
-                bracket_count -= line.count(']')
-                if bracket_count == 0:
-                    end_index = start_index + i
-                    break
-
-            # Recria a string da lista
-            new_list_str = "service_types = [\n"
-            for st in service_types:
-                new_list_str += f"    {{'id': {st['id']}, 'nome': '{st['nome']}'}},\n"
-            new_list_str += "]\n"
-
-            # Substitui a lista antiga pela nova
-            lines = lines[:start_index] + [new_list_str] + lines[end_index + 1:]
-
-            # Escreve o conteúdo de volta no arquivo
-            with open('data/dados.py', 'w', encoding='utf-8') as f:
-                f.writelines(lines)
-
-        return '/dashboard/services'
-    return dash.no_update
+    return dash.no_update, dash.no_update

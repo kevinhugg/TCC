@@ -1,4 +1,3 @@
-/* Light/Dark Mode Theme Variables */
 .light-mode {
     --bg-color: #f8f9fa;
     --sidebar-bg-color: #111827;
@@ -14,6 +13,7 @@
     --button-bg-color: #3b82f6;
     --button-text-color: #ffffff;
     --button-hover-bg-color: #2563eb;
+    --icon-filter: invert(0%);
 }
 
 .dark-mode {
@@ -31,11 +31,84 @@
     --button-bg-color: #60a5fa;
     --button-text-color: #1e293b;
     --button-hover-bg-color: #93c5fd;
+    --icon-filter: invert(100%);
 }
 
-/* Base Styles */
+.high-contrast-mode {
+    --bg-color: #000000;
+    --sidebar-bg-color: #000000;
+    --card-bg-color: #000000;
+    --primary-text-color: #ffffff;
+    --secondary-text-color: #ffff00;
+    --border-color: #ffff00;
+    --accent-color: #ffff00;
+    --accent-color-hover: #ffffff;
+    --table-header-bg-color: #000000;
+    --table-row-hover-bg-color: #333333;
+    --table-row-hover-text-color: #ffff00;
+    --button-bg-color: #ffff00;
+    --button-text-color: #000000;
+    --button-hover-bg-color: #ffffff;
+    --icon-filter: invert(100%) sepia(100%) saturate(10000%) hue-rotate(0deg);
+}
+
+.high-contrast-mode .card {
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+.high-contrast-mode .sidebar-link {
+    border: 1px solid var(--border-color);
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.high-contrast-mode .header {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.high-contrast-mode button,
+.high-contrast-mode .btn {
+    border: 2px solid var(--border-color);
+    font-weight: bold;
+}
+
+.high-contrast-mode table {
+    border: 2px solid var(--border-color);
+}
+
+.high-contrast-mode th {
+    background-color: var(--accent-color) !important;
+    color: var(--button-text-color) !important;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+}
+
+.high-contrast-mode td {
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+}
+
+.high-contrast-mode {
+    font-weight: 500;
+}
+
+.high-contrast-mode .config-list-container {
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+.high-contrast-mode .config-item {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.high-contrast-mode .sobre-nos-card {
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
 html {
-  background-color: var(--bg-color);
+    background-color: var(--bg-color);
 }
 
 body {
@@ -161,17 +234,18 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: var(--accent-color-hover);
-  border-radius: 8px;
-}
-::-webkit-scrollbar-track {
-  background-color: var(--sidebar-bg-color);
+    width: 8px;
 }
 
-/* Add agent card styles */
+::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color-hover);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--sidebar-bg-color);
+}
+
 .add-driver-box, .add-agent-box {
     cursor: pointer;
     display: flex;
@@ -193,27 +267,142 @@ body {
     margin: 0;
 }
 
-/* Responsive adjustments */
-@media (max-width: 992px) {
-    /* On medium screens, the sidebar is already at its compact size,
-       so no changes are needed for the sidebar itself.
-       We just need to adjust the content margin if needed. */
-}
-
 @media (max-width: 768px) {
     .sidebar {
-        display: none; /* Hide sidebar completely on small screens */
+        display: none;
     }
+    
     .header {
         width: 100%;
         left: 0;
-        justify-content: center; /* Center header content */
+        justify-content: center;
     }
+    
     .page-content {
         margin-left: 0;
         padding: 1rem;
     }
+    
     .profile-pic {
         margin: 0;
     }
+}
+
+body.high-contrast-mode {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode .page-content {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode .config-list-container {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 3px solid #ffff00 !important;
+}
+
+body.high-contrast-mode .config-item {
+    border-bottom: 2px solid #ffff00 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode p,
+body.high-contrast-mode h2 {
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+body.high-contrast-mode,
+#theme.high-contrast-mode {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode .page-content,
+#theme.high-contrast-mode .page-content {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode .config-list-container,
+#theme.high-contrast-mode .config-list-container {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 3px solid #ffff00 !important;
+    box-shadow: 0 0 10px #ffff00 !important;
+}
+
+body.high-contrast-mode .config-item,
+#theme.high-contrast-mode .config-item {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #ffff00 !important;
+}
+
+body.high-contrast-mode p,
+body.high-contrast-mode h1,
+body.high-contrast-mode h2,
+body.high-contrast-mode h3,
+#theme.high-contrast-mode p,
+#theme.high-contrast-mode h1,
+#theme.high-contrast-mode h2,
+#theme.high-contrast-mode h3 {
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+body.high-contrast-mode .icon-config,
+#theme.high-contrast-mode .icon-config {
+    filter: invert(100%) brightness(100) !important;
+}
+
+.profile-pic {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-color);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.profile-pic:hover {
+    transform: scale(1.1);
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 10px 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 60px;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-pic {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #f3f4f6;
+}
+
+.profile-pic {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
 }
