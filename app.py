@@ -59,7 +59,6 @@ dash_app = create_dash_app(app)
 def pagina_login():
     return render_template('login/index.html')
 
-
 # Rota para o forms de login
 @app.route('/login', methods=['POST'])
 def info_login():
