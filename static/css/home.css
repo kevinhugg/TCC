@@ -7,8 +7,7 @@
         "GraphIndOcu GraphIndOcu GraphTimeRes GraphTimeRes"
         "GraphMap GraphMap Ranking_Ocu NgbhInfos";
     gap: 1.5rem;
-    height: 100%;
-    margin: 10px auto;
+    margin: 0 auto;
 }
 
 .vehicles { grid-area: vehicles; }

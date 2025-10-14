@@ -16,7 +16,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 def sign_in_user(email, password):
-    api_key = os.environ.get("FIREBASE_WEB_API_KEY")
+    api_key = os.environ.get("FIREBASE_WEB_API_KEY") or "AIzaSyB2KdylIBY_pAPmJe6ps-DFN5PZZf0GQKA"
     if not api_key:
         return None, "Erro de configuração do servidor."
 

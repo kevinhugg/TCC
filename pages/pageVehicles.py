@@ -267,7 +267,7 @@ def filter_damage_reports(status, selected_part):
 
 @callback(Output('link-pdf', 'href'), Input('status-filter', 'value'))
 def atualizar_link_pdf(filtro_status):
-    return f"/pdf_viaturas_Danificadas?status={filtro_status}"
+    return f"/gerar_pdf_viaturas_danificadas?status={filtro_status}"
 
 @callback(Output('damage-graph', 'figure'), Input('theme-mode', 'data'))
 def update_graph_theme(theme):

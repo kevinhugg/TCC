@@ -210,12 +210,13 @@ body {
 }
 
 .page-content {
-    background-color: var(--bg-color);
+    background-color: var(--bg-color) !important;
     padding: 2rem;
     margin-left: 8em;
     margin-top: 60px;
     transition: margin-left 0.3s ease;
-    max-width: 100rem;
+    width: calc(100% - 8em);
+    min-height: calc(100vh - 60px);
 }
 
 .card {
