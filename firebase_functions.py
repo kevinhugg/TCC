@@ -6,6 +6,9 @@ from urllib.parse import quote
 import requests
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 if not firebase_admin._apps:
     cred = credentials.Certificate("firebase_config.json")
@@ -16,7 +19,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 def sign_in_user(email, password):
-    api_key = os.environ.get("FIREBASE_WEB_API_KEY") or "AIzaSyB2KdylIBY_pAPmJe6ps-DFN5PZZf0GQKA"
+    api_key = os.getenv("FIREBASE_WEB_API_KEY")
     if not api_key:
         return None, "Erro de configuração do servidor."
 
