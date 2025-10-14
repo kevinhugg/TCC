@@ -86,7 +86,6 @@ def info_login():
             flash(error_message, 'danger')
             return redirect(url_for('pagina_login'))
 
-
 # =============================================
 # ROTAS ADMINISTRATIVAS COM FIREBASE AUTH
 # =============================================
