@@ -53,7 +53,6 @@ mail = Mail(app)
 # integração do Dash
 dash_app = create_dash_app(app)
 
-
 # Rota para index.html (sua página de login)
 @app.route('/')
 def pagina_login():
