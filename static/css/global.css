@@ -406,3 +406,47 @@ body.high-contrast-mode .icon-config,
     from { opacity: 0.5; }
     to { opacity: 1; }
 }
+
+html, body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: var(--bg-color) !important;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-color);
+    z-index: -1000;
+    pointer-events: none;
+}
+
+#body {
+    background-color: var(--bg-color) !important;
+    min-height: 100vh;
+    position: relative;
+}
+
+.page-content {
+    position: relative;
+    z-index: 1;
+}
+
+.sidebar {
+    background-color: var(--sidebar-bg-color) !important;
+    position: fixed;
+    z-index: 1000;
+}
+
+.header {
+    background-color: var(--bg-color) !important;
+    position: fixed;
+    z-index: 1000;
+}

@@ -41,7 +41,10 @@ def create_dash_app(flask_app):
 
             html.Div(dash.page_container, id='page-content', className='page-content')
         ])
-    ], id='body', className='parent')
+    ], id='body', className='parent', style={  
+    'background-color': 'var(--bg-color)',
+    'minHeight': '100vh'
+    })
 
     @dash_app.callback(
         Output('header-profile-pic', 'src'),

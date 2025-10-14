@@ -59,7 +59,7 @@ def layout():
     ], className='serv-table')
 
     service_types_container = html.Div([
-        html.H4("Tipos de Serviço"),
+        html.H4("Tipos de Serviço", style={'color': 'var(--primary-text-color)'}),
         html.Div(service_types_table, className='service-types-list'),
         html.A('Adicionar Tipo', id='add-service-type-btn', className='btn_add')
     ], className='graph_tipes card')
@@ -99,7 +99,7 @@ def layout():
         html.Div([
             html.Div([
                 html.Div([
-                    html.H3('Serviços Gerais', className='title'),
+                    html.H3('Serviços Gerais', className='title', style={'color': 'var(--primary-text-color)'}),
                     html.Div([
                         dcc.Input(id='input-search-serv', type='text', placeholder='Buscar por tipo ou viatura...',
                                   className='input-search'),
@@ -175,7 +175,7 @@ def update_list(search_value, mes, edit_mode, pathname, n_intervals):
     if not servicos:
         col_span = 6 if edit_mode else 5
         return html.Tr([
-            html.Td("Nenhum serviço encontrado.", colSpan=col_span, className='not-found'),
+            html.Td("Nenhum serviço encontrado.", colSpan=col_span, className='not-found', style={'color': 'var(--secondary-text-color)'}),
         ]), "/gerar_pdf_servicos_gerais", {'display': 'none'}
 
     if mes != 'todos':
@@ -200,7 +200,7 @@ def update_list(search_value, mes, edit_mode, pathname, n_intervals):
     if not filtered:
         col_span = 6 if edit_mode else 5
         return html.Tr([
-            html.Td("Serviço não encontrado!", colSpan=col_span, className='not-found'),
+            html.Td("Serviço não encontrado!", colSpan=col_span, className='not-found', style={'color': 'var(--secondary-text-color)'}),
         ]), f"/gerar_pdf_servicos_gerais?filtro={search_value or ''}&mes={mes or ''}", {'display': 'none'}
 
     rows = []
@@ -222,18 +222,18 @@ def update_list(search_value, mes, edit_mode, pathname, n_intervals):
 
         cells = [
             checkbox_cell,
-            html.Td(item.get('data', 'N/A')),
+            html.Td(item.get('data', 'N/A'), style={'color': 'var(--primary-text-color)'}),
             html.Td(
-                dcc.Link(agent_name, href=f"/dashboard/agent/{agent_id}") if agent_id else agent_name,
+                dcc.Link(agent_name, href=f"/dashboard/agent/{agent_id}", style={'color': 'var(--accent-color)'}) if agent_id else html.Span(agent_name, style={'color': 'var(--primary-text-color)'}),
                 className='btn_ag'
             ),
-            html.Td(item.get('nomenclatura', 'N/A')),
+            html.Td(item.get('nomenclatura', 'N/A'), style={'color': 'var(--primary-text-color)'}),
             html.Td(
-                dcc.Link(viatura, href=f"/dashboard/veiculo/{viatura}"),
+                dcc.Link(viatura, href=f"/dashboard/veiculo/{viatura}", style={'color': 'var(--accent-color)'}),
                 className='btn_veh'
             ),
             html.Td(
-                dcc.Link('Ver Mais', href=f"/dashboard/services/{item.get('id', '')}", className='btn_view')
+                dcc.Link('Ver Mais', href=f"/dashboard/services/{item.get('id', '')}", className='btn_view', style={'color': 'var(--button-text-color)', 'backgroundColor': 'var(--button-bg-color)'})
             ),
         ]
 

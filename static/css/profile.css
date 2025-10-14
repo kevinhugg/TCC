@@ -165,7 +165,6 @@
 .profile-field {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
     transition: background-color 0.3s ease;
 }
 
@@ -204,7 +203,6 @@
 }
 
 .high-contrast-mode .profile-field {
-    border-bottom: 2px solid var(--border-color);
     font-weight: 500;
 }
 

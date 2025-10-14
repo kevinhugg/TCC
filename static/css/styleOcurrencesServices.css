@@ -134,9 +134,11 @@
     border-collapse: collapse;
     overflow: scroll;
 }
-
-.title{
-    color: #295678;
+.title {
+    color: var(--primary-text-color);
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .oco-table th, .oco-table td,

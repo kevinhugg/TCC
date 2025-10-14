@@ -190,26 +190,37 @@ def layout():
     Input('dropdown-year', 'value')
 )
 def update_static_graphs(theme, time_range):
-    is_dark = theme == 'dark'
-
-    if is_dark:
-        plot_bg_color = '#1f293b'
-        paper_bg_color = '#1f293b'
-        font_color = '#f9fafb'
+    # CORES DINÂMICAS BASEADAS NO TEMA
+    if theme == 'dark':
+        plot_bg_color = '#1f2937'
+        paper_bg_color = '#1f2937'
+        font_color = '#ffffff'
+        grid_color = '#374151'
         marker_color = '#60a5fa'
         table_header_bg = '#374151'
         table_row_even = '#1f2937'
         table_row_odd = '#111827'
-    else:
+        map_style = 'carto-darkmatter'
+    elif theme == 'high-contrast':
+        plot_bg_color = '#000000'
+        paper_bg_color = '#000000'
+        font_color = '#ffffff'
+        grid_color = '#ffff00'
+        marker_color = '#ffff00'
+        table_header_bg = '#000000'
+        table_row_even = '#000000'
+        table_row_odd = '#333333'
+        map_style = 'carto-darkmatter'
+    else:  # light mode
         plot_bg_color = '#ffffff'
         paper_bg_color = '#ffffff'
         font_color = '#1f2937'
+        grid_color = '#e5e7eb'
         marker_color = '#3b82f6'
-        table_header_bg = '#f3f4f6'
+        table_header_bg = '#f9fafb'
         table_row_even = '#ffffff'
-        table_row_odd = '#f9fafb'
-
-    map_style = 'carto-darkmatter' if is_dark else 'open-street-map'
+        table_row_odd = '#f8f9fa'
+        map_style = 'open-street-map'
 
     def get_occurrence_location_data():
         try:
@@ -222,12 +233,16 @@ def update_static_graphs(theme, time_range):
                          occurrence.get('endereco') or 
                          'Não especificado')
                 
-                latitude = occurrence.get('latitude') or occurrence.get('lat')
-                longitude = occurrence.get('longitude') or occurrence.get('lon') or occurrence.get('lng')
+                latitude = (occurrence.get('latitude') or 
+                           occurrence.get('lat') or 
+                           occurrence.get('localizacao_lat'))
+                longitude = (occurrence.get('longitude') or 
+                            occurrence.get('lon') or 
+                            occurrence.get('lng') or 
+                            occurrence.get('localizacao_lng'))
                 
                 if not latitude or not longitude:
                     endereco_completo = occurrence.get('endereco_completo') or occurrence.get('localizacao') or ''
-                    
                     if ',' in endereco_completo:
                         try:
                             coords = [coord.strip() for coord in endereco_completo.split(',')]
@@ -240,37 +255,13 @@ def update_static_graphs(theme, time_range):
                             pass
                 
                 if not latitude or not longitude:
-                    bairro_coords = {
-                        'Centro': (-23.5505, -46.6333),
-                        'Jardins': (-23.5614, -46.6550),
-                        'Vila Madalena': (-23.5475, -46.6911),
-                        'Pinheiros': (-23.5675, -46.7033),
-                        'Moema': (-23.6042, -46.6661),
-                        'Itaim Bibi': (-23.5811, -46.6772),
-                        'Morumbi': (-23.6227, -46.6994),
-                        'Perdizes': (-23.5361, -46.6819),
-                        'Lapa': (-23.5211, -46.7086),
-                        'Santo Amaro': (-23.6508, -46.7208),
-                        'Bela Vista': (-23.5575, -46.6469),
-                        'Consolação': (-23.5536, -46.6597),
-                        'República': (-23.5450, -46.6439),
-                        'Santa Cecília': (-23.5358, -46.6542),
-                        'Barra Funda': (-23.5261, -46.6672),
-                        'Cambuci': (-23.5703, -46.6219),
-                        'Ipiranga': (-23.5881, -46.6092),
-                        'Butantã': (-23.5719, -46.7083)
-                    }
-                    
-                    if bairro in bairro_coords:
-                        latitude, longitude = bairro_coords[bairro]
-                    else:
-                        latitude, longitude = -23.5505, -46.6333
+                    latitude, longitude = -23.511, -46.876
                 
                 try:
                     latitude = float(latitude)
                     longitude = float(longitude)
                 except (ValueError, TypeError):
-                    latitude, longitude = -23.5505, -46.6333
+                    latitude, longitude = -23.511, -46.876
                 
                 if bairro and bairro != 'Não especificado':
                     if bairro not in neighborhood_data:
@@ -324,36 +315,43 @@ def update_static_graphs(theme, time_range):
                 y=occurrence_counts, 
                 marker=dict(color=marker_color),
                 hovertemplate='<b>%{x}</b><br>Ocorrências: %{y}<extra></extra>'
-            )],
-            layout=go.Layout(
-                plot_bgcolor=plot_bg_color,
-                paper_bgcolor=paper_bg_color,
-                title={"text": "Ocorrências por Mês", "x": 0.5, "xanchor": "center", "font": {"color": font_color, "size": 14}},
-                margin=dict(t=40, b=30, l=40, r=20),
-                font_color=font_color,
-                xaxis=dict(
-                    title='Mês',
-                    title_font=dict(color=font_color),
-                    tickfont=dict(color=font_color)
-                ),
-                yaxis=dict(
-                    title='Número de Ocorrências',
-                    title_font=dict(color=font_color),
-                    tickfont=dict(color=font_color)
-                )
+            )]
+        )
+        
+        graphOcurrence.update_layout(
+            plot_bgcolor=plot_bg_color,
+            paper_bgcolor=paper_bg_color,
+            title={"text": "Ocorrências por Mês", "x": 0.5, "xanchor": "center", "font": {"color": font_color, "size": 14}},
+            margin=dict(t=40, b=30, l=40, r=20),
+            font=dict(color=font_color),
+            xaxis=dict(
+                title='Mês',
+                title_font=dict(color=font_color),
+                tickfont=dict(color=font_color),
+                gridcolor=grid_color,
+                linecolor=grid_color,
+                zerolinecolor=grid_color
+            ),
+            yaxis=dict(
+                title='Número de Ocorrências',
+                title_font=dict(color=font_color),
+                tickfont=dict(color=font_color),
+                gridcolor=grid_color,
+                linecolor=grid_color,
+                zerolinecolor=grid_color
             )
         )
         
     except Exception as e:
         graphOcurrence = go.Figure(
-            data=[go.Bar(x=['Jan', 'Fev', 'Mar', 'Abr', 'Mai'], y=[10, 20, 30, 15, 45], marker=dict(color=marker_color))],
-            layout=go.Layout(
-                plot_bgcolor=plot_bg_color,
-                paper_bgcolor=paper_bg_color,
-                title={"text": "Ocorrências por Mês", "x": 0.5, "xanchor": "center", "font": {"color": font_color}},
-                margin=dict(t=40, b=30, l=30, r=30),
-                font_color=font_color
-            )
+            data=[go.Bar(x=['Jan', 'Fev', 'Mar', 'Abr', 'Mai'], y=[10, 20, 30, 15, 45], marker=dict(color=marker_color))]
+        )
+        graphOcurrence.update_layout(
+            plot_bgcolor=plot_bg_color,
+            paper_bgcolor=paper_bg_color,
+            title={"text": "Ocorrências por Mês", "x": 0.5, "xanchor": "center", "font": {"color": font_color}},
+            margin=dict(t=40, b=30, l=30, r=30),
+            font=dict(color=font_color)
         )
 
     try:
@@ -378,9 +376,10 @@ def update_static_graphs(theme, time_range):
                 lon=[b['longitude'] for b in top_neighborhoods],
                 mode='markers',
                 marker=dict(
-                    size=[min(b['quantidade'] * 2, 40) for b in top_neighborhoods],
+                    size=[min(b['quantidade'] * 3 + 8, 25) for b in top_neighborhoods],
                     color=marker_color,
-                    opacity=0.7
+                    opacity=0.8,
+                    sizemode='diameter'
                 ),
                 text=[f"{b['bairro']}<br>Ocorrências: {b['quantidade']}" for b in top_neighborhoods],
                 hovertemplate='<b>%{text}</b><extra></extra>',
@@ -390,25 +389,29 @@ def update_static_graphs(theme, time_range):
             GraphMapOcurrence.update_layout(
                 mapbox=dict(
                     style=map_style,
-                    center=dict(lat=-23.5505, lon=-46.6333),
-                    zoom=10
+                    center=dict(lat=-23.511, lon=-46.876),
+                    zoom=12, 
                 ),
                 margin=dict(t=0, b=0, l=0, r=0),
                 height=300,
-                showlegend=False
+                showlegend=False,
+                paper_bgcolor=paper_bg_color,
+                plot_bgcolor=plot_bg_color,
+                font=dict(color=font_color)
             )
             
         else:
             GraphMapOcurrence = go.Figure()
-            GraphMapOcurrence.add_trace(go.Scattermapbox(
-                lat=[-23.5505], lon=[-46.6333],
-                mode='markers',
-                marker=dict(size=10, color=marker_color)
-            ))
             GraphMapOcurrence.update_layout(
-                mapbox=dict(style=map_style, center=dict(lat=-23.5505, lon=-46.6333), zoom=10),
+                mapbox=dict(
+                    style=map_style, 
+                    center=dict(lat=-23.511, lon=-46.876), 
+                    zoom=12
+                ),
                 margin=dict(t=0, b=0, l=0, r=0),
                 height=300,
+                paper_bgcolor=paper_bg_color,
+                plot_bgcolor=plot_bg_color,
                 annotations=[dict(
                     text="Nenhum dado de localização disponível",
                     x=0.5, y=0.5, xref="paper", yref="paper",
@@ -419,15 +422,22 @@ def update_static_graphs(theme, time_range):
             
     except Exception as e:
         GraphMapOcurrence = go.Figure()
-        GraphMapOcurrence.add_trace(go.Scattermapbox(
-            lat=[-23.5505], lon=[-46.6333],
-            mode='markers',
-            marker=dict(size=10, color=marker_color)
-        ))
         GraphMapOcurrence.update_layout(
-            mapbox=dict(style=map_style, center=dict(lat=-23.5505, lon=-46.6333), zoom=10),
+            mapbox=dict(
+                style=map_style, 
+                center=dict(lat=-23.511, lon=-46.876), 
+                zoom=12
+            ),
             margin=dict(t=0, b=0, l=0, r=0),
-            height=300
+            height=300,
+            paper_bgcolor=paper_bg_color,
+            plot_bgcolor=plot_bg_color,
+            annotations=[dict(
+                text="Erro ao carregar mapa",
+                x=0.5, y=0.5, xref="paper", yref="paper",
+                showarrow=False,
+                font=dict(color=font_color, size=12)
+            )]
         )
 
     try:
@@ -449,13 +459,17 @@ def update_static_graphs(theme, time_range):
                             'backgroundColor': table_header_bg,
                             'padding': '10px',
                             'textAlign': 'left',
-                            'fontWeight': 'bold'
+                            'fontWeight': 'bold',
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         }),
                         html.Th('Quantidade', style={
                             'backgroundColor': table_header_bg,
                             'padding': '10px',
                             'textAlign': 'center',
-                            'fontWeight': 'bold'
+                            'fontWeight': 'bold',
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         })
                     ])
                 ]),
@@ -463,22 +477,27 @@ def update_static_graphs(theme, time_range):
                     html.Tr([
                         html.Td(tipo, style={
                             'padding': '8px 10px',
-                            'borderBottom': '1px solid #e5e7eb',
-                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd
+                            'borderBottom': f'1px solid {grid_color}',
+                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd,
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         }),
                         html.Td(quantidade, style={
                             'padding': '8px 10px',
-                            'borderBottom': '1px solid #e5e7eb',
+                            'borderBottom': f'1px solid {grid_color}',
                             'textAlign': 'center',
                             'fontWeight': 'bold',
-                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd
+                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd,
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         })
                     ]) for i, (tipo, quantidade) in enumerate(most_common_types)
                 ])
             ], className='table_ocu', style={
                 'width': '100%',
                 'borderCollapse': 'collapse',
-                'fontSize': '14px'
+                'fontSize': '14px',
+                'border': f'1px solid {grid_color}'
             })
         else:
             most_common_table = html.Div(
@@ -518,13 +537,17 @@ def update_static_graphs(theme, time_range):
                             'backgroundColor': table_header_bg,
                             'padding': '10px',
                             'textAlign': 'left',
-                            'fontWeight': 'bold'
+                            'fontWeight': 'bold',
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         }),
                         html.Th('Ocorrências', style={
                             'backgroundColor': table_header_bg,
                             'padding': '10px',
                             'textAlign': 'center',
-                            'fontWeight': 'bold'
+                            'fontWeight': 'bold',
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         })
                     ])
                 ]),
@@ -532,22 +555,27 @@ def update_static_graphs(theme, time_range):
                     html.Tr([
                         html.Td(bairro['bairro'], style={
                             'padding': '8px 10px',
-                            'borderBottom': '1px solid #e5e7eb',
-                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd
+                            'borderBottom': f'1px solid {grid_color}',
+                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd,
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         }),
                         html.Td(bairro['quantidade'], style={
                             'padding': '8px 10px',
-                            'borderBottom': '1px solid #e5e7eb',
+                            'borderBottom': f'1px solid {grid_color}',
                             'textAlign': 'center',
                             'fontWeight': 'bold',
-                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd
+                            'backgroundColor': table_row_even if i % 2 == 0 else table_row_odd,
+                            'color': font_color,
+                            'border': f'1px solid {grid_color}'
                         })
                     ]) for i, bairro in enumerate(neighborhoods_data)
                 ])
             ], className='table_neighborhoods', style={
                 'width': '100%',
                 'borderCollapse': 'collapse',
-                'fontSize': '14px'
+                'fontSize': '14px',
+                'border': f'1px solid {grid_color}'
             })
         else:
             neighborhoods_table = html.Div(
@@ -611,42 +639,46 @@ def update_static_graphs(theme, time_range):
             month_names.append(month_date.strftime('%b/%y'))
             service_counts.append(monthly_services.get(month, 0))
         
-        services_color = '#10B981' if is_dark else '#059669'
-        
         services_fig = go.Figure(
             data=[go.Bar(
                 x=month_names, 
                 y=service_counts, 
-                marker=dict(color=services_color),
+                marker=dict(color=marker_color),
                 hovertemplate='<b>%{x}</b><br>Serviços: %{y}<extra></extra>',
                 name='Serviços'
-            )],
-            layout=go.Layout(
-                margin=dict(t=40, b=30, l=40, r=20),
-                plot_bgcolor=plot_bg_color,
-                paper_bgcolor=paper_bg_color,
-                title={
-                    'text': f'Serviços por Mês ({ "Últimos 12 meses" if time_range == "12months" else "Últimos 6 meses" })', 
-                    'x': 0.5, 
-                    "xanchor": "center", 
-                    "font": {"color": font_color, "size": 14}
-                },
-                font_color=font_color,
-                xaxis=dict(
-                    title='Mês',
-                    title_font=dict(color=font_color),
-                    tickfont=dict(color=font_color)
-                ),
-                yaxis=dict(
-                    title='Número de Serviços',
-                    title_font=dict(color=font_color),
-                    tickfont=dict(color=font_color)
-                )
+            )]
+        )
+        
+        services_fig.update_layout(
+            margin=dict(t=40, b=30, l=40, r=20),
+            plot_bgcolor=plot_bg_color,
+            paper_bgcolor=paper_bg_color,
+            title={
+                'text': f'Serviços por Mês ({ "Últimos 12 meses" if time_range == "12months" else "Últimos 6 meses" })', 
+                'x': 0.5, 
+                "xanchor": "center", 
+                "font": {"color": font_color, "size": 14}
+            },
+            font=dict(color=font_color),
+            xaxis=dict(
+                title='Mês',
+                title_font=dict(color=font_color),
+                tickfont=dict(color=font_color),
+                gridcolor=grid_color,
+                linecolor=grid_color,
+                zerolinecolor=grid_color
+            ),
+            yaxis=dict(
+                title='Número de Serviços',
+                title_font=dict(color=font_color),
+                tickfont=dict(color=font_color),
+                gridcolor=grid_color,
+                linecolor=grid_color,
+                zerolinecolor=grid_color
             )
         )
         
     except Exception as e:
-        services_color = '#10B981' if is_dark else '#059669'
         fallback_months = ['Jan/24', 'Fev/24', 'Mar/24', 'Abr/24', 'Mai/24', 'Jun/24']
         fallback_data = [15, 22, 18, 25, 30, 28]
         
@@ -655,14 +687,14 @@ def update_static_graphs(theme, time_range):
             fallback_data = [10, 15, 12, 18, 22, 20, 25, 28, 30, 25, 22, 20]
         
         services_fig = go.Figure(
-            data=[go.Bar(x=fallback_months, y=fallback_data, marker=dict(color=services_color))],
-            layout=go.Layout(
-                margin=dict(t=40, b=30, l=40, r=20),
-                plot_bgcolor=plot_bg_color,
-                paper_bgcolor=paper_bg_color,
-                title={'text': f'Serviços por Mês ({ "Últimos 12 meses" if time_range == "12months" else "Últimos 6 meses" })', 'x': 0.5, "xanchor": "center", "font": {"color": font_color}},
-                font_color=font_color
-            )
+            data=[go.Bar(x=fallback_months, y=fallback_data, marker=dict(color=marker_color))]
+        )
+        services_fig.update_layout(
+            margin=dict(t=40, b=30, l=40, r=20),
+            plot_bgcolor=plot_bg_color,
+            paper_bgcolor=paper_bg_color,
+            title={'text': f'Serviços por Mês ({ "Últimos 12 meses" if time_range == "12months" else "Últimos 6 meses" })', 'x': 0.5, "xanchor": "center", "font": {"color": font_color}},
+            font=dict(color=font_color)
         )
 
     return graphOcurrence, GraphMapOcurrence, most_common_table, neighborhoods_table, services_fig
@@ -689,22 +721,22 @@ def att_flux(n, theme):
                 status = "Nenhum ativo"
                 icon_class = 'fas fa-times-circle'
                 cor = '#ef4444'
-                flux_text = '0% da equipe'
+                flux_text = '0%'
             elif percentage_logged >= 60:
                 status = "Alta atividade"
                 icon_class = 'fas fa-arrow-up'
                 cor = '#10B981'
-                flux_text = f'{percentage_logged:.0f}% da equipe'
+                flux_text = f'{percentage_logged:.0f}%'
             elif percentage_logged >= 30:
                 status = "Atividade normal"
                 icon_class = 'fas fa-check-circle'
                 cor = '#3b82f6'
-                flux_text = f'{percentage_logged:.0f}% da equipe'
+                flux_text = f'{percentage_logged:.0f}%'
             else:
                 status = "Baixa atividade"
                 icon_class = 'fas fa-arrow-down'
                 cor = '#f59e0b'
-                flux_text = f'{percentage_logged:.0f}% da equipe'
+                flux_text = f'{percentage_logged:.0f}%'
                 
         else:
             status = "Sem dados"

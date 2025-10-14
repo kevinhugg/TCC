@@ -152,12 +152,12 @@ def load_profile_data(n, trigger, user_data):
             html.H3(current_adm.get('nome', 'Nome não informado'), className='profile-title'),
             
             html.Div([
-                html.Span("📧 Email: ", className='profile-label'),
+                html.Span("Email: ", className='profile-label'),
                 html.Span(current_adm.get('email', 'Não informado'), className='profile-value')
             ], className='profile-field'),
             
             html.Div([
-                html.Span("🔢 Matrícula: ", className='profile-label'),
+                html.Span("Matrícula: ", className='profile-label'),
                 html.Span(current_adm.get('matricula', 'Não informada'), className='profile-value')
             ], className='profile-field'),
         ]
@@ -165,7 +165,7 @@ def load_profile_data(n, trigger, user_data):
         if current_adm.get('cargo_at'):
             profile_elements.append(
                 html.Div([
-                    html.Span("💼 Cargo: ", className='profile-label'),
+                    html.Span("Cargo: ", className='profile-label'),
                     html.Span(current_adm['cargo_at'], className='profile-value')
                 ], className='profile-field')
             )
@@ -173,7 +173,7 @@ def load_profile_data(n, trigger, user_data):
         if current_adm.get('func_mes'):
             profile_elements.append(
                 html.Div([
-                    html.Span("⚙️ Função: ", className='profile-label'),
+                    html.Span("Função: ", className='profile-label'),
                     html.Span(current_adm['func_mes'], className='profile-value')
                 ], className='profile-field')
             )

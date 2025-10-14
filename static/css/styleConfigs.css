@@ -21,11 +21,11 @@
     justify-content: left;
     gap: 2rem;
     padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
 }
 
 .config-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .txt-icon {
