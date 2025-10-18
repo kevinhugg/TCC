@@ -180,7 +180,6 @@ def create_adm_route():
             flash('Ocorreu um erro ao criar o usuário.', 'danger')
             return redirect(url_for('pagina_registro'))
 
-        # Se o usuário foi criado com sucesso no Auth, adicione os dados ao Firestore
         adm_data = {
             "nome": nome,
             "email": email,
@@ -193,16 +192,17 @@ def create_adm_route():
             "data_criacao": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
-        # Adiciona o agente no Firestore
-        from firebase_functions import add_agent
-        agent_id = add_agent(adm_data)
 
-        if agent_id:
-            flash('Agente registrado com sucesso!', 'success')
+        from firebase_functions import add_adm
+        adm_id = add_adm(adm_data)
+
+        if adm_id:
+            flash('Administrador registrado com sucesso!', 'success')
             return redirect(url_for('pagina_registro'))
         else:
-            flash('Erro ao salvar os dados do agente no banco de dados.', 'danger')
+            flash('Erro ao salvar os dados do admin no banco de dados.', 'danger')
             return redirect(url_for('pagina_registro'))
+
 
 # Rota para logout administrativo
 @app.route('/admin_logout')
