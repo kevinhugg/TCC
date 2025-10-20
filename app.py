@@ -193,8 +193,8 @@ def create_adm_route():
         }
 
 
-        from firebase_functions import add_adm
-        adm_id = add_adm(adm_data)
+        from firebase_functions import create_admin_user
+        adm_id = create_admin_user(adm_data)
 
         if adm_id:
             flash('Administrador registrado com sucesso!', 'success')
