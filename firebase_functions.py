@@ -23,6 +23,7 @@ def sign_in_user(email, password):
     if not api_key:
         return None, "Erro de configuração do servidor."
 
+
     rest_api_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
 
     payload = {
