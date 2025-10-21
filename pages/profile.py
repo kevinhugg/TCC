@@ -9,8 +9,8 @@ dash.register_page(__name__, path='/profile', name='Perfil', className='pg-at')
 def get_profile_image_url(adm_data):
     foto_path = adm_data.get('foto_agnt', '')
     
-    if not foto_path or foto_path == '/static/assets/img/persona.png':
-        return '/static/assets/img/persona.png'
+    if not foto_path :
+        return '/static/assets/img/personaa.png'
     
     if foto_path.startswith('http'):
         return foto_path
@@ -27,7 +27,7 @@ def get_profile_image_url(adm_data):
         
         return firebase_url
     
-    return '/static/assets/img/persona.png'
+    return '/static/assets/img/personaa.png'
 
 def layout():
     return html.Div([
@@ -37,7 +37,7 @@ def layout():
         dcc.Store(id='user-store', data={'user_id': session.get('user_id', '')}),
         dcc.Store(id='current-adm-data'),
         dcc.Store(id='profile-trigger', data=0),
-        dcc.Store(id='user-profile-image', data={'profile_image': '/static/assets/img/persona.png'}),
+        dcc.Store(id='user-profile-image', data={'profile_image': '/static/assets/img/personaa.png'}),
         dcc.ConfirmDialog(id='update-confirm-profile', message=''),
         dcc.Interval(id='interval-component', interval=1000, n_intervals=0, max_intervals=1),
         
@@ -100,7 +100,7 @@ def layout():
                             html.Img(
                                 id='profile-image',
                                 className='profile-pic-large',
-                                src='/static/assets/img/persona.png'
+                                src='/static/assets/img/personaa.png'
                             )
                         ]
                     ),
@@ -129,7 +129,7 @@ def load_profile_data(n, trigger, user_data):
             return [
                 html.H3("Usuário não identificado", className='profile-title'),
                 html.P("Faça login novamente", className='profile-text'),
-            ], '/static/assets/img/persona.png', {}, {'profile_image': '/static/assets/img/persona.png'}
+            ], '/static/assets/img/personaa.png', {}, {'profile_image': '/static/assets/img/personaa.png'}
         
         adms = fb.get_all_adms()
         
@@ -144,7 +144,7 @@ def load_profile_data(n, trigger, user_data):
             return [
                 html.H3("Administrador não encontrado", className='profile-title'),
                 html.P("Contate o suporte do sistema", className='profile-text'),
-            ], '/static/assets/img/persona.png', {}, {'profile_image': '/static/assets/img/persona.png'}
+            ], '/static/assets/img/personaa.png', {}, {'profile_image': '/static/assets/img/personaa.png'}
 
         image_url = get_profile_image_url(current_adm)
         
@@ -187,7 +187,7 @@ def load_profile_data(n, trigger, user_data):
         return [
             html.H3("Erro ao carregar", className='profile-title'),
             html.P("Tente recarregar a página", className='profile-text'),
-        ], '/static/assets/img/persona.png', {}, {'profile_image': '/static/assets/img/persona.png'}
+        ], '/static/assets/img/personaa.png', {}, {'profile_image': '/static/assets/img/personaa.png'}
 
 @callback(
     Output('upload-modal', 'style'),

@@ -22,19 +22,7 @@ DEFAULT_FONT['DejaVuSans'] = '/caminho/para/DejaVuSans.ttf'
 
 from dash_app import create_dash_app
 
-from firebase_functions import (
-    sign_in_user, create_user, add_adm,
-    get_all_vehicles, get_vehicle_by_number, get_damage_reports_by_vehicle,
-    get_all_damage_reports, get_damage_by_id, delete_damage_by_id,
-    get_agent_by_doc_id, get_all_agents, get_unassigned_agents,
-    get_history_by_agent, get_occurrences_and_services_by_vehicle,
-    get_all_occurrences_and_services, get_agents_by_vehicle,
-    add_occurrence_or_service, add_vehicle, delete_agent, delete_vehicle,
-    update_agent_by_doc_id, update_vehicle,
-    replace_vehicle_image, replace_agent_image, clear_agent_assignment,
-    get_occurrence_or_service_by_id,
-    reset_password, get_admin_by_uid
-)
+from firebase_functions import *
 
 from data.dados import *
 
@@ -53,10 +41,12 @@ mail = Mail(app)
 # integração do Dash
 dash_app = create_dash_app(app)
 
+
 # Rota para index.html (sua página de login)
 @app.route('/')
 def pagina_login():
     return render_template('login/index.html')
+
 
 # Rota para o forms de login
 @app.route('/login', methods=['POST'])
@@ -86,6 +76,7 @@ def info_login():
             flash(error_message, 'danger')
             return redirect(url_for('pagina_login'))
 
+
 # =============================================
 # ROTAS ADMINISTRATIVAS COM FIREBASE AUTH
 # =============================================
@@ -95,23 +86,24 @@ def info_login():
 def admin_login_page():
     return render_template('login/admin_login.html')
 
+
 # Rota para processar login administrativo com Firebase Auth
 @app.route('/admin_login', methods=['POST'])
 def admin_login():
     email = request.form.get('email')
     senha = request.form.get('senha')
-    
+
     try:
         # Tenta fazer login no Firebase Authentication
         user_data, error_message = sign_in_user(email, senha)
-        
+
         if user_data:
             # Login bem-sucedido no Authentication
             user_uid = user_data.get('localId')
-            
+
             # Verifica se este usuário é um administrador
             admin_user = get_admin_by_uid(user_uid)
-            
+
             if admin_user:
                 # É um administrador - permite acesso
                 session['admin_logged_in'] = True
@@ -128,11 +120,12 @@ def admin_login():
             # Falha no login
             flash(error_message, 'error')
             return redirect(url_for('admin_login_page'))
-            
+
     except Exception as e:
         print(f"❌ Erro no login administrativo: {e}")
         flash('Erro interno no servidor.', 'error')
         return redirect(url_for('admin_login_page'))
+
 
 # Rota para página de registro (protegida)
 @app.route('/pagina_registro')
@@ -141,8 +134,9 @@ def pagina_registro():
     if not session.get('admin_logged_in'):
         flash('Acesso negado. Faça login como administrador primeiro.', 'error')
         return redirect(url_for('admin_login_page'))
-    
+
     return render_template('login/register.html')
+
 
 # Rota para criar novo agente (protegida)
 @app.route('/create_adm', methods=['POST'])
@@ -154,7 +148,7 @@ def create_adm_route():
     if not session.get('admin_logged_in'):
         flash('Acesso negado.', 'error')
         return redirect(url_for('admin_login_page'))
-    
+
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
@@ -185,15 +179,12 @@ def create_adm_route():
             "email": email,
             "matricula": matricula,
             "uid": user.uid,
-            "cargo_at": "",
             "func_mes": "",
-            "viatura_mes": "",
-            "tipo": "agente",
+            "cargo_at": "",
+            "tipo": "admin",
             "data_criacao": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
-
-        from firebase_functions import add_adm
         adm_id = add_adm(adm_data)
 
         if adm_id:
@@ -232,68 +223,68 @@ def enviar_codigo():
 
     try:
         print(f" Tentando enviar código para: {email_destino}")
-        
+
         smtp_server = "smtp.gmail.com"
         port = 587
         sender_email = "kevinmar704@gmail.com"
-        sender_password = "xfju vcgm ylkm hzgt" 
+        sender_password = "xfju vcgm ylkm hzgt"
 
         # ✅ CORREÇÃO: Remover caracteres não-ASCII do email
         email_limpo = ''.join(char for char in email_destino if ord(char) < 128)
-        print(f"📧 Email limpo: {email_limpo}")
-        
+        print(f"Email limpo: {email_limpo}")
+
         # ✅ CORREÇÃO: Especificar encoding UTF-8 explicitamente
         mensagem = MIMEMultipart("alternative")
         mensagem["Subject"] = "Código de Recuperação de Senha - SEMURB"
         mensagem["From"] = sender_email
         mensagem["To"] = email_limpo
         mensagem["Date"] = email.utils.formatdate(localtime=True)
-        
+
         # Texto simples sem caracteres especiais
         texto = f"""
         SEMURB - Secretaria Municipal de Urbanismo
-        
+
         Seu codigo de recuperacao de senha e: {codigo}
-        
+
         Este codigo e valido por 10 minutos.
-        
+
         Se voce nao solicitou este codigo, ignore este email.
-        
+
         Atenciosamente,
         Equipe SEMURB
         """
-        
+
         # ✅ CORREÇÃO: Especificar charset UTF-8
         parte_texto = MIMEText(texto, "plain", "utf-8")
         mensagem.attach(parte_texto)
-        
+
         print(" Conectando ao servidor SMTP...")
-        
+
         # Envia o email
         servidor = smtplib.SMTP(smtp_server, port)
-        servidor.set_debuglevel(1) 
+        servidor.set_debuglevel(1)
         servidor.ehlo()
         servidor.starttls()
         servidor.ehlo()
         servidor.login(sender_email, sender_password)
-        
+
         # ✅ CORREÇÃO: Codificar a mensagem para UTF-8 antes de enviar
         mensagem_utf8 = mensagem.as_string().encode('utf-8')
         servidor.sendmail(sender_email, email_limpo, mensagem_utf8)
         servidor.quit()
-        
+
         print(" Email enviado com sucesso via SMTP!")
-        
+
         flash('Um código de recuperação foi enviado para o seu e-mail.', 'success')
         return redirect(url_for('pagina_codigo'))
-        
+
     except smtplib.SMTPException as e:
-        print(f"❌ ERRO SMTP: {e}")
+        print(f"ERRO SMTP: {e}")
         flash('Erro ao enviar e-mail. Verifique sua conexão e tente novamente.', 'danger')
         return redirect(url_for('metodoRecSenha'))
-        
+
     except Exception as e:
-        print(f"❌ ERRO GERAL: {e}")
+        print(f"ERRO GERAL: {e}")
         import traceback
         print("Traceback completo:")
         print(traceback.format_exc())
@@ -394,7 +385,8 @@ def proteger_rotas():
 def remover_acentos(txt):
     return ''.join(c for c in unicodedata.normalize('NFD', txt) if unicodedata.category(c) != 'Mn').lower()
 
-#Função genérica para gerar pdf's
+
+# Função genérica para gerar pdf's
 def gerar_pdf(template_htlm, dados, nome_arquivo):
     html_content = render_template_string(template_htlm, **dados)
     pdf_buffer = io.BytesIO()
@@ -410,6 +402,7 @@ def gerar_pdf(template_htlm, dados, nome_arquivo):
         download_name=f"{nome_arquivo}.pdf",
         mimetype='application/pdf',
     )
+
 
 @app.route(f'/gerar_pdf_<tipo_pdf>')
 def gerar_pdf_tipo_pdf(tipo_pdf):
