@@ -167,7 +167,11 @@ def layout():
                 html.Div([
                     dcc.Graph(
                         id='map-chart',
-                        config={'displayModeBar': False},
+                        config={
+                            'displayModeBar': True,
+                            'ScrollZoom': True,
+                            'displaylogo': False
+                        },
                     )
                 ]),
             ], className='GraphMap card'),
@@ -389,8 +393,8 @@ def update_static_graphs(theme, time_range):
             GraphMapOcurrence.update_layout(
                 mapbox=dict(
                     style=map_style,
-                    center=dict(lat=-23.511, lon=-46.876),
-                    zoom=12, 
+                    center=dict(lat=-23.505, lon=-46.875),
+                    zoom=13.5,
                 ),
                 margin=dict(t=0, b=0, l=0, r=0),
                 height=300,
@@ -638,17 +642,24 @@ def update_static_graphs(theme, time_range):
             month_date = datetime.strptime(month, '%Y-%m')
             month_names.append(month_date.strftime('%b/%y'))
             service_counts.append(monthly_services.get(month, 0))
-        
-        services_fig = go.Figure(
-            data=[go.Bar(
-                x=month_names, 
-                y=service_counts, 
-                marker=dict(color=marker_color),
-                hovertemplate='<b>%{x}</b><br>Serviços: %{y}<extra></extra>',
-                name='Serviços'
-            )]
-        )
-        
+
+        services_fig = go.Figure()
+
+        # Linha principal (mês atual)
+        services_fig.add_trace(go.Scatter(
+            x=month_names,
+            y=service_counts,
+            mode='lines+markers',
+            line_shape='spline',  # suaviza a linha (forma de onda)
+            line=dict(color=marker_color, width=3),
+            marker=dict(size=6, color=marker_color),
+            hovertemplate='<b>%{x}</b><br>Serviços: %{y}<extra></extra>',
+            name='Serviços'
+        ))
+
+        # Linha comparativa (exemplo de meses anteriores)
+        prev_year_counts = [max(0, y - 5) for y in service_counts]
+
         services_fig.update_layout(
             margin=dict(t=40, b=30, l=40, r=20),
             plot_bgcolor=plot_bg_color,
