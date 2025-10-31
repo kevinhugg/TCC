@@ -175,7 +175,6 @@ def layout():
                     )
                 ]),
             ], className='GraphMap card'),
-
             html.Div([
                 html.H4('Bairros com mais ocorrências'),
                 html.Div(id='neighborhoods-table'),
