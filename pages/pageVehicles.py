@@ -62,6 +62,8 @@ def layout():
             damage_counts[num_viatura] = damage_counts.get(num_viatura, 0) + 1
     for v in viaturas:
         v['damage_count'] = damage_counts.get(v.get('numero'), 0)
+        if 'status' not in v:
+            v['status'] = 'operante' if v.get('damage_count', 0) == 0 else 'avariada'
     viaturas_sorted = sorted(viaturas, key=lambda x: x.get('damage_count', 0), reverse=True)
 
     fig = create_damage_graph(damVehicles)
@@ -182,6 +184,7 @@ def layout():
             ], className='list-header'),
             html.Div(id='list-vehicles', className='list-vehicles', children=[
                 html.Div([
+                    html.Div(className=f"status-indicator {v.get('status', 'operante')}"),
                     dcc.Link(html.Img(src=v.get('imagem', '/static/assets/img/imageNot.png'), className='img-vehicle'), href=f"/dashboard/veiculo/{v.get('numero', '').upper()}"),
                     html.P(f"{v.get('placa')}", className='infoVehicle'),
                     html.P(f"{v.get('numero')}", className='infoVehicle'),
@@ -231,6 +234,8 @@ def update_list(search_value, selected_part, pathname):
             damage_counts[num_viatura] = damage_counts.get(num_viatura, 0) + 1
     for v in viaturas:
         v['damage_count'] = damage_counts.get(v.get('numero'), 0)
+        if 'status' not in v:
+            v['status'] = 'operante' if v.get('damage_count', 0) == 0 else 'avariada'
     viaturas_sorted = sorted(viaturas, key=lambda x: x.get('damage_count', 0), reverse=True)
 
     if search_value:
@@ -244,6 +249,7 @@ def update_list(search_value, selected_part, pathname):
 
     return [
         html.Div([
+            html.Div(className=f"status-indicator {v.get('status', 'operante')}"),
             dcc.Link(html.Img(src=v.get('imagem', '/static/assets/img/imageNot.png'), className='img-vehicle'), href=f"/dashboard/veiculo/{v.get('numero')}"),
             html.P(v.get('placa'), className='infoVehicle'),
             html.P(v.get('numero'), className='infoVehicle'),
