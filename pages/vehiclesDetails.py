@@ -12,6 +12,10 @@ def layout(numero=None):
 
     if not dados:
         return html.H3("Veículo não encontrado")
+    
+    status_atual = dados.get('status', 'operante')
+    if 'status' not in dados:
+        status_atual = 'avariada' if dados.get('avariada') else 'operante'
 
     return html.Div([
         html.Link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.8.1/css/all.css'),
@@ -44,10 +48,20 @@ def layout(numero=None):
                 html.Div([
                     html.P(f"Placa: {dados.get('placa', '---')}", className='det placa'),
                     html.P(f"Tipo: {dados.get('veiculo', '---')}", className='det tipo'),
-                    html.P(
-                        f"Situação: {'Avariada' if dados.get('avariada') else 'Operante'}",
-                        className='det avariada' if dados.get('avariada') else 'det operante'
-                    ),
+                    html.Div([
+                html.Label("Status:", style={'marginRight': '10px', 'fontWeight': 'bold'}),
+                dcc.Dropdown(
+                    id='status-dropdown',
+                    options=[
+                        {'label': 'Operante', 'value': 'operante'},
+                        {'label': 'Avariada', 'value': 'avariada'},
+                        {'label': 'Não-Operante', 'value': 'nao-operante'}
+                    ],
+                    value=status_atual,
+                    clearable=False,
+                    style={'width': '200px', 'display': 'inline-block'}
+                )
+            ], className='det status-container', style={'display': 'flex', 'alignItems': 'center', 'gap': '10px'}),
                     html.P(
                         f"Partes Avariadas: {', '.join(sorted(list(set(p['parte'] for p in partes_avariadas))))}" if partes_avariadas else "Partes Avariadas: Sem avarias",
                         className='det loc_av'),
@@ -568,3 +582,16 @@ def atualizar_imagem(submit_n_clicks, numero):
 
     viatura = fb.get_vehicle_by_number(numero)
     return f"{viatura['imagem']}?v={int(time.time())}"
+
+@callback(
+    Output('update-confirm', 'displayed', allow_duplicate=True),
+    Output('update-confirm', 'message', allow_duplicate=True),
+    Input('status-dropdown', 'value'),
+    State('vehicle-store', 'data'),
+    prevent_initial_call=True
+)
+def update_vehicle_status(new_status, numero):
+    if fb.update_vehicle_status(numero, new_status):
+        return True, "Status do veículo atualizado com sucesso!"
+    else:
+        return True, "Erro ao atualizar o status do veículo."

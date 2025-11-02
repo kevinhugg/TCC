@@ -400,6 +400,8 @@ def add_occurrence_or_service(agent_id, date, data):
 
 def add_vehicle(vehicle_data):
     try:
+        if 'status' not in vehicle_data:
+            vehicle_data['status'] = 'operante'
         doc_ref = db.collection('veiculos').document()
         doc_ref.set(vehicle_data)
         return doc_ref.id
@@ -1312,5 +1314,21 @@ def create_admin_user(email, password, nome, matricula):
         
         return True
         
+    except Exception as e:
+        return False
+    
+def update_vehicle_status(numero, status):
+    try:
+        docs = db.collection('veiculos').where('numero', '==', numero).limit(1).stream()
+        doc_to_update = next(docs, None)
+
+        if doc_to_update:
+            doc_to_update.reference.update({
+                'status': status,
+                'avariada': status == 'avariada'
+            })
+            return True
+        else:
+            return False
     except Exception as e:
         return False

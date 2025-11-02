@@ -339,3 +339,41 @@
     background-color: var(--table-row-hover-bg-color);
     color: var(--table-row-hover-text-color);
 }
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    left: 25px;
+    top: 40%;
+    border: 2px solid white;
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+.status-indicator.operante {
+    background-color: #22c55e; 
+}
+
+.status-indicator.nao-operante{
+    background-color: #ef4444; 
+}
+
+.status-indicator.avariada {
+    background-color: #eab308; 
+}
+
+.card-vehicles {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    align-items: center;
+    background-color: var(--sidebar-bg-color);
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 1rem;
+    text-align: center;
+    gap: 10px;
+    color: var(--primary-text-color-light);
+    position: relative; 
+}

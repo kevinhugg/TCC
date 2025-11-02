@@ -349,3 +349,33 @@
     gap: 20px;
     width: 100%;
 }
+
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-container label {
+    font-weight: bold;
+    color: var(--primary-text-color);
+    margin-bottom: 0;
+}
+
+.Select-control {
+    background-color: var(--bg-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.Select-menu-outer {
+    background-color: var(--bg-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.Select-value-label {
+    color: var(--primary-text-color) !important;
+}
+
+.Select-input input {
+    color: var(--primary-text-color) !important;
+}
