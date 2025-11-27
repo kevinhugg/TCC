@@ -10,3 +10,5 @@ Requests==2.32.5
 xhtml2pdf==0.2.15
 Pillow
 python-dotenv
+
+gunicorn
