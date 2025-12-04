@@ -365,27 +365,40 @@ def update_image_preview(contents, remove_clicks):
 
 @callback(
     Output("modal-delete-all-vehicles", "style"),
+    Output('url-vehicles', 'pathname', allow_duplicate=True),
     [Input("rem_all_vehicles", "n_clicks"),
      Input("cancel-delete-all-vehicles", "n_clicks"),
-     Input("cancel-delete-all-vehicles-x", "n_clicks")],
+     Input("cancel-delete-all-vehicles-x", "n_clicks"),
+     Input("confirm-delete-all-vehicles", "n_clicks")],
     [State("modal-delete-all-vehicles", "style")],
     prevent_initial_call=True,
 )
-def toggle_delete_all_modal(n_open, n_cancel, n_cancel_x, style):
-    if n_open or n_cancel or n_cancel_x:
+def handle_delete_all_modal(rem_clicks, cancel_clicks, cancel_x_clicks, confirm_clicks, style):
+    ctx = dash.callback_context
+    
+    if not ctx.triggered:
+        return dash.no_update, dash.no_update
+    
+    triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    if triggered_id in ['rem_all_vehicles', 'cancel-delete-all-vehicles', 'cancel-delete-all-vehicles-x']:
         if style and style.get('display') == 'flex':
-            return {'display': 'none'}
+            return {'display': 'none'}, dash.no_update
         else:
-            return {'display': 'flex'}
-    return style
-
-@callback(
-    Output('url-vehicles', 'pathname', allow_duplicate=True),
-    Input('confirm-delete-all-vehicles', 'n_clicks'),
-    prevent_initial_call=True
-)
-def delete_all_vehicles(n_clicks):
-    if n_clicks:
-        if fb.delete_all_vehicles():
-            return '/dashboard/pageVehicles'
-    return dash.no_update
+            return {'display': 'flex'}, dash.no_update
+    
+    elif triggered_id == 'confirm-delete-all-vehicles':
+        try:
+            success, message = fb.delete_all_vehicles()
+            
+            if success:
+                return {'display': 'none'}, '/dashboard/pageVehicles'
+            else:
+                print(f"Erro: {message}")
+                return dash.no_update, dash.no_update
+                
+        except Exception as e:
+            print(f"Erro ao deletar veículos: {e}")
+            return dash.no_update, dash.no_update
+    
+    return dash.no_update, dash.no_update

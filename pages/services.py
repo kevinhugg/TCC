@@ -49,13 +49,10 @@ def get_service_types_data():
 
 def layout():
     servicos = get_page_data()
-    service_types = get_service_types_data()
 
     service_types_table = html.Table([
         html.Thead(html.Tr([html.Th("Tipos de Serviço")])),
-        html.Tbody([
-            html.Tr([html.Td(st['nome'])]) for st in service_types
-        ])
+        html.Tbody(id='service-types-table-body')  
     ], className='serv-table')
 
     service_types_container = html.Div([
@@ -93,6 +90,7 @@ def layout():
             interval=10*1000,
             n_intervals=0
         ),
+        dcc.Store(id='service-types-refresh-trigger', data=0),
 
         confirm_remove_services,
 
@@ -155,8 +153,54 @@ def layout():
             ])
         ]),
         
-        dcc.Store(id='service-types-store', data=service_types),
     ], className='page-content')
+
+@callback(
+    Output('service-types-table-body', 'children'),
+    [Input('service-types-refresh-trigger', 'data'),
+     Input('interval-services', 'n_intervals')]
+)
+def update_service_types_table(refresh_trigger, n_intervals):
+    service_types = get_service_types_data()
+    
+    rows = []
+    for st in service_types:
+        rows.append(html.Tr([
+            html.Td(st.get('nome', 'N/A'), style={'color': 'var(--primary-text-color)'})
+        ]))
+    
+    return rows
+
+@callback(
+    [Output('url-services', 'pathname', allow_duplicate=True),
+     Output('input-new-service-type-name', 'value'),
+     Output('service-types-refresh-trigger', 'data', allow_duplicate=True)],
+    Input('save-new-service-type-btn', 'n_clicks'),
+    State('input-new-service-type-name', 'value'),
+    State('service-types-refresh-trigger', 'data'),
+    prevent_initial_call=True
+)
+def save_new_service_type(n_clicks, name, refresh_data):
+    if n_clicks and name and name.strip():
+        success, message = add_service_type({'nome': name.strip()})
+        
+        if success:
+            return '/dashboard/services', '', refresh_data + 1
+    
+    return dash.no_update, dash.no_update, dash.no_update
+
+@callback(
+    Output('serv-table', 'children', allow_duplicate=True),
+    Output('pdf_serv_gerar', 'href', allow_duplicate=True),
+    Output('select-header-services', 'style', allow_duplicate=True),
+    Input('service-types-refresh-trigger', 'data'),
+    State('input-search-serv', 'value'),
+    State('filter-month-serv', 'value'),
+    State('edit-mode-services', 'data'),
+    prevent_initial_call=True
+)
+def refresh_services_on_type_change(refresh_trigger, search_value, mes, edit_mode):
+    return update_list(search_value, mes, edit_mode, '/dashboard/services', 0)
 
 @callback(
     Output('serv-table', 'children'),
@@ -326,19 +370,3 @@ def toggle_modal(n1, n2, n3, style):
         return {'display': 'none'}
 
     return style
-
-@callback(
-    Output('url-services', 'pathname', allow_duplicate=True),
-    Output('input-new-service-type-name', 'value'),
-    Input('save-new-service-type-btn', 'n_clicks'),
-    State('input-new-service-type-name', 'value'),
-    prevent_initial_call=True
-)
-def save_new_service_type(n_clicks, name):
-    if n_clicks and name:
-        success, message = add_service_type({'nome': name})
-        
-        if success:
-            return '/dashboard/services', ''
-
-    return dash.no_update, dash.no_update

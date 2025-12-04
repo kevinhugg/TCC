@@ -379,3 +379,32 @@
 .Select-input input {
     color: var(--primary-text-color) !important;
 }
+
+.agent-image-container .img,
+.agents-grid .agent-box .img {
+    border-radius: 8px !important;    
+    object-fit: cover !important;   
+}
+
+.agent-image-container .img {
+    width: 200px;
+    height: 200px;
+}
+
+.agents-grid .agent-box .img {
+    width: 150px !important;
+    height: 150px !important;
+    margin: 0 auto 15px auto !important;
+}
+
+.agent-box {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+.agent-name {
+    margin-top: 10px !important;
+    text-align: center !important;
+    width: 100% !important;
+}

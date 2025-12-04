@@ -242,7 +242,7 @@ def enviar_codigo():
 
         # Texto simples sem caracteres especiais
         texto = f"""
-        SEMURB - Secretaria Municipal de Urbanismo
+        SEMURB - Secretaria de Mobilidade Urbana
 
         Seu codigo de recuperacao de senha e: {codigo}
 
@@ -411,7 +411,6 @@ def gerar_pdf_tipo_pdf(tipo_pdf):
 
     dados = {"data_emissao": data_emissao}
 
-    # Carrega apenas os dados correspondentes
     if tipo_pdf == "agentes":
         from firebase_functions import get_all_agents
         agentes = get_all_agents()
@@ -420,8 +419,8 @@ def gerar_pdf_tipo_pdf(tipo_pdf):
         dados["agentes"] = agentes
 
     elif tipo_pdf == "ocorrencias":
-        from firebase_functions import get_all_ocorrencias
-        ocorrencias = get_all_ocorrencias()
+        from firebase_functions import get_all_occurrences
+        ocorrencias = get_all_occurrences()
         if filtro:
             ocorrencias = [o for o in ocorrencias if filtro in o.get("nomenclatura", "").lower()]
         dados["ocorrencias"] = ocorrencias
@@ -502,126 +501,1054 @@ def gerar_pdf_tipo_pdf(tipo_pdf):
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <style>
-            body { font-family: DejaVu Sans; margin: 20px; color: #000; font-size: 14px; }
-            h2 { text-align: center; font-size: 24px; margin-bottom: 20px; }
-            .header-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-size: 16px; }
-            .section-title { font-size: 20px; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-            .item-card { border: 1px solid #000; border-radius: 5px; padding: 15px; margin-bottom: 20px; page-break-inside: avoid; }
-            .item-card h3 { margin-top: 0; font-size: 18px; margin-bottom: 10px; }
-            .item-table { width: 100%; border-collapse: collapse; font-size: 16px; }
-            .item-table td { border: 1px solid #000; padding: 8px; }
-            .item-table td.label { font-weight: bold; background-color: #f2f2f2; width: 30%; }
-            .item-table td.value { width: 70%; }
-            .footer { text-align: center; font-size: 12px; color: #666; margin-top: 30px; }
+            body { 
+                font-family: DejaVu Sans, Arial, sans-serif; 
+                margin: 25px; 
+                color: #000; 
+                font-size: 14px;
+                text-align: center; 
+            }
+    
+            .container {
+                width: 100%;
+                max-width: 210mm; 
+                margin: 0 auto;
+                text-align: left; 
+            }
+            
+            h2 { 
+                text-align: center; 
+                font-size: 24px; 
+                margin-bottom: 25px; 
+            }
+            
+            .header-info { 
+                background-color: #f8f9fa; 
+                padding: 15px; 
+                border-radius: 5px; 
+                margin-bottom: 20px; 
+                font-size: 16px; 
+                text-align: center; 
+            }
+            
+            .section-title { 
+                font-size: 20px; 
+                margin-top: 30px; 
+                margin-bottom: 15px; 
+                border-bottom: 1px solid #ccc; 
+                padding-bottom: 8px; 
+                text-align: center; 
+                font-weight: bold;
+            }
+            
+            .item-table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-size: 14px;
+                margin: 0 auto 30px auto;
+                table-layout: auto; 
+            }
+            
+            .item-table th { 
+                border: 1px solid #000; 
+                padding: 12px 10px; 
+                background-color: #f2f2f2; 
+                font-weight: bold; 
+                text-align: center;
+                vertical-align: middle;
+            }
+            
+            .item-table td { 
+                border: 1px solid #000; 
+                padding: 10px 8px; 
+                text-align: center; 
+                vertical-align: middle; 
+            }
+            
+            .item-table td.label { 
+                font-weight: bold; 
+                background-color: #f2f2f2; 
+                text-align: center; 
+                vertical-align: middle;
+            }
+            
+            .item-table td.value { 
+                text-align: center; 
+                vertical-align: middle;
+            }
+            
+            .item-card { 
+                border: 1px solid #000; 
+                border-radius: 5px; 
+                padding: 15px; 
+                margin-bottom: 20px; 
+                page-break-inside: avoid;
+                text-align: center; 
+            }
+            
+            .item-card h3 { 
+                margin-top: 0; 
+                font-size: 18px; 
+                margin-bottom: 15px; 
+                text-align: center; 
+            }
+            
+            .item-card .item-table {
+                margin: 15px auto;
+                width: 95%;
+            }
+            
+            .footer { 
+                text-align: center; 
+                font-size: 12px; 
+                color: #666; 
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+            
+            .item-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            
+            .item-table tr:hover {
+                background-color: #f0f0f0;
+            }
+            
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
         </style>
     </head>
     <body>
-        <h2>RELATÓRIO - SEMURB</h2>
+        <div class="container">
+            <h2>RELATÓRIO - SEMURB</h2>
 
-        <div class="header-info">
-            <strong>Data de emissão:</strong> {{ data_emissao }}
-        </div>
+            <div class="header-info">
+                <strong>Data de emissão:</strong> {{ data_emissao }}
+            </div>
 
-        {% if agentes %}
-        <div class="section-title">Agentes</div>
-        <table class="item-table">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Função</th>
-                    <th>Equipe</th>
-                    <th>Turno</th>
-                    <th>Viatura</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ag in agentes %}
-                <tr>
-                    <td>{{ ag.nome }}</td>
-                    <td>{{ ag.funcao or "N/A" }}</td>
-                    <td>{{ ag.equipe or "N/A" }}</td>
-                    <td>{{ ag.turno or "N/A" }}</td>
-                    <td>{{ ag.viatura or "N/A" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-
-        {% if ocorrencias %}
-        <div class="section-title">Ocorrências</div>
-        {% for oco in ocorrencias %}
-        <div class="item-card">
-            <h3>{{ oco.nomenclatura or "Ocorrência" }}</h3>
+            {% if agentes %}
+            <div class="section-title"> Agentes Cadastrados</div>
             <table class="item-table">
-                {% if oco.data %}<tr><td class="label">Data</td><td class="value">{{ oco.data }}</td></tr>{% endif %}
-                {% if oco.responsavel %}<tr><td class="label">Responsável</td><td class="value">{{ oco.responsavel }}</td></tr>{% endif %}
-                {% if oco.viatura %}<tr><td class="label">Veículo</td><td class="value">{{ oco.viatura }}</td></tr>{% endif %}
-                {% if oco.descricao %}<tr><td class="label">Descrição</td><td class="value">{{ oco.descricao }}</td></tr>{% endif %}
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Matrícula</th>
+                        <th>Patente</th>
+                        <th>Função</th>
+                        <th>Equipe</th>
+                        <th>Turno</th>
+                        <th>Viatura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ag in agentes %}
+                    <tr>
+                        <td>{{ ag.get('nome') or 'N/A' }}</td>
+                        <td>{{ ag.get('matricula') or 'N/A' }}</td>
+                        <td>{{ ag.get('patente') or 'N/A' }}</td>
+                        <td>{{ ag.get('funcao') or 'N/A' }}</td>
+                        <td>{{ ag.get('equipe') or 'N/A' }}</td>
+                        <td>{{ ag.get('turno') or 'N/A' }}</td>
+                        <td>{{ ag.get('viatura') or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-        </div>
-        {% endfor %}
-        {% endif %}
+            {% endif %}
 
-        {% if danos %}
-        <div class="section-title">Viaturas Danificadas</div>
-        <table class="item-table">
-            <thead>
-                <tr>
-                    <th>N° Viatura</th>
-                    <th>Área Avariada</th>
-                    <th>Descrição</th>
-                    <th>Status</th>
-                    <th>Data</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for d in danos %}
-                <tr>
-                    <td>{{ d.viatura }}</td>
-                    <td>{{ d.parte }}</td>
-                    <td>{{ d.descricao }}</td>
-                    <td>{{ d.status }}</td>
-                    <td>{{ d.data }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
+            {% if ocorrencias %}
+            <div class="section-title"> Ocorrências Registradas</div>
+            {% for oco in ocorrencias %}
+            <div class="item-card">
+                <h3>{{ oco.nomenclatura or "Ocorrência" }}</h3>
+                <table class="item-table">
+                    {% if oco.data %}
+                    <tr>
+                        <td class="label">Data</td>
+                        <td class="value">{{ oco.data }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if oco.responsavel %}
+                    <tr>
+                        <td class="label">Responsável</td>
+                        <td class="value">{{ oco.responsavel }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if oco.viatura %}
+                    <tr>
+                        <td class="label">Veículo</td>
+                        <td class="value">{{ oco.viatura }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if oco.descricao %}
+                    <tr>
+                        <td class="label">Descrição</td>
+                        <td class="value">{{ oco.descricao }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+            {% endfor %}
+            {% endif %}
 
-        {% if servicos %}
-        <div class="section-title">Serviços</div>
-        <table class="item-table">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Responsável</th>
-                    <th>Tipo</th>
-                    <th>Veículo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in servicos %}
-                <tr>
-                    <td>{{ s.data or "N/A" }}</td>
-                    <td>{{ s.responsavel or "N/A" }}</td>
-                    <td>{{ s.nomenclatura or "N/A" }}</td>
-                    <td>{{ s.viatura or "N/A" }}</td>
-                </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endif %}
+            {% if danos %}
+            <div class="section-title"> Viaturas Danificadas</div>
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>N° Viatura</th>
+                        <th>Área Avariada</th>
+                        <th>Descrição</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in danos %}
+                    <tr>
+                        <td>{{ d.viatura }}</td>
+                        <td>{{ d.parte }}</td>
+                        <td>{{ d.descricao }}</td>
+                        <td>{{ d.status }}</td>
+                        <td>{{ d.data }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
 
+            {% if servicos %}
+            <div class="section-title"> Serviços Realizados</div>
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Responsável</th>
+                        <th>Tipo</th>
+                        <th>Veículo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in servicos %}
+                    <tr>
+                        <td>{{ s.data or "N/A" }}</td>
+                        <td>{{ s.responsavel or "N/A" }}</td>
+                        <td>{{ s.nomenclatura or "N/A" }}</td>
+                        <td>{{ s.viatura or "N/A" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
 
-        <div class="footer">
-            Relatório gerado automaticamente pelo Sistema SEMURB
+            <div class="footer">
+                Relatório gerado automaticamente pelo Sistema SEMURB<br>
+                {{ data_emissao }}
+            </div>
         </div>
     </body>
     </html>
     """
 
     return gerar_pdf(template_universal, dados, f"relatorio_{tipo_pdf}")
+
+@app.route('/gerar_pdf_servico_detalhes')
+def gerar_pdf_servico_detalhes():
+    service_id = request.args.get('id')
+    
+    if not service_id:
+        flash('ID do serviço não fornecido', 'error')
+        return redirect('/dashboard/services')
+    
+    try:
+        from urllib.parse import unquote
+        decoded_id = unquote(service_id)
+        
+        from firebase_functions import get_service_by_id, get_agents_by_vehicle
+        
+        service_data = get_service_by_id(decoded_id)
+        
+        if not service_data:
+            flash('Serviço não encontrado', 'error')
+            return redirect('/dashboard/services')
+        
+        data_emissao = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        
+        vehicle_number = service_data.get('viatura')
+        team_agents = get_agents_by_vehicle(vehicle_number) if vehicle_number else []
+        
+        motorista = next((a for a in team_agents if a.get('funcao', '').lower() == 'motorista'), None)
+        outros_agentes = [a for a in team_agents if a != motorista]
+        
+        dados = {
+            'data_emissao': data_emissao,
+            'servico': service_data,
+            'motorista': motorista,
+            'outros_agentes': outros_agentes,
+            'total_agentes': len(team_agents),
+            'viatura': vehicle_number,
+            'tem_foto': bool(service_data.get('fotoUrl'))
+        }
+        
+        template_html = """
+        <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+            <style>
+                body { 
+                    font-family: DejaVu Sans, Arial, sans-serif; 
+                    margin: 20px; 
+                    color: #000; 
+                    font-size: 12px;
+                }
+                
+                .container {
+                    width: 100%;
+                    max-width: 210mm; 
+                    margin: 0 auto;
+                }
+                
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #333;
+                    padding-bottom: 10px;
+                }
+                
+                .header h1 {
+                    font-size: 24px;
+                    margin: 0;
+                    color: #2c3e50;
+                }
+                
+                .header-info {
+                    background-color: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                    text-align: center;
+                }
+                
+                .section {
+                    margin-bottom: 25px;
+                    page-break-inside: avoid;
+                }
+                
+                .section-title {
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 15px;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 5px;
+                }
+                
+                .info-card {
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    background-color: #fff;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .info-item {
+                    display: flex;
+                    align-items: flex-start;
+                    margin-bottom: 12px;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .info-item:last-child {
+                    border-bottom: none;
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                }
+                
+                .info-label {
+                    width: 160px;
+                    font-weight: bold;
+                    color: #2c3e50;
+                    flex-shrink: 0;
+                }
+                
+                .info-value {
+                    flex: 1;
+                    color: #333;
+                    margin-left: 10px;
+                }
+                
+                .agents-section {
+                    margin-top: 30px;
+                }
+                
+                .agent-card {
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                    background-color: #f9f9f9;
+                }
+                
+                .agent-title {
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 10px;
+                    font-size: 16px;
+                }
+                
+                .agent-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+                
+                .agent-label {
+                    width: 100px;
+                    font-weight: bold;
+                    color: #666;
+                    font-size: 12px;
+                    flex-shrink: 0;
+                }
+                
+                .agent-value {
+                    flex: 1;
+                    color: #333;
+                    font-size: 14px;
+                    margin-left: 10px;
+                }
+                
+                .agent-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                
+                .agent-row {
+                    display: flex;
+                    gap: 20px;
+                }
+                
+                .agent-field {
+                    flex: 1;
+                }
+                
+                .foto-container {
+                    text-align: center;
+                    margin: 25px 0;
+                    padding: 15px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    background-color: #f9f9f9;
+                }
+                
+                .foto-container img {
+                    max-width: 100%;
+                    max-height: 250px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                }
+                
+                .footer {
+                    margin-top: 40px;
+                    text-align: center;
+                    font-size: 10px;
+                    color: #7f8c8d;
+                    border-top: 1px solid #ddd;
+                    padding-top: 15px;
+                }
+                
+                .no-photo {
+                    text-align: center;
+                    color: #999;
+                    font-style: italic;
+                    padding: 20px;
+                }
+                
+                .no-agents {
+                    text-align: center;
+                    color: #999;
+                    font-style: italic;
+                    padding: 20px;
+                    border: 1px dashed #ddd;
+                    border-radius: 8px;
+                    background-color: #f9f9f9;
+                }
+                
+                @page {
+                    size: A4;
+                    margin: 20mm;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>RELATÓRIO DE DETALHES DO SERVIÇO</h1>
+                    <p>Sistema SEMURB - Secretaria de Mobilidade Urbana</p>
+                </div>
+                
+                <div class="header-info">
+                    <strong>Data de emissão:</strong> {{ data_emissao }}<br>
+                    <strong>ID do Serviço:</strong> {{ servico.id or 'N/A' }}
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">INFORMAÇÕES DO SERVIÇO</div>
+                    <div class="info-card">
+                        <div class="info-item">
+                            <div class="info-label">Nomenclatura:</div>
+                            <div class="info-value">{{ servico.nomenclatura or 'Serviço de Viário' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Data e Horário:</div>
+                            <div class="info-value">{{ servico.data }} {{ servico.horario or '' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tipo de Serviço:</div>
+                            <div class="info-value">{{ servico.tipo or 'Serviço Viário' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Descrição:</div>
+                            <div class="info-value">{{ servico.descricao or 'Não informada' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Endereço:</div>
+                            <div class="info-value">{{ servico.endereco or 'Não informado' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Observações:</div>
+                            <div class="info-value">{{ servico.observacoes or 'Não informadas' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Quantidade de Itens:</div>
+                            <div class="info-value">{{ servico.qtd_items or 'N/A' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Responsável:</div>
+                            <div class="info-value">{{ servico.responsavel or 'N/A' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Veículo:</div>
+                            <div class="info-value">{{ servico.viatura or 'N/A' }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if tem_foto %}
+                <div class="section">
+                    <div class="section-title">FOTO DO SERVIÇO</div>
+                    <div class="foto-container">
+                        <img src="{{ servico.fotoUrl }}" alt="Foto do serviço" />
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-photo">
+                    Nenhuma foto registrada para este serviço
+                </div>
+                {% endif %}
+                
+                <div class="section agents-section">
+                    <div class="section-title">EQUIPE RESPONSÁVEL</div>
+                    
+                    {% if motorista %}
+                    <div class="agent-card">
+                        <div class="agent-title"> MOTORISTA</div>
+                        <div class="agent-info">
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Nome:</div>
+                                        <div class="agent-value">{{ motorista.nome or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Matrícula:</div>
+                                        <div class="agent-value">{{ motorista.matricula or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Função:</div>
+                                        <div class="agent-value">{{ motorista.funcao or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Turno:</div>
+                                        <div class="agent-value">{{ motorista.turno or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if outros_agentes %}
+                    <div class="section-title">OUTROS INTEGRANTES DA EQUIPE</div>
+                    {% for agente in outros_agentes %}
+                    <div class="agent-card">
+                        <div class="agent-info">
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Nome:</div>
+                                        <div class="agent-value">{{ agente.nome or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Matrícula:</div>
+                                        <div class="agent-value">{{ agente.matricula or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Função:</div>
+                                        <div class="agent-value">{{ agente.funcao or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Turno:</div>
+                                        <div class="agent-value">{{ agente.turno or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if total_agentes == 0 %}
+                    <div class="no-agents">
+                        Nenhum agente atribuído a este veículo
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="footer">
+                    Relatório gerado automaticamente pelo Sistema SEMURB<br>
+                    Data: {{ data_emissao }}
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return gerar_pdf(template_html, dados, f"servico_detalhes_{decoded_id[:8]}")
+        
+    except Exception as e:
+        flash(f'Erro ao gerar PDF: {str(e)}', 'error')
+        return redirect('/dashboard/services')
+
+@app.route('/gerar_pdf_ocorrencia_detalhes')
+def gerar_pdf_ocorrencia_detalhes():
+    occurrence_id = request.args.get('id')
+    
+    if not occurrence_id:
+        flash('ID da ocorrência não fornecido', 'error')
+        return redirect('/dashboard/ocurrences')
+    
+    try:
+        from urllib.parse import unquote
+        decoded_id = unquote(occurrence_id)
+        
+        from firebase_functions import get_occurrence_by_id, get_agents_by_vehicle
+        
+        occurrence_data = get_occurrence_by_id(decoded_id)
+        
+        if not occurrence_data:
+            flash('Ocorrência não encontrada', 'error')
+            return redirect('/dashboard/ocurrences')
+        
+        data_emissao = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        
+        vehicle_number = occurrence_data.get('viatura')
+        team_agents = get_agents_by_vehicle(vehicle_number) if vehicle_number else []
+        
+        motorista = next((a for a in team_agents if a.get('funcao', '').lower() == 'motorista'), None)
+        outros_agentes = [a for a in team_agents if a != motorista]
+        
+        dados = {
+            'data_emissao': data_emissao,
+            'ocorrencia': occurrence_data,
+            'motorista': motorista,
+            'outros_agentes': outros_agentes,
+            'total_agentes': len(team_agents),
+            'viatura': vehicle_number,
+            'tem_foto': bool(occurrence_data.get('fotoUrl'))
+        }
+        
+        template_html = """
+        <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+            <style>
+                body { 
+                    font-family: DejaVu Sans, Arial, sans-serif; 
+                    margin: 20px; 
+                    color: #000; 
+                    font-size: 12px;
+                }
+                
+                .container {
+                    width: 100%;
+                    max-width: 210mm; 
+                    margin: 0 auto;
+                }
+                
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #333;
+                    padding-bottom: 10px;
+                }
+                
+                .header h1 {
+                    font-size: 24px;
+                    margin: 0;
+                    color: #2c3e50;
+                }
+                
+                .header-info {
+                    background-color: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                    text-align: center;
+                }
+                
+                .section {
+                    margin-bottom: 25px;
+                    page-break-inside: avoid;
+                }
+                
+                .section-title {
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 15px;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 5px;
+                }
+                
+                .info-card {
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    background-color: #fff;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                /* INFORMAÇÕES NA MESMA LINHA */
+                .info-item {
+                    display: flex;
+                    align-items: flex-start;
+                    margin-bottom: 12px;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .info-item:last-child {
+                    border-bottom: none;
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                }
+                
+                .info-label {
+                    width: 160px; 
+                    font-weight: bold;
+                    color: #2c3e50;
+                    flex-shrink: 0;
+                }
+                
+                .info-value {
+                    flex: 1;
+                    color: #333;
+                    margin-left: 10px;
+                }
+                
+                .agents-section {
+                    margin-top: 30px;
+                }
+                
+                .agent-card {
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                    background-color: #f9f9f9;
+                }
+                
+                .agent-title {
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 10px;
+                    font-size: 16px;
+                }
+                
+                .agent-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+                
+                .agent-label {
+                    width: 100px;
+                    font-weight: bold;
+                    color: #666;
+                    font-size: 12px;
+                    flex-shrink: 0;
+                }
+                
+                .agent-value {
+                    flex: 1;
+                    color: #333;
+                    font-size: 14px;
+                    margin-left: 10px;
+                }
+                
+                .agent-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                
+                .agent-row {
+                    display: flex;
+                    gap: 20px;
+                }
+                
+                .agent-field {
+                    flex: 1;
+                }
+                
+                .foto-container {
+                    text-align: center;
+                    margin: 25px 0;
+                    padding: 15px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    background-color: #f9f9f9;
+                }
+                
+                .foto-container img {
+                    max-width: 100%;
+                    max-height: 250px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                }
+                
+                .footer {
+                    margin-top: 40px;
+                    text-align: center;
+                    font-size: 10px;
+                    color: #7f8c8d;
+                    border-top: 1px solid #ddd;
+                    padding-top: 15px;
+                }
+                
+                .no-photo {
+                    text-align: center;
+                    color: #999;
+                    font-style: italic;
+                    padding: 20px;
+                }
+                
+                .no-agents {
+                    text-align: center;
+                    color: #999;
+                    font-style: italic;
+                    padding: 20px;
+                    border: 1px dashed #ddd;
+                    border-radius: 8px;
+                    background-color: #f9f9f9;
+                }
+                
+                @page {
+                    size: A4;
+                    margin: 20mm;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>RELATÓRIO DE DETALHES DA OCORRÊNCIA</h1>
+                    <p>Sistema SEMURB - Secretaria de Mobilidade Urbana</p>
+                </div>
+                
+                <div class="header-info">
+                    <strong>Data de emissão:</strong> {{ data_emissao }}<br>
+                    <strong>ID da Ocorrência:</strong> {{ ocorrencia.id or 'N/A' }}
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">INFORMAÇÕES DA OCORRÊNCIA</div>
+                    <div class="info-card">
+                        <div class="info-item">
+                            <div class="info-label">Nomenclatura:</div>
+                            <div class="info-value">{{ ocorrencia.nomenclatura or ocorrencia.tipo_ocorrencia or 'Ocorrência' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Data e Horário:</div>
+                            <div class="info-value">{{ ocorrencia.data }} {{ ocorrencia.horario or '' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tipo:</div>
+                            <div class="info-value">{{ ocorrencia.tipo_ocorrencia or 'Geral' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Descrição:</div>
+                            <div class="info-value">{{ ocorrencia.descricao or 'Não informada' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Endereço:</div>
+                            <div class="info-value">{{ ocorrencia.endereco or 'Não informado' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Cidadão Atendido:</div>
+                            <div class="info-value">{{ ocorrencia.nome or 'Não informado' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Contato:</div>
+                            <div class="info-value">{{ ocorrencia.contato or 'Não informado' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Responsável:</div>
+                            <div class="info-value">{{ ocorrencia.responsavel or 'N/A' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Veículo:</div>
+                            <div class="info-value">{{ ocorrencia.viatura or 'N/A' }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if tem_foto %}
+                <div class="section">
+                    <div class="section-title">FOTO DA OCORRÊNCIA</div>
+                    <div class="foto-container">
+                        <img src="{{ ocorrencia.fotoUrl }}" alt="Foto da ocorrência" />
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-photo">
+                    Nenhuma foto registrada para esta ocorrência
+                </div>
+                {% endif %}
+                
+                <div class="section agents-section">
+                    <div class="section-title">EQUIPE RESPONSÁVEL</div>
+                    
+                    {% if motorista %}
+                    <div class="agent-card">
+                        <div class="agent-title"> MOTORISTA</div>
+                        <div class="agent-info">
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Nome:</div>
+                                        <div class="agent-value">{{ motorista.nome or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Matrícula:</div>
+                                        <div class="agent-value">{{ motorista.matricula or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Função:</div>
+                                        <div class="agent-value">{{ motorista.funcao or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Turno:</div>
+                                        <div class="agent-value">{{ motorista.turno or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if outros_agentes %}
+                    <div class="section-title">OUTROS INTEGRANTES DA EQUIPE</div>
+                    {% for agente in outros_agentes %}
+                    <div class="agent-card">
+                        <div class="agent-info">
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Nome:</div>
+                                        <div class="agent-value">{{ agente.nome or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Matrícula:</div>
+                                        <div class="agent-value">{{ agente.matricula or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-row">
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Função:</div>
+                                        <div class="agent-value">{{ agente.funcao or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div class="agent-field">
+                                    <div class="agent-item">
+                                        <div class="agent-label">Turno:</div>
+                                        <div class="agent-value">{{ agente.turno or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if total_agentes == 0 %}
+                    <div class="no-agents">
+                        Nenhum agente atribuído a este veículo
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="footer">
+                    Relatório gerado automaticamente pelo Sistema SEMURB<br>
+                    Data: {{ data_emissao }}
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return gerar_pdf(template_html, dados, f"ocorrencia_detalhes_{decoded_id[:8]}")
+        
+    except Exception as e:
+        flash(f'Erro ao gerar PDF: {str(e)}', 'error')
+        return redirect('/dashboard/ocurrences')
 
 
 if __name__ == '__main__':

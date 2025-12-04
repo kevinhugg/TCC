@@ -647,3 +647,16 @@ a, .dash-link {
 .btn_add:hover {
     background-color: #218838;
 }
+
+.btn-pdf, #pdf_serv_gerar {
+    min-width: 150px !important;
+    height: 44px !important;
+    padding: 0.5px 2px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}

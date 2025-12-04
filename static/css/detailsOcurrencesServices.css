@@ -1,11 +1,32 @@
 .page-content {
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;    
+    gap: 30px;
     padding: 2rem;
     margin-left: 8em;
-    margin-top: 20px;
+    margin-top: 60px;
     transition: margin-left 0.3s ease;
+    width: calc(100% - 8em);
+    min-height: calc(100vh - 60px);
+}
+
+.page-content.details-page.centered-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    margin: 60px auto 0 auto;
+    padding: 2rem;
+}
+
+.agents-section,
+.agents-container,
+.agents-container.card {
+    display: none !important;
 }
 
 .details-container,
@@ -496,4 +517,321 @@ a {
 .modal-button.cancel:hover {
     background-color: #5a6268;
     border-color: #545b62;
+}
+
+.btn-pdf {
+    padding: 6px 12px !important; 
+    font-size: 0.85rem !important;
+    min-width: 100px !important; 
+    height: 32px !important; 
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.btn_pdf {
+    display: flex !important;
+    justify-content: center !important;
+    margin-top: 1rem !important;
+}
+
+.btn-pdf-container {
+    text-align: center !important;
+    width: 100% !important;
+}
+
+.details-section {
+    width: 100% !important;
+    max-width: 800px !important; 
+    margin: 0 auto 30px auto !important; 
+}
+
+.details-container.card {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important; 
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; 
+}
+
+.texts-det {
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+}
+
+.texts-det p {
+    text-align: center !important;
+    margin: 0.5rem auto !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+.tittle {
+    text-align: center !important;
+    width: 100% !important;
+    margin: 0 auto 1.5rem auto !important;
+    display: block !important;
+}
+
+.service-photo {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.service-photo img {
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+@media (max-width: 768px) {
+    .page-content.details-page.vertical-layout {
+        padding: 1rem !important;
+        max-width: 95% !important;
+        margin-top: 40px !important;
+    }
+    
+    .details-container.card {
+        padding: 1rem !important;
+    }
+    
+    .btn-pdf {
+        padding: 5px 10px !important;
+        font-size: 0.8rem !important;
+        min-width: 90px !important;
+    }
+}
+
+.page-content.details-page.vertical-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    margin: 60px auto 0 auto;
+    padding: 2rem;
+    gap: 30px;
+}
+
+.page-content.details-page:not(.vertical-layout) {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
+
+.details-section {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto 30px auto !important;
+}
+
+.details-container.card {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.agents-section {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+}
+
+.agents-container.card {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.tittle {
+    text-align: center !important;
+    width: 100% !important;
+    margin: 0 auto 1.5rem auto !important;
+    display: block !important;
+    color: var(--primary-text-color);
+}
+
+.texts-det {
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+}
+
+.texts-det p {
+    text-align: center !important;
+    margin: 0.5rem auto !important;
+    display: block !important;
+    width: 100% !important;
+    color: var(--secondary-text-color);
+    font-size: 1.1rem !important;
+}
+
+.occurrence-photo {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 20px 0 !important;
+}
+
+.occurrence-photo img {
+    margin: 0 auto !important;
+    display: block !important;
+    max-width: 100% !important;
+    max-height: 300px !important;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.btn_rem_pdf {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-top: 1.5rem !important;
+    gap: 15px !important;
+    width: 100% !important;
+}
+
+.dropdown-title {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.agents-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+    padding: 0 !important;
+}
+
+.btn-pdf {
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+    min-width: 120px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: var(--button-bg-color) !important;
+    color: var(--button-text-color) !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease-in-out !important;
+    border: 1px solid transparent !important;
+}
+
+.btn-pdf:hover {
+    background-color: var(--button-hover-bg-color) !important;
+}
+
+.btn.btn-danger {
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+    min-width: 120px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-radius: 8px !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.btn.btn-danger:hover {
+    background-color: #c82333 !important;
+}
+
+@media (max-width: 768px) {
+    .page-content.details-page.vertical-layout {
+        padding: 1rem !important;
+        max-width: 95% !important;
+        margin-top: 40px !important;
+    }
+    
+    .details-container.card,
+    .agents-container.card {
+        padding: 1rem !important;
+        max-width: 95% !important;
+    }
+    
+    .dropdown-title {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: flex-start !important;
+    }
+    
+    .dropdown-title h3 {
+        margin-bottom: 0 !important;
+    }
+    
+    .dropdown-turnos {
+        width: 100% !important;
+        max-width: 200px !important;
+    }
+    
+    .btn-pdf,
+    .btn.btn-danger {
+        padding: 6px 12px !important;
+        font-size: 0.85rem !important;
+        min-width: 110px !important;
+        height: 32px !important;
+    }
+    
+    .btn_rem_pdf {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .agents-grid {
+        justify-content: center !important;
+    }
+    
+    .agent-box {
+        width: 180px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .texts-det p {
+        font-size: 1rem !important;
+    }
+    
+    .agent-box {
+        width: 160px !important;
+    }
+    
+    .img_agent {
+        width: 80px !important;
+        height: 80px !important;
+    }
 }

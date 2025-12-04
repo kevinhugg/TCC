@@ -129,6 +129,7 @@ def update_agent_details(store_data):
                 html.Div([
                     html.P(f"Cargo: {agent_data.get('cargo_at', 'N/A')}", className='det carg'),
                     html.P(f"Função: {agent_data.get('funcao', 'Sem função')}", className='det func'),
+                    html.P(f"Matrícula: {agent_data.get('matricula', 'N/A')}", className='det func'),
                     dcc.Link(
                         html.P(f"Viatura: {agent_data.get('viatura', 'N/A')}"),
                         href=f"/dashboard/veiculo/{vehicle_data['numero']}" if vehicle_data else '#',

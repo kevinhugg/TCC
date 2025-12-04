@@ -50,19 +50,18 @@ def get_page_data():
     except Exception as e:
         return []
 
-def layout():
-    ocorrencias = get_page_data()
-    
+def get_occurrence_types_data():
     try:
-        occurrence_types_fb = get_all_occurrence_types()
+        occurrence_types = get_all_occurrence_types()
+        return occurrence_types
     except Exception as e:
-        occurrence_types_fb = []
+        return []
 
+def layout():
+    ocorrencias = get_page_data()    
     occurrence_types_table = html.Table([
         html.Thead(html.Tr([html.Th("Tipos de Ocorrência")])),
-        html.Tbody([
-            html.Tr([html.Td(ot['tipo'])]) for ot in occurrence_types_fb
-        ])
+        html.Tbody(id='occurrence-types-table-body') 
     ], className='serv-table')
 
     occurrence_types_container = html.Div([
@@ -95,6 +94,7 @@ def layout():
         dcc.Location(id='url-occurrences', refresh=True),
         dcc.Store(id='selected-occurrences', data=[]),
         dcc.Store(id='edit-mode-occurrences', data=False),
+        dcc.Store(id='occurrence-types-refresh-trigger', data=0),
         dcc.Interval(
             id='interval-occurrences',
             interval=10*1000,
@@ -163,6 +163,57 @@ def layout():
             ])
         ]),
     ], className='page-content')
+
+@callback(
+    Output('occurrence-types-table-body', 'children'),
+    [Input('occurrence-types-refresh-trigger', 'data'),
+     Input('interval-occurrences', 'n_intervals')]
+)
+def update_occurrence_types_table(refresh_trigger, n_intervals):
+    occurrence_types = get_occurrence_types_data()
+    
+    rows = []
+    for ot in occurrence_types:
+        rows.append(html.Tr([
+            html.Td(ot.get('tipo', 'N/A'), style={'color': 'var(--primary-text-color)'})
+        ]))
+    
+    return rows
+
+@callback(
+    [Output('url-occurrences', 'pathname', allow_duplicate=True),
+     Output('input-new-occurrence-type-name', 'value'),
+     Output('occurrence-types-refresh-trigger', 'data', allow_duplicate=True)],
+    Input('save-new-occurrence-type-btn', 'n_clicks'),
+    State('input-new-occurrence-type-name', 'value'),
+    State('occurrence-types-refresh-trigger', 'data'),
+    prevent_initial_call=True
+)
+def save_new_occurrence_type(n_clicks, name, refresh_data):
+    if n_clicks and name and name.strip():
+        occurrence_data = {
+            'tipo': name.strip()  
+        }
+        
+        success, message = add_occurrence_type(occurrence_data)
+        
+        if success:
+            return '/dashboard/ocurrences', '', refresh_data + 1
+    
+    return dash.no_update, dash.no_update, dash.no_update
+
+@callback(
+    Output('oco-table', 'children', allow_duplicate=True),
+    Output('pdf_oco_gerar', 'href', allow_duplicate=True),
+    Output('select-header-occurrences', 'style', allow_duplicate=True),
+    Input('occurrence-types-refresh-trigger', 'data'),
+    State('input-search-oco', 'value'),
+    State('filter-month-oco', 'value'),
+    State('edit-mode-occurrences', 'data'),
+    prevent_initial_call=True
+)
+def refresh_occurrences_on_type_change(refresh_trigger, search_value, mes, edit_mode):
+    return update_occurrence_table(search_value, mes, edit_mode, '/dashboard/ocurrences', 0)
 
 def remover_acentos(txt):
     if not txt:
@@ -361,30 +412,6 @@ def toggle_modal(n1, n2, n3, style_type):
         return {'display': 'none'}
 
     return style_type
-
-@callback(
-    [Output('url-occurrences', 'pathname', allow_duplicate=True),
-     Output('input-new-occurrence-type-name', 'value')],
-    Input('save-new-occurrence-type-btn', 'n_clicks'),
-    State('input-new-occurrence-type-name', 'value'),
-    prevent_initial_call=True
-)
-def save_new_occurrence_type(n_clicks, name):
-    if n_clicks and name:
-        try:
-            occurrence_data = {
-                'tipo': name.strip()  
-            }
-            
-            success, message = add_occurrence_type(occurrence_data)
-            
-            if success:
-                return '/dashboard/ocurrences', ''
-                
-        except Exception as e:
-            pass
-    
-    return dash.no_update, dash.no_update
 
 @callback(
     Output('filtro-search-oco', 'data'),

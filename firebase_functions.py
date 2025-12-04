@@ -758,8 +758,7 @@ def get_all_occurrences():
                                 'id': occurrence_id,
                                 'data': data_str,
                                 'horario': occurrence_data.get('horario_envio', 'N/A'),
-                                'nomenclatura': occurrence_data.get('nomenclatura', 
-                                                                   occurrence_data.get('tipo_ocorrencia', 'Ocorrência')),
+                                'nomenclatura': occurrence_data.get('nomenclatura', occurrence_data.get('tipo_ocorrencia', 'Ocorrência')),
                                 'viatura': occurrence_data.get('viatura', agent_vehicle),
                                 'tipo_ocorrencia': occurrence_data.get('tipo_ocorrencia', 'Geral'),
                                 'descricao': occurrence_data.get('descricao', ''),
@@ -1332,3 +1331,22 @@ def update_vehicle_status(numero, status):
             return False
     except Exception as e:
         return False
+    
+def delete_all_vehicles():
+    """
+    Remove TODOS os veículos do banco de dados Firebase
+    """
+    try:
+        veiculos_ref = db.collection('veiculos')
+        docs = veiculos_ref.stream()
+        
+        deleted_count = 0
+        for doc in docs:
+            doc.reference.delete()
+            deleted_count += 1
+        
+        return True, f"{deleted_count} veículos removidos com sucesso"
+        
+    except Exception as e:
+        print(f"Erro ao deletar todos os veículos: {e}")
+        return False, f"Erro ao deletar veículos: {str(e)}"

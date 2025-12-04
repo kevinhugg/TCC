@@ -97,63 +97,67 @@ def layout(occurrence_id=None):
             ])
         ]),
 
-        html.Div([
-            html.H3(f"{dados.get('nomenclatura', dados.get('tipo_ocorrencia', 'Ocorrência'))}", className='tittle'),
-            html.Div([
+        html.Div([  
+            html.Div([ 
+                html.H3(f"{dados.get('nomenclatura', dados.get('tipo_ocorrencia', 'Ocorrência'))}", className='tittle'),
                 html.Div([
-                    html.P(f"Data: {dados.get('data', 'N/A')} {dados.get('horario', '')}"),
-                    html.P(f"Tipo: {dados.get('tipo_ocorrencia', dados.get('tipo', 'N/A'))}"),
-                    html.P(f"Descrição: {dados.get('descricao', 'Não informada.')}"),
-                    html.P(f"Endereço: {dados.get('endereco', 'Não informado.')}"),
-                    html.P(f"Cidadão atendido: {dados.get('nome', dados.get('n_cidadao', 'Não informado.'))}"),
-                    html.P(f"Contato: {dados.get('contato', dados.get('numcontato', 'Não informado.'))}"),
-                    html.P(f"Responsável: {dados.get('responsavel', 'N/A')}"),
-                    dcc.Link(
-                        html.P(f"Veículo: {dados.get('viatura', 'N/A')}"),
-                        href=f"/veiculo/{vehicle_number}" if vehicle_number else '#',
-                        className='link-ag-vt'
-                    )
-                ], className='texts-det'),
-            ], className='details-items'),
-            
-            html.Div([
-                html.Img(
-                    src=dados.get('fotoUrl', ''),
-                    style={'maxWidth': '100%', 'maxHeight': '300px', 'display': 'block' if dados.get('fotoUrl') else 'none'}
-                ) if dados.get('fotoUrl') else html.Div()
-            ], className='occurrence-photo', style={'textAlign': 'center', 'margin': '20px 0'}),
-            
-            html.Div([
+                    html.Div([
+                        html.P(f"Data: {dados.get('data', 'N/A')} {dados.get('horario', '')}"),
+                        html.P(f"Tipo: {dados.get('tipo_ocorrencia', dados.get('tipo', 'N/A'))}"),
+                        html.P(f"Descrição: {dados.get('descricao', 'Não informada.')}"),
+                        html.P(f"Endereço: {dados.get('endereco', 'Não informado.')}"),
+                        html.P(f"Cidadão atendido: {dados.get('nome', dados.get('n_cidadao', 'Não informado.'))}"),
+                        html.P(f"Contato: {dados.get('contato', dados.get('numcontato', 'Não informado.'))}"),
+                        html.P(f"Responsável: {dados.get('responsavel', 'N/A')}"),
+                        dcc.Link(
+                            html.P(f"Veículo: {dados.get('viatura', 'N/A')}"),
+                            href=f"/veiculo/{vehicle_number}" if vehicle_number else '#',
+                            className='link-ag-vt'
+                        )
+                    ], className='texts-det'),
+                ], className='details-items'),
+                
                 html.Div([
-                    html.A(id='pdf_oco_serv_det_gerar', children='Gerar PDF', target="_blank", className='btn-pdf'),
-                    html.Button('Excluir Ocorrência', id='delete-oco-btn', className='btn btn-danger', style={'marginLeft': '10px'})
-                ], className='btn-pdf'),
-            ], className='btn_rem_pdf'),
-        ], className='details-container'),
+                    html.Img(
+                        src=dados.get('fotoUrl', ''),
+                        style={'maxWidth': '100%', 'maxHeight': '300px', 'display': 'block' if dados.get('fotoUrl') else 'none'}
+                    ) if dados.get('fotoUrl') else html.Div()
+                ], className='occurrence-photo', style={'textAlign': 'center', 'margin': '20px 0'}),
+                
+                html.Div([
+                    html.Div([
+                        html.A(id='pdf_oco_serv_det_gerar', children='Gerar PDF', target="_blank", className='btn-pdf'),
+                        html.Button('Excluir Ocorrência', id='delete-oco-btn', className='btn btn-danger', style={'marginLeft': '10px'})
+                    ], className='btn-pdf-container'),
+                ], className='btn_rem_pdf'),
+            ], className='details-container card'),
+        ], className='details-section', style={'marginBottom': '30px'}),
 
-        html.Div([
-            html.Div([
-                html.H3(f"Responsáveis do Veículo", className='tittle'),
-                dcc.Dropdown(
-                    id='dropdown-turnos-oco',
-                    options=[
-                        {'label': 'Todos os turnos', 'value': 'todos'},
-                        {'label': 'Manhã', 'value': 'manha'},
-                        {'label': 'Tarde', 'value': 'tarde'},
-                        {'label': 'Noite', 'value': 'noite'}
-                    ],
-                    value='todos',
-                    clearable=False,
-                    className='dropdown-turnos',
-                    style={'height': '40px', 'width': '200px'}
-                ),
-            ], className='dropdown-title'),
+        html.Div([  
+            html.Div([  
+                html.Div([
+                    html.H3(f"Responsáveis do Veículo", className='tittle'),
+                    dcc.Dropdown(
+                        id='dropdown-turnos-oco',
+                        options=[
+                            {'label': 'Todos os turnos', 'value': 'todos'},
+                            {'label': 'Manhã', 'value': 'manha'},
+                            {'label': 'Tarde', 'value': 'tarde'},
+                            {'label': 'Noite', 'value': 'noite'}
+                        ],
+                        value='todos',
+                        clearable=False,
+                        className='dropdown-turnos',
+                        style={'height': '40px', 'width': '200px'}
+                    ),
+                ], className='dropdown-title'),
 
-            html.Div(id='agents-grid-oco', className='agents-grid'),
+                html.Div(id='agents-grid-oco', className='agents-grid'),
 
-        ], className='agents-container card'),
+            ], className='agents-container card'),
+        ], className='agents-section'),
 
-    ], className='page-content details-page')
+    ], className='page-content details-page vertical-layout')
 
 @callback(
     Output('agents-grid-oco', 'children'),

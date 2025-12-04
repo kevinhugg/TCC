@@ -86,7 +86,6 @@ def layout(id=None):
                         html.P(f"Tipo: {dados.get('tipo', 'Serviço Viário')}"),
                         html.P(f"Descrição: {dados.get('descricao', 'Não informada.')}"),
                         html.P(f"Endereço: {dados.get('endereco', 'Não informado.')}"),
-                        html.P(f"Local: {dados.get('local', 'Não informado.')}"),
                         html.P(f"Observações: {dados.get('observacoes', 'Não informadas.')}"),
                         html.P(f"Quantidade de Itens: {dados.get('qtd_items', 'N/A')}"),
                         html.P(f"Responsável: {dados.get('responsavel', 'N/A')}"),
