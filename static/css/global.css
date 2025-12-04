@@ -446,6 +446,23 @@ body::before {
     z-index: 1000;
 }
 
+button, .btn {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.card, p, h1, h2, h3, a, span {
+    transition: transform 0.2s ease;
+}
+
+button:hover, .btn:hover {
+    transform: scale(1.03);
+    background-color: var(--accent-color-hover);
+}
+
+.card:hover, p:hover, h1:hover, h2:hover, h3:hover, a:hover, span:hover {
+    transform: scale(1.01);
+}
+
 .header {
     background-color: var(--bg-color) !important;
     position: fixed;
